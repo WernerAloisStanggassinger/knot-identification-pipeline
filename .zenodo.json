@@ -1,0 +1,31 @@
+{
+  "title": "knot-identification-pipeline: knot type of closed space curves from their geometry",
+  "upload_type": "software",
+  "creators": [
+    {
+      "name": "Stanggassinger, Werner Alois",
+      "affiliation": "Independent (sculptor), Wasserburg am Inn, Germany",
+      "orcid": "0009-0005-8569-8317"
+    }
+  ],
+  "description": "Identifies the knot type of a closed space curve given as a Fourier series, without consulting knot tables during identification: GPU camera-flight crossing scanner, crossing tracker, diagram resolution, simplification (Regina, spherogram), invariants (SnapPy, SageMath, KnotJob, Bar-Natan–van der Veen Theta), and only afterwards a comparison with KnotInfo, Fremlin and the SnapPy census. Built for the stainless-steel knot sculptures of Werner Alois Stanggassinger (sculptor). Code written by Claude Code (Anthropic), which orchestrates the computations. Every released module is proven equivalent to the code used in the authors' runs (equivalence gates included). Website: https://knot-structures.stainlesssteel4u.de/",
+  "keywords": [
+    "knot theory",
+    "knot identification",
+    "space curves",
+    "Fourier knots",
+    "knot invariants",
+    "GPU",
+    "SnapPy",
+    "Regina",
+    "SageMath"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isSupplementTo",
+      "identifier": "https://knot-structures.stainlesssteel4u.de/",
+      "scheme": "url"
+    }
+  ],
+  "license": "GPL-3.0-or-later"
+}

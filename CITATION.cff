@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "knot-identification-pipeline: knot type of closed space curves from their geometry"
+authors:
+  - family-names: Stanggassinger
+    given-names: Werner Alois
+    orcid: "https://orcid.org/0009-0005-8569-8317"
+    affiliation: "Independent (sculptor), Wasserburg am Inn, Germany"
+license: "GPL-3.0-or-later"
+url: "https://knot-structures.stainlesssteel4u.de/"
+notes: "Code written by Claude Code (Anthropic), which orchestrates the computations, in collaboration with Werner Alois Stanggassinger."

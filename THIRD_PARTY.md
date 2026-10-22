@@ -4,8 +4,8 @@ This repository contains only our own code. The pipeline calls the programs and 
 Get each one from its authors, then point the pipeline at it (`pipeline/site_config.py`: put it at the default location, or set
 the environment variable `KNOT_PIPELINE_<NAME>`). `python3 pipeline/site_config.py` lists every location the pipeline will use.
 
-Libraries installed with pip/conda (SnapPy, spherogram, SageMath, Regina, pyknotid, NumPy, SciPy, CuPy, scikit-learn, pyarrow …) are
-listed in `requirements.txt`, not here.
+Libraries installed with pip/conda (SnapPy, spherogram, SageMath, Regina, pyknotid, knotpy, NumPy, SciPy, SymPy, pandas, CuPy, pyarrow …)
+are listed per conda environment in `environments/`, not here.
 
 | What | Authors | Where to get it | Used by | site_config name |
 |---|---|---|---|---|

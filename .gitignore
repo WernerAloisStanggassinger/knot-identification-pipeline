@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.parquet
+*.npz
+camera_*.csv
+# internal working notes of the authors (translation and release logs), not part of the release
+reports/

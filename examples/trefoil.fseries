@@ -1,0 +1,7 @@
+% Trefoil, standard Fourier parametrisation (example input for the scanner)
+% x(s) = sin s + 2 sin 2s,  y(s) = cos s - 2 cos 2s,  z(s) = -sin 3s
+% One row per harmonic j = 1, 2, 3:  a_x  b_x  a_y  b_y  a_z  b_z   (x = sum_j a_x cos(js) + b_x sin(js), etc.)
+% An optional first row with 3 values is a constant offset (x0 y0 z0).
+0 1 1 0 0 0
+0 2 -2 0 0 0
+0 0 0 0 0 -1

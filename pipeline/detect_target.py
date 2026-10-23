@@ -25,7 +25,7 @@ Output (--json for wrappers):
     "n_crossings_total": 3051374,
     "per_frame_n_cross": {
       "min": 14, "max": 46, "median": 22, "mean": 23.28,
-      "modus": 22, "q05": 16, "q25": 18, "q75": 26, "q95": 34
+      "mode_name": 22, "q05": 16, "q25": 18, "q75": 26, "q95": 34
     },
     "all_even_n_cross": true,         // π-antisym signature
     "all_odd_n_cross":  false,

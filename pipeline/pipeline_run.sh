@@ -284,8 +284,9 @@ tracker_versuch() {
 }
 MIN_CELL_USED=""
 for MC in ${MIN_CELL:-2000 1000 500 300 200 100}; do
-    tracker_versuch "$MC"
-    TRACKER_RC=$?
+    # NOT a bare call: under set -e a bare rc=1 killed the script before the ladder could lower (broken 24.08.-23.10.2026).
+    TRACKER_RC=0
+    tracker_versuch "$MC" || TRACKER_RC=$?
     if [ $TRACKER_RC -eq 0 ]; then
         MIN_CELL_USED="$MC"
         break

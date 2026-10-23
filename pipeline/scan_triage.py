@@ -92,7 +92,7 @@ def self_test():
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('wurzel', nargs='?')
+    ap.add_argument('root', nargs='?')
     ap.add_argument('--self-test', action='store_true')
     ap.add_argument('--gate', metavar='CROSSINGS.PARQUET',
                     help='gate mode for the pipeline: exit 0 = UNKNOTEN (unknot) '
@@ -120,7 +120,7 @@ if __name__ == '__main__':
               f"it only means: lowering the threshold is allowed, the pipeline decides.")
         sys.exit(1)
     if not a.root:
-        ap.error('wurzel, --gate or --self-test is required')
+        ap.error('root, --gate or --self-test is required')
 
     pqs = []
     for d in sorted(glob.glob(os.path.join(a.root, '*/'))):

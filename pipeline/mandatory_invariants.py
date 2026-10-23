@@ -463,7 +463,7 @@ def snappy_full(pd_code, point_eval=False):
             # the NEGATIVE of Sage Link.signature() on the same PD. It is a witness for
             # |sigma|, NOT for the sign — whoever puts it unflipped next to the column
             # sees nothing but spurious contradictions.
-            out['signature_konvention'] = 'spherogram V+V^T = -1 * sage Link.signature() (675/675 measured)'
+            out['signature_convention'] = 'spherogram V+V^T = -1 * sage Link.signature() (675/675 measured)'
         except Exception as e:
             out['seifert_err'] = str(e)
         print(json.dumps(out))

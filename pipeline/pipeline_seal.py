@@ -90,8 +90,8 @@ def seal_sage_knotinfo():
         return False
 
     blocked = _blocked_factory(
-        "Pipeline-Seal: Sage KnotInfo-Tabellen-Zugriff blockiert. "
-        "Eigene Berechnung verwenden."
+        "Pipeline seal: Sage KnotInfo table access blocked. "
+        "Use your own computation."
     )
 
     class _SealedKnotInfo:

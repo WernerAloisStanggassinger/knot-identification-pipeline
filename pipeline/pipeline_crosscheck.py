@@ -87,13 +87,13 @@ def jones_substitute_t_to_x_squared(jones_t: str) -> str:
 # fractions `coef/var^exp`. We parse token by token.
 _TERM_RE = re.compile(
     r"""(?P<sign>[+-]?)\s*
-        (?:(?P<coef>\d+)\s*\*?\s*)?         # optionaler Koeffizient
-        (?:                                  # entweder normaler Variablen-Term
+        (?:(?P<coef>\d+)\s*\*?\s*)?         # optional coefficient
+        (?:                                  # either a normal variable term
             (?P<var>[a-zA-Z])
-            (?:\s*\*\*\s*|\s*\^\s*)?         # ** oder ^ oder direkt
+            (?:\s*\*\*\s*|\s*\^\s*)?         # ** or ^ or directly
             (?P<expnum>-?\d+)?
         |
-            (?P<bare>)                        # oder reine Konstante
+            (?P<bare>)                        # or a bare constant
         )""",
     re.VERBOSE,
 )

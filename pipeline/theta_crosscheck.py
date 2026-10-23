@@ -101,7 +101,7 @@ if int(n) == 0:
         "theta_norm_str": "0",
         "n_crossings":    int(0),
         "ok": True,
-        "note": "Unknot (PD leer) - theta=0 per Konvention",
+        "note": "Unknot (PD empty) - theta=0 by convention",
     }))
     sys.exit(0)
 
@@ -361,9 +361,9 @@ def main():
             "pflicht_determinant": pflicht_det,
             "theta_determinant": theta_det,
             "match": det_gate_ok,
-            "note": ("HART (Disc #533): |Delta1(-1)| == pflicht-Quartett-det. "
-                     "Mismatch = stale/wrong-knot theta -> exit 4, nicht vertrauen. "
-                     "theta_det=None (leeres/<...>-delta1) = Gate nicht anwendbar."),
+            "note": ("HARD (Disc #533): |Delta1(-1)| == pflicht quartet det. "
+                     "Mismatch = stale/wrong-knot theta -> exit 4, do not trust. "
+                     "theta_det=None (empty/<...> delta1) = gate not applicable."),
         },
         "tool_version": "Bar-Natan/van der Veen Theta.sage (external_tools/bar_natan_theta)",
     }

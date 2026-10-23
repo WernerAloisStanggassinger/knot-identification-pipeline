@@ -96,7 +96,7 @@ def is_failure(d: Path, pfl: Path | None, pdata: dict | None) -> tuple[bool, str
     Type b: _complete.json exists but the mandatory core fields are all None.
     """
     if pfl is None or pdata is None:
-        return True, 'type_a (kein _complete.json)'
+        return True, 'type_a (no _complete.json)'
     pl = pdata.get('pflichtliste', {})
     alg = pl.get('ALGEBRA', {}) or {}
     hyp = pl.get('HYPERBOLISCH', {}) or {}
@@ -107,7 +107,7 @@ def is_failure(d: Path, pfl: Path | None, pdata: dict | None) -> tuple[bool, str
         hyp.get('is_amphicheiral'),
     ]
     if all(v is None for v in vals):
-        return True, 'type_b (Pflicht-Kernfelder alle None)'
+        return True, 'type_b (mandatory core fields all None)'
     return False, ''
 
 
@@ -319,7 +319,7 @@ def determine_target(folder: Path, dry_run: bool = False) -> tuple[str, Path, st
     # own_knots/ sculptures are off-limits
     rel = folder.relative_to(ROOT) if folder.is_relative_to(ROOT) else folder
     if any(part == 'own_knots' for part in rel.parts):
-        return 'own_knots_skip', folder, 'own_knots: Künstlernamen bleiben (Doktrin)'
+        return 'own_knots_skip', folder, 'own_knots: artist names stay (doctrine)'
 
     pfl = find_pflicht_complete(folder)
     pdata = load_pflicht_data(pfl) if pfl else None
@@ -338,7 +338,7 @@ def determine_target(folder: Path, dry_run: bool = False) -> tuple[str, Path, st
     if ki_id:
         new_name = klassisch_target_name(ki_id, folder.name)
         target = BEKANNT / new_name
-        return 'knotinfo', target, f'KnotInfo-Treffer: {ki_id}'
+        return 'knotinfo', target, f'KnotInfo hit: {ki_id}'
 
     # Cluster fingerprint + Theta check (Discovery #177)
     c, det, sym, chir = fingerprint_from_pflicht(pdata)
@@ -351,26 +351,26 @@ def determine_target(folder: Path, dry_run: bool = False) -> tuple[str, Path, st
                 ref_member = members[0]
                 if theta_match(folder, ref_member):
                     target = existing / klassisch_target_name(existing.name, folder.name)
-                    return 'cluster', target, f'Cluster-Match (theta-verifiziert): {existing.name}'
+                    return 'cluster', target, f'cluster match (theta-verified): {existing.name}'
                 else:
                     # Mandatory fingerprint matched but Theta did not — separate class
-                    return 'singleton', SINGLETONS / folder.name, f'Pflicht-Match {existing.name}, aber Theta divergiert → eigene Klasse, bleibt Singleton'
+                    return 'singleton', SINGLETONS / folder.name, f'mandatory-list match {existing.name}, but theta differs → own class, stays a singleton'
             else:
                 # Cluster folder empty → simply move in
                 target = existing / klassisch_target_name(existing.name, folder.name)
-                return 'cluster', target, f'Cluster-Match (leerer Cluster): {existing.name}'
+                return 'cluster', target, f'cluster match (empty cluster): {existing.name}'
         # Check for a 2nd singleton with Theta verification
         sib = find_singleton_match(c, det, sym, chir, exclude=folder)
         if sib:
             if theta_match(folder, sib):
                 new_cluster = ERZ / cluster_folder_name(c, det, sym, chir)
-                return 'cluster_promote', new_cluster, f'2nd Singleton (theta-verifiziert), Promote zu S_-Cluster mit Sibling: {sib.name}'
+                return 'cluster_promote', new_cluster, f'2nd singleton (theta-verified), promoted to an S_ cluster with sibling: {sib.name}'
             else:
-                return 'singleton', SINGLETONS / folder.name, f'Pflicht-Match {sib.name}, aber Theta divergiert → kein Promote, beide bleiben Singletons'
+                return 'singleton', SINGLETONS / folder.name, f'mandatory-list match {sib.name}, but theta differs → no promotion, both stay singletons'
 
     # Default: Singleton in singletons/
     target = SINGLETONS / folder.name
-    return 'singleton', target, 'kein DB-Treffer + kein Cluster-Match'
+    return 'singleton', target, 'no DB hit + no cluster match'
 
 
 def do_render(knot_dir: Path, dry_run: bool = False) -> bool:

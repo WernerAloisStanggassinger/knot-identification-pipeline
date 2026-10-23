@@ -208,9 +208,9 @@ def main():
     output = {
         'fseries_path': args.fseries,
         'polygon_pd': True,                              # recipe #3 marker (provenance)
-        'method': ('Rezept #3: Polygon-Sampling -> eigene Projektion (flachste Achse, '
-                   'rechtshändiger Frame) -> signed Gauss exakt -> regina; '
-                   'Nyquist-Gate (det+Alexander bit-gleich bei zwei Auflösungen)'),
+        'method': ('recipe #3: polygon sampling -> own projection (flattest axis, '
+                   'right-handed frame) -> signed Gauss exact -> regina; '
+                   'Nyquist gate (det+Alexander bit-identical at two resolutions)'),
         'chosen': {
             'signed_gauss': r['signed_gauss_simplified'],
             'signed_gauss_raw': r['signed_gauss_raw'],

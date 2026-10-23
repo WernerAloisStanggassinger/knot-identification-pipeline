@@ -70,22 +70,22 @@ def selbsttest():
         # (1) curve with a crossing-free projection ⟹ UNKNOTEN
         p1 = os.path.join(d, 'a.parquet')
         pd.DataFrame({'t_step': [0,0,0, 2,2, 3]}).to_parquet(p1)   # frame 1 empty
-        pruef('leerer Frame ⟹ UNKNOTEN', eine(p1)['sorte'], 'UNKNOTEN')
+        pruef('empty frame ⟹ UNKNOTEN', eine(p1)['sorte'], 'UNKNOTEN')
         # (2) every projection carries crossings ⟹ VERSCHMIERT
         p2 = os.path.join(d, 'b.parquet')
         pd.DataFrame({'t_step': [0,0, 1,1, 2,2, 3,3]}).to_parquet(p2)
-        pruef('kein leerer Frame ⟹ VERSCHMIERT', eine(p2)['sorte'], 'VERSCHMIERT')
+        pruef('no empty frame ⟹ VERSCHMIERT', eine(p2)['sorte'], 'VERSCHMIERT')
         # (3) COUNTER-CASE: a single gap must be enough to flip (2) —
         #     otherwise the test measures the amount instead of the minimum.
         p3 = os.path.join(d, 'c.parquet')
         pd.DataFrame({'t_step': [0]*500 + [1]*500 + [3]*500}).to_parquet(p3)
-        pruef('EINE Luecke unter 1500 Punkten kippt es', eine(p3)['sorte'], 'UNKNOTEN')
+        pruef('ONE gap among 1500 points flips it', eine(p3)['sorte'], 'UNKNOTEN')
         # (4) empty file ⟹ UNKNOTEN, no crash
         p4 = os.path.join(d, 'e.parquet')
         pd.DataFrame({'t_step': pd.Series([], dtype='int64')}).to_parquet(p4)
-        pruef('leere Datei ⟹ UNKNOTEN', eine(p4)['sorte'], 'UNKNOTEN')
+        pruef('empty file ⟹ UNKNOTEN', eine(p4)['sorte'], 'UNKNOTEN')
         # (5) canary: a result that must NOT be true
-        pruef('Kanarie (muss rot sein, wenn der Test blind ist)',
+        pruef('canary (must be red if the test is blind)',
               eine(p2)['sorte'] == 'UNKNOTEN', False)
     print(f"\n  {ok}/{total} probes")
     return 0 if ok == total else 1

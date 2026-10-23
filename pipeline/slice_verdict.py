@@ -96,8 +96,8 @@ def slice_verdict(a):
         try:
             arf_aus_det = 0 if int(det) % 8 in (1, 7) else 1
             if arf is not None and arf != arf_aus_det:
-                arf_konflikt = 'gespeichertes Arf=%s widerspricht det=%s mod 8 (=> Arf=%s); ' \
-                               'der Satz gilt, das Feld nicht' % (arf, det, arf_aus_det)
+                arf_konflikt = 'stored Arf=%s contradicts det=%s mod 8 (=> Arf=%s); ' \
+                               'the theorem holds, the field does not' % (arf, det, arf_aus_det)
             arf = arf_aus_det
         except (TypeError, ValueError):
             pass
@@ -110,9 +110,9 @@ def slice_verdict(a):
     if sig not in (0, None):
         obstr.append('signature=%s != 0 (Murasugi)' % sig)
     if arf not in (0, None):
-        obstr.append('Arf=%s != 0 (Robertello%s)' % (arf, ', aus det mod 8' if det is not None else ''))
+        obstr.append('Arf=%s != 0 (Robertello%s)' % (arf, ', from det mod 8' if det is not None else ''))
     if det is not None and _quadratzahl(det) is False:
-        obstr.append('det=%s keine Quadratzahl (Fox-Milnor, Punkt-Auswertung bei t=-1)' % det)
+        obstr.append('det=%s not a square (Fox-Milnor, point evaluation at t=-1)' % det)
     # FULL Fox-Milnor: Delta = f(t)*f(1/t) as a factorisation condition. Strictly stronger than
     # the determinant test, which only looks at Delta(-1) (2026-07-23, Disc #558).
     alex = a.get('alexander_polynomial') or a.get('alexander')
@@ -127,16 +127,16 @@ def slice_verdict(a):
 
     warn = (' | ⚠ ' + arf_konflikt) if arf_konflikt else ''
     if obstr:
-        return False, 'bewiesen NICHT slice: ' + '; '.join(obstr) + warn, obstr
+        return False, 'proven NOT slice: ' + '; '.join(obstr) + warn, obstr
     if genus == 0:
-        return True, 'Unknoten (genus 0) — trivial slice' + warn, []
+        return True, 'unknot (genus 0) — trivially slice' + warn, []
     fehlt = [n for n, v in (('tau', tau), ('s', s), ('signature', sig),
                             ('Arf', arf), ('determinant', det)) if v is None]
-    note = ('unbestimmt: alle geprueften notwendigen Bedingungen erfuellt '
-            '(tau=s=signature=Arf=0, det Quadratzahl), das ist NICHT hinreichend — '
-            'die Pipeline kann slice nicht beweisen')
+    note = ('undetermined: all checked necessary conditions hold '
+            '(tau=s=signature=Arf=0, det a square), that is NOT sufficient — '
+            'the pipeline cannot prove slice')
     if fehlt:
-        note += ' | nicht geprueft (Feld fehlt): ' + ', '.join(fehlt)
+        note += ' | not checked (field missing): ' + ', '.join(fehlt)
     return None, note + warn, []
 
 
@@ -149,7 +149,7 @@ def apply_to_algebra(a, name=None, identitaet=None):
         a['slice'] = e['slice']
         a['slice_note'] = 'BELEGT (beweis_register.json): ' + ' '.join(e['beweis'])
         a['slice_obstructions'] = []
-        a['slice_method'] = 'beweis_register.json, belegt am %s' % e.get('belegt_am', '?')
+        a['slice_method'] = 'beweis_register.json, receipted on %s' % e.get('belegt_am', '?')
         if 'ribbon' in e:
             a['ribbon'] = e['ribbon']
         # Publicly citable source (2026-08-19). The internal slice_method only says
@@ -166,5 +166,5 @@ def apply_to_algebra(a, name=None, identitaet=None):
     a['slice'] = v
     a['slice_note'] = note
     a['slice_obstructions'] = obstr
-    a['slice_method'] = 'slice_verdict.py (2026-07-23): widerlegbar, nicht beweisbar'
+    a['slice_method'] = 'slice_verdict.py (2026-07-23): refutable, not provable'
     return v

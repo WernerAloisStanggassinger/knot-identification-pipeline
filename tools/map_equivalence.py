@@ -90,6 +90,13 @@ def strip_comments_loose(s):
         out.append(line[:cut].rstrip())
     return '\n'.join(l for l in out if l.strip())
 
+CODE_LINE = re.compile(r'^\s*(def |class |import |from \S+ import |for |while |if |elif |else:|try:|except|finally:|return\b|with |raise |'
+                       r'del |assert |pass\b|yield\b|break\b|continue\b|global |nonlocal |lambda\b|[A-Za-z_][\w.]*\(|'
+                       r'[A-Za-z_][\w.\[\]\'"]*\s*[-+*/]?=[^=])')
+
+def looks_like_code(s):
+    return '\n' in s and any(CODE_LINE.match(l) for l in s.split('\n'))
+
 def template(js):
     return ''.join(v.value if isinstance(v, ast.Constant) else f'__FV{i}__' for i, v in enumerate(js.values))
 
@@ -110,7 +117,7 @@ class Walk:
                 if a.value != b.value:
                     ca, cb = parse_code(a.value), parse_code(b.value)
                     if ca is not None and cb is not None: self.cmp(ca, cb, path + '<code>')
-                    elif '\n' in a.value or '\n' in b.value:
+                    elif looks_like_code(a.value) or looks_like_code(b.value):
                         if strip_comments_loose(a.value) != strip_comments_loose(b.value):
                             self.errors.append(f'{self.f}: {path}: multi-line string changed beyond comments')
                     else: self.strings.append((a.value, b.value, getattr(a, 'lineno', 0)))
@@ -124,7 +131,7 @@ class Walk:
             if ta != tb:
                 ca, cb = parse_code(ta), parse_code(tb)
                 if ca is not None and cb is not None: self.cmp(ca, cb, path + '<fcode>')
-                elif '\n' in ta or '\n' in tb:
+                elif looks_like_code(ta) or looks_like_code(tb):
                     if strip_comments_loose(ta) != strip_comments_loose(tb):
                         self.errors.append(f'{self.f}: {path}: multi-line f-string template changed beyond comments')
                 else: self.strings.append((ta, tb, getattr(a, 'lineno', 0)))

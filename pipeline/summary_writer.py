@@ -73,18 +73,18 @@ def main():
     ocount = count_leaf(opt)
 
     lines = []
-    lines.append(f"# {name} — Pipeline-Identifikation\n")
-    lines.append(f"_Generiert aus_ `{os.path.basename(args.complete_json)}`\n")
+    lines.append(f"# {name} — pipeline identification\n")
+    lines.append(f"_Generated from_ `{os.path.basename(args.complete_json)}`\n")
 
-    lines.append(f"\n## Profil (Pflichtliste)\n")
-    lines.append("| Kategorie | Wert |")
+    lines.append(f"\n## Profile (mandatory list)\n")
+    lines.append("| Category | Value |")
     lines.append("|---|---|")
     rows = [
         ('crossing_number_min',   diag.get('crossing_number_min')),
         ('alternating',            diag.get('alternating')),
         ('writhe',                 diag.get('writhe')),
         ('braid_index',            f"{diag.get('braid_index_lower_bound')}..{diag.get('braid_index_upper_bound') if diag.get('braid_index_upper_bound') is not None else '?'} "
-                                   f"(MFW-Spread {diag.get('braid_index_mfw_v_spread')})"
+                                   f"(MFW spread {diag.get('braid_index_mfw_v_spread')})"
                                    if diag.get('braid_index_lower_bound') else diag.get('braid_index')),
         ('bridge_number',          f"{diag.get('bridge_number_lower_bound')}..{diag.get('bridge_number_upper_bound')}"
                                    if diag.get('bridge_number_lower_bound') is not None else diag.get('bridge_number')),
@@ -105,8 +105,8 @@ def main():
                                    if isinstance(alg.get('khovanov_homology'), dict) else None),
         ('hyperbolic_volume',      hyp.get('hyperbolic_volume')),
         ('chern_simons',           hyp.get('chern_simons')),
-        ('symmetry_group',         f"{hyp.get('symmetry_group')} (Ord {hyp.get('symmetry_group_order')})"),
-        ('amphichiral / invertibel', f"{hyp.get('is_amphicheiral')} / {hyp.get('is_invertible_knot')}"),
+        ('symmetry_group',         f"{hyp.get('symmetry_group')} (order {hyp.get('symmetry_group_order')})"),
+        ('amphichiral / invertible', f"{hyp.get('is_amphicheiral')} / {hyp.get('is_invertible_knot')}"),
         ('homology',               hyp.get('homology')),
         ('unknotting_number',      f"{alg.get('unknotting_number')} "
                                    f"(strict [{alg.get('unknotting_number_strict_lower')}, "
@@ -117,8 +117,8 @@ def main():
     for k, v in rows:
         lines.append(f"| {k} | {fmt(v, 100)} |")
 
-    lines.append(f"\n## Polynome\n")
-    lines.append("| Polynom | Wert |")
+    lines.append(f"\n## Polynomials\n")
+    lines.append("| Polynomial | Value |")
     lines.append("|---|---|")
     pols = [
         ('Alexander',          alg.get('alexander_polynomial')),
@@ -130,7 +130,7 @@ def main():
     for k, v in pols:
         lines.append(f"| {k} | `{fmt(v, 200)}` |")
 
-    lines.append(f"\n## Diagramm-Codes\n")
+    lines.append(f"\n## Diagram codes\n")
     codes = [
         ('signed_gauss_reduced',  diag.get('signed_gauss_reduced')),
         ('dt_code',               diag.get('dt_code')),
@@ -141,25 +141,25 @@ def main():
     for k, v in codes:
         lines.append(f"- **{k}**: `{fmt(v, 200)}`")
 
-    lines.append(f"\n## Konsistenz\n")
-    lines.append(f"- Pipeline-Konsistenz: **{'OK' if d.get('konsistenz_consistent') else 'FAIL'}**")
-    lines.append(f"- Det-Pfade: `{quart.get('det_paths')}` → det = {quart.get('det_value')}")
+    lines.append(f"\n## Consistency\n")
+    lines.append(f"- Pipeline consistency: **{'OK' if d.get('konsistenz_consistent') else 'FAIL'}**")
+    lines.append(f"- det paths: `{quart.get('det_paths')}` → det = {quart.get('det_value')}")
     lines.append(f"- HFK-rank check: rank={quart.get('hfk_rank_check', {}).get('rank')}, "
                  f"diff={quart.get('hfk_rank_check', {}).get('diff_rank_minus_det')}, "
                  f"rank=det:{quart.get('hfk_rank_equals_det')}")
     if alg.get('kauffman_polynomial_amphi_symmetry_check') is True:
         lines.append(f"- Kauffman F amphi-symmetry-check: ✓")
 
-    lines.append(f"\n## Bilanz\n")
+    lines.append(f"\n## Balance\n")
     def _pct(p, t):
         return f"{p/t*100:.1f}%" if t else "n/a (empty)"
-    lines.append(f"- Pflichtliste: **{pcount['populated']} / {pcount['total']}** "
+    lines.append(f"- Mandatory list: **{pcount['populated']} / {pcount['total']}** "
                  f"populated ({_pct(pcount['populated'], pcount['total'])})")
     lines.append(f"- Optional:    **{ocount['populated']} / {ocount['total']}** "
                  f"populated ({_pct(ocount['populated'], ocount['total'])})")
 
-    lines.append(f"\n---\n_Pipeline-Blindtest-konform_ "
-                 f"(`pipeline_seal.py` aktiv, keine Knot-Tabellen-Lookups).")
+    lines.append(f"\n---\n_Pipeline blind-test compliant_ "
+                 f"(`pipeline_seal.py` active, no knot-table lookups).")
 
     with open(out_path, 'w') as f:
         f.write('\n'.join(lines) + '\n')

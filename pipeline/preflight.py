@@ -73,16 +73,16 @@ def classify_symmetry(harmonics, eps=1e-12):
 
     if nonzero_j and not even_nonzero:
         sym = "pi_antisymmetric"
-        rationale = (f"alle non-zero j sind ungerade ({odd_nonzero}); "
-                     f"alle geraden j null. → x(s+pi) = -x(s); Discovery #70.")
+        rationale = (f"all non-zero j are odd ({odd_nonzero}); "
+                     f"all even j zero. → x(s+pi) = -x(s); Discovery #70.")
     elif nonzero_j and not odd_nonzero:
         sym = "pi_periodic"
-        rationale = (f"alle non-zero j sind gerade ({even_nonzero}); "
-                     f"alle ungeraden j null. → x(s+pi) = +x(s); Discovery #70.")
+        rationale = (f"all non-zero j are even ({even_nonzero}); "
+                     f"all odd j zero. → x(s+pi) = +x(s); Discovery #70.")
     else:
         sym = "generic"
-        rationale = (f"gemischte j-Paritaet (ungerade: {odd_nonzero}, "
-                     f"gerade: {even_nonzero}); keine pi-Symmetrie.")
+        rationale = (f"mixed j parity (odd: {odd_nonzero}, "
+                     f"even: {even_nonzero}); no pi symmetry.")
 
     return sym, nonzero_j, all_zero_j, rationale
 

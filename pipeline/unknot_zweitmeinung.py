@@ -52,15 +52,15 @@ def selbsttest():
     t = np.linspace(0, 2*np.pi, 3000, endpoint=False)
     # circle — must give 0
     kreis = np.stack([np.cos(t), np.sin(t), np.zeros_like(t)], 1)
-    pruef('Kreis ⟹ Unknoten', reduced_crossings(kreis), 0)
+    pruef('circle ⟹ unknot', reduced_crossings(kreis), 0)
     # COUNTER-CASE trefoil T(2,3) — must give 3, otherwise the tool says "unknot" to everything
     kle = np.stack([np.sin(t)+2*np.sin(2*t), np.cos(t)-2*np.cos(2*t), -np.sin(3*t)], 1)
-    pruef('Kleeblatt ⟹ NICHT Unknoten (Gegenfall)', reduced_crossings(kle), 3)
+    pruef('trefoil ⟹ NOT unknot (counter-case)', reduced_crossings(kle), 3)
     # COUNTER-CASE figure-eight — 4
     ach = np.stack([(2+np.cos(2*t))*np.cos(3*t), (2+np.cos(2*t))*np.sin(3*t), np.sin(4*t)], 1)
-    pruef('Achterknoten ⟹ 4 (zweiter Gegenfall)', reduced_crossings(ach), 4)
+    pruef('figure-eight ⟹ 4 (second counter-case)', reduced_crossings(ach), 4)
     # canary: a shifted circle stays an unknot
-    pruef('Kanarie verschobener Kreis', reduced_crossings(kreis + np.array([5., -3., 2.])), 0)
+    pruef('canary: shifted circle', reduced_crossings(kreis + np.array([5., -3., 2.])), 0)
     print(f"\n  {ok}/{tot} probes")
     return 0 if ok == tot else 1
 

@@ -307,7 +307,7 @@ for MC in ${MIN_CELL:-2000 1000 500 300 200 100}; do
         exit 3
     fi
     if [ -n "${MIN_CELL:-}" ]; then
-        break                       # ausdruecklicher Wunsch von aussen: kein Nachfassen
+        break                       # explicit request from outside: no follow-up
     fi
     if conda run -n gnottheorie_env python "$TRIAGE" --gate "$CROSS"; then
         err "Stage 2: UNKNOT — the threshold is not too high, the curve is unknotted."
@@ -532,7 +532,7 @@ T6=$(date +%s)
 # the worker count by crossing number (TARGET≈c). Env PFLICHT_EXTRA_PROCESSES
 # (e.g. via r3_reresolve) overrides and also wins inside the script itself.
 if [ -n "${PFLICHT_EXTRA_PROCESSES:-}" ]; then
-    PE_PROC="$PFLICHT_EXTRA_PROCESSES"          # nur fürs Log; Skript liest Env selbst
+    PE_PROC="$PFLICHT_EXTRA_PROCESSES"          # only for the log; the script reads the env itself
 elif ! [[ "${TARGET:-}" =~ ^[0-9]+$ ]]; then
     PE_PROC=12                                   # TARGET unbekannt → alter Default
 elif [ "$TARGET" -gt 36 ]; then

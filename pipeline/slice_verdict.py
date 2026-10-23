@@ -147,7 +147,7 @@ def apply_to_algebra(a, name=None, identitaet=None):
     e = beweis_eintrag(name, identitaet) if (name or identitaet) else None
     if e is not None and 'slice' in e:
         a['slice'] = e['slice']
-        a['slice_note'] = 'BELEGT (beweis_register.json): ' + ' '.join(e['beweis'])
+        a['slice_note'] = 'RECEIPTED (beweis_register.json): ' + ' '.join(e['beweis'])
         a['slice_obstructions'] = []
         a['slice_method'] = 'beweis_register.json, receipted on %s' % e.get('belegt_am', '?')
         if 'ribbon' in e:

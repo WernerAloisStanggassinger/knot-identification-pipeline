@@ -1,15 +1,15 @@
 {
  "_doku": [
-  "Belegtragende Ueberschreibungen. NUR fuer Faelle, wo ein BEWEIS vorliegt, den die Pipeline",
-  "algorithmisch nicht fuehren kann. Jeder Eintrag MUSS 'beweis' tragen -- ein Eintrag ohne",
-  "Beweistext wird von slice_verdict/four_genus_verdict ignoriert. Das ist die einzige Stelle,",
-  "an der ein Urteil die berechneten Schranken ueberschreiben darf; sie ist absichtlich klein,",
-  "handgepflegt und lesbar, damit sie nicht zur Hintertuer fuer Behauptungen wird.",
-  "Angelegt 2026-07-23 nach Disc #555/#556/#557.",
-  "SCHLUESSEL (erweitert 2026-08-19): ein Eintrag darf auf den STAMM eines Records lauten",
-  "(z.B. 'double-3') ODER auf die KNOTEN-IDENTITAET (z.B. '12a_1019'). Sliceness ist eine",
-  "Eigenschaft des KNOTENS, nicht der Parametrisierung -- ein Identitaets-Eintrag gilt daher",
-  "fuer alle Records mit dieser distinct_knot_id. Reihenfolge: Stamm schlaegt Identitaet."
+  "Receipt-bearing overrides. ONLY for cases where a PROOF exists that the pipeline",
+  "cannot carry out algorithmically. Every entry MUST carry 'beweis' (proof) -- an entry without",
+  "proof text is ignored by slice_verdict/four_genus_verdict. This is the only place",
+  "where a verdict may override the computed bounds; it is deliberately small,",
+  "hand-maintained and readable, so that it does not become a back door for claims.",
+  "Created 2026-07-23 after Disc #555/#556/#557.",
+  "KEYS (extended 2026-08-19): an entry may be keyed to the STEM of a record",
+  "(e.g. 'double-3') OR to the KNOT IDENTITY (e.g. '12a_1019'). Sliceness is a",
+  "property of the KNOT, not of the parametrisation -- an identity entry therefore applies",
+  "to all records with this distinct_knot_id. Order: stem beats identity."
  ],
  "knots-of-love": {
   "slice": true,
@@ -18,24 +18,24 @@
   "topological_4_genus": 0,
   "is_amphicheiral": true,
   "beweis": [
-   "Identitaet (Disc #142/#557, Anker 1): knots-of-love = 3_1 # 3_1 # 3_1 # m3_1 # m3_1 # m3_1 (drei rechts-, drei linkshaendige Kleeblaetter = Quadratknoten dreimal; Haendigkeit korrigiert 2026-07-26, vorher stand hier sechsmal 3_1 -- det=3^6 und Alexander (t^2-t+1)^6 sind chiralitaetsblind, der Beweis steht drei Zeilen tiefer),",
-   "Alexander (t^2-t+1)^6 bit-genau, det 729 = 3^6, Genus 6, nicht hyperbolisch (vol ~ 1.5e-5).",
-   "HAENDIGKEIT (2026-07-23, Disc #557): Jones ist multiplikativ unter Verbindungssumme UND",
-   "unterscheidet Spiegelbilder. Faktorisierung gegen das Kleeblatt aus dem eigenen Korpus",
-   "(celtic-trefoil) ergibt V = V_R^3 * V_L^3 -- von allen sieben Aufteilungen a+b=6 passt",
-   "GENAU DIESE. HOMFLY (staerker) liefert unabhaengig dasselbe 3+3. Additiv bestaetigt:",
-   "sigma = 0, tau = 0, s = 0, jede Summe von sechs +-Beitraegen wird nur bei 3+3 null.",
-   "FOLGERUNG: mit K = 3_1#3_1#3_1 ist der Knoten K # m(K). Das Kleeblatt ist invertierbar,",
-   "also ist m(K) das Konkordanz-Inverse von K, und K # m(K) ist stets ein BANDKNOTEN.",
-   "  => ribbon => slice => g_4 = 0 (glatt und topologisch).",
-   "  => amphichiral, denn m(K # m(K)) = m(K) # K = K # m(K) (Verbindungssumme kommutativ).",
-   "Das gespeicherte is_amphicheiral=False kam von snappy auf einem NICHT-hyperbolischen Knoten",
-   "(vol ~ 0) und ist dort ohne Aussagekraft.",
-   "Gegenprobe: alle notwendigen slice-Bedingungen waren ohnehin erfuellt (sigma=tau=s=Arf=0,",
-   "det=729=27^2) -- der Beweis erklaert, WARUM, statt es zu vermuten."
+   "Identity (Disc #142/#557, anchor 1): knots-of-love = 3_1 # 3_1 # 3_1 # m3_1 # m3_1 # m3_1 (three right- and three left-handed trefoils = square knot three times; handedness corrected 2026-07-26, before that this said six times 3_1 -- det=3^6 and Alexander (t^2-t+1)^6 are chirality-blind, the proof stands three lines further down),",
+   "Alexander (t^2-t+1)^6 bit-exact, det 729 = 3^6, genus 6, not hyperbolic (vol ~ 1.5e-5).",
+   "HANDEDNESS (2026-07-23, Disc #557): Jones is multiplicative under connected sum AND",
+   "distinguishes mirror images. Factorisation against the trefoil from our own corpus",
+   "(celtic-trefoil) gives V = V_R^3 * V_L^3 -- of all seven splittings a+b=6 EXACTLY",
+   "THIS ONE fits. HOMFLY (stronger) independently gives the same 3+3. Additively confirmed:",
+   "sigma = 0, tau = 0, s = 0; a sum of six +- contributions is zero only for 3+3.",
+   "CONSEQUENCE: with K = 3_1#3_1#3_1 the knot is K # m(K). The trefoil is invertible,",
+   "so m(K) is the concordance inverse of K, and K # m(K) is always a RIBBON KNOT.",
+   "  => ribbon => slice => g_4 = 0 (smooth and topological).",
+   "  => amphichiral, because m(K # m(K)) = m(K) # K = K # m(K) (connected sum is commutative).",
+   "The stored is_amphicheiral=False came from snappy on a NON-hyperbolic knot",
+   "(vol ~ 0) and carries no meaning there.",
+   "Cross-check: all necessary slice conditions were satisfied anyway (sigma=tau=s=Arf=0,",
+   "det=729=27^2) -- the proof explains WHY instead of presuming it."
   ],
   "belegt_am": "2026-07-23",
-  "belegt_von": "Werner Stanggassinger + Claude Code",
+  "belegt_von": "Werner Alois Stanggassinger + Claude Code",
   "quelle_oeffentlich": "Own result: the knot is K # m(K) with K = 3₁#3₁#3₁ (handedness fixed by Jones/HOMFLY factorisation against our own trefoil). K # m(K) is always a ribbon knot ⇒ slice ⇒ g₄ = 0."
  },
  "12a_1019": {
@@ -44,17 +44,17 @@
   "smooth_4_genus": 0,
   "topological_4_genus": 0,
   "beweis": [
-   "IDENTITAET BLIND GERECHNET: 12a_1019 stammt aus der eigenen .fseries-Kette (crosscheck_knotinfo), unabhaengig von der hier zitierten Quelle. Nachgeschlagen wurde eine EIGENSCHAFT eines bereits identifizierten Knotens -- Hard-Rule 1 nicht verletzt.",
-   "RIBBON-BELEG (Literatur, gezogen 2026-08-19): Christoph Lamm, 'The search for non-symmetric ribbon knots', arXiv:1710.06909v2 (5. Januar 2019), Table 1: 'a list of all 137 prime ribbon knots with crossing numbers 11 or 12'. Beleg-PDF: konversationen/slice_stand_20260818/. 12a1019 steht in dieser Liste.",
-   "KONSTRUKTION (Lamm, Anhang Seite 20, det=361-Block): 12a1019 ist die SYMMETRISCHE VEREINIGUNG mit Teilknoten K_+- = 7_6 und Achsenparametern (1, -1).",
-   "BAUART (Kinoshita-Terasaka 1957, Lamm Def. 6.1): Teilknoten und sein Spiegelbild beiderseits einer Symmetrieachse, dazwischen der zentrale Teil C mit Twist-Tangles, deren vorzeichenbehaftete Kreuzungszahlen (1,-1) sind. Falten laengs der Achse -- das Diagramm liefert die Hoehenfunktion -- ergibt ein Band konstanter Breite. Nach Aceto (Lamm Prop. 5.1) besteht dieses Band nur aus Streifen, Enden, Twists und RIBBON-SINGULARITAETEN; es enthaelt weder Kreuzungen noch Junctions. Symmetrische Vereinigungen sind damit per Bauart RIBBON.",
-   "UNABHAENGIGE GEGENPROBE (2026-08-19, GERECHNET, nicht zitiert): fuer eine symmetrische Vereinigung gilt det = det(K_+-)^2. det(7_6) = 19, bestimmt als Torsion von H_1 der 2-fach zyklischen Ueberlagerung (snappy, gnottheorie_env; Methode am Gegenfall 4_1 -> det 5 geeicht). 19^2 = 361 = unsere eigene, blind gerechnete Determinante. Die zitierte Bauanleitung reproduziert unsere Zahl auf einem voellig anderen Weg.",
-   "FOLGERUNG: ribbon => slice => g_4 = 0, glatt UND topologisch.",
-   "Die notwendigen Bedingungen waren ohnehin alle erfuellt (tau = s = sigma = Arf = 0, det = 361 = 19^2) -- der Beleg erklaert, WARUM, statt es offen zu lassen.",
-   "GRENZE, ausdruecklich: das ist ein LITERATUR-BELEG fuer eine Eigenschaft eines blind identifizierten Knotens, KEINE von uns selbst gebaute Scheibe. Solange wir die Bandpraesentation nicht eigenhaendig konstruieren und pruefen, ist Lamm die Quelle."
+   "IDENTITY COMPUTED BLIND: 12a_1019 comes from our own .fseries chain (crosscheck_knotinfo), independently of the source cited here. What was looked up is a PROPERTY of an already identified knot -- hard rule 1 not violated.",
+   "RIBBON RECEIPT (literature, fetched 2026-08-19): Christoph Lamm, 'The search for non-symmetric ribbon knots', arXiv:1710.06909v2 (5 January 2019), Table 1: 'a list of all 137 prime ribbon knots with crossing numbers 11 or 12'. Receipt PDF: konversationen/slice_stand_20260818/. 12a1019 is in this list.",
+   "CONSTRUCTION (Lamm, appendix page 20, det=361 block): 12a1019 is the SYMMETRIC UNION with partial knot K_+- = 7_6 and axis parameters (1, -1).",
+   "DESIGN (Kinoshita-Terasaka 1957, Lamm Def. 6.1): a partial knot and its mirror image on either side of a symmetry axis, between them the central part C with twist tangles whose signed crossing numbers are (1,-1). Folding along the axis -- the diagram supplies the height function -- gives a band of constant width. By Aceto (Lamm Prop. 5.1) this band consists only of strips, ends, twists and RIBBON SINGULARITIES; it contains neither crossings nor junctions. Symmetric unions are therefore RIBBON by design.",
+   "INDEPENDENT CROSS-CHECK (2026-08-19, COMPUTED, not cited): for a symmetric union det = det(K_+-)^2. det(7_6) = 19, determined as the torsion of H_1 of the 2-fold cyclic cover (snappy, gnottheorie_env; method calibrated on the counter-case 4_1 -> det 5). 19^2 = 361 = our own determinant, computed blind. The cited construction reproduces our number by an entirely different route.",
+   "CONSEQUENCE: ribbon => slice => g_4 = 0, smooth AND topological.",
+   "The necessary conditions were all satisfied anyway (tau = s = sigma = Arf = 0, det = 361 = 19^2) -- the receipt explains WHY instead of leaving it open.",
+   "LIMIT, explicitly: this is a LITERATURE RECEIPT for a property of a blindly identified knot, NOT a disc we built ourselves. As long as we have not constructed and checked the band presentation by our own hand, Lamm is the source."
   ],
   "belegt_am": "2026-08-19",
-  "belegt_von": "Werner Stanggassinger + Claude Code",
+  "belegt_von": "Werner Alois Stanggassinger + Claude Code",
   "quelle_oeffentlich": "C. Lamm, The search for non-symmetric ribbon knots, arXiv:1710.06909v2 (2019), Table 1 and appendix p. 20: symmetric union with partial knot 7₆ and axis parameters (1, −1). Ribbon ⇒ slice ⇒ g₄ = 0. Cross-check: det(7₆)² = 19² = 361, matching our independently computed determinant.",
   "quelle_url": "https://arxiv.org/abs/1710.06909"
  },
@@ -64,17 +64,17 @@
   "smooth_4_genus": 0,
   "topological_4_genus": 0,
   "beweis": [
-   "IDENTITAET BLIND GERECHNET: 12n_706 stammt aus der eigenen .fseries-Kette (crosscheck_knotinfo), unabhaengig von der hier zitierten Quelle. Nachgeschlagen wurde eine EIGENSCHAFT eines bereits identifizierten Knotens -- Hard-Rule 1 nicht verletzt.",
-   "RIBBON-BELEG (Literatur, gezogen 2026-08-19): Christoph Lamm, 'The search for non-symmetric ribbon knots', arXiv:1710.06909v2 (5. Januar 2019), Table 1: 'a list of all 137 prime ribbon knots with crossing numbers 11 or 12'. Beleg-PDF: konversationen/slice_stand_20260818/. 12n706 steht in dieser Liste.",
-   "KONSTRUKTION (Lamm, Anhang Seite 18, det=49-Block): 12n706 ist die SYMMETRISCHE VEREINIGUNG mit Teilknoten K_+- = 7_1 und Achsenparametern (1, -1).",
-   "BAUART (Kinoshita-Terasaka 1957, Lamm Def. 6.1): Teilknoten und sein Spiegelbild beiderseits einer Symmetrieachse, dazwischen der zentrale Teil C mit Twist-Tangles, deren vorzeichenbehaftete Kreuzungszahlen (1,-1) sind. Falten laengs der Achse -- das Diagramm liefert die Hoehenfunktion -- ergibt ein Band konstanter Breite. Nach Aceto (Lamm Prop. 5.1) besteht dieses Band nur aus Streifen, Enden, Twists und RIBBON-SINGULARITAETEN; es enthaelt weder Kreuzungen noch Junctions. Symmetrische Vereinigungen sind damit per Bauart RIBBON.",
-   "UNABHAENGIGE GEGENPROBE (2026-08-19, GERECHNET, nicht zitiert): fuer eine symmetrische Vereinigung gilt det = det(K_+-)^2. det(7_1) = 7, bestimmt als Torsion von H_1 der 2-fach zyklischen Ueberlagerung (snappy, gnottheorie_env; Methode am Gegenfall 4_1 -> det 5 geeicht). 7^2 = 49 = unsere eigene, blind gerechnete Determinante. Die zitierte Bauanleitung reproduziert unsere Zahl auf einem voellig anderen Weg.",
-   "FOLGERUNG: ribbon => slice => g_4 = 0, glatt UND topologisch.",
-   "Die notwendigen Bedingungen waren ohnehin alle erfuellt (tau = s = sigma = Arf = 0, det = 49 = 7^2) -- der Beleg erklaert, WARUM, statt es offen zu lassen.",
-   "GRENZE, ausdruecklich: das ist ein LITERATUR-BELEG fuer eine Eigenschaft eines blind identifizierten Knotens, KEINE von uns selbst gebaute Scheibe. Solange wir die Bandpraesentation nicht eigenhaendig konstruieren und pruefen, ist Lamm die Quelle."
+   "IDENTITY COMPUTED BLIND: 12n_706 comes from our own .fseries chain (crosscheck_knotinfo), independently of the source cited here. What was looked up is a PROPERTY of an already identified knot -- hard rule 1 not violated.",
+   "RIBBON RECEIPT (literature, fetched 2026-08-19): Christoph Lamm, 'The search for non-symmetric ribbon knots', arXiv:1710.06909v2 (5 January 2019), Table 1: 'a list of all 137 prime ribbon knots with crossing numbers 11 or 12'. Receipt PDF: konversationen/slice_stand_20260818/. 12n706 is in this list.",
+   "CONSTRUCTION (Lamm, appendix page 18, det=49 block): 12n706 is the SYMMETRIC UNION with partial knot K_+- = 7_1 and axis parameters (1, -1).",
+   "DESIGN (Kinoshita-Terasaka 1957, Lamm Def. 6.1): a partial knot and its mirror image on either side of a symmetry axis, between them the central part C with twist tangles whose signed crossing numbers are (1,-1). Folding along the axis -- the diagram supplies the height function -- gives a band of constant width. By Aceto (Lamm Prop. 5.1) this band consists only of strips, ends, twists and RIBBON SINGULARITIES; it contains neither crossings nor junctions. Symmetric unions are therefore RIBBON by design.",
+   "INDEPENDENT CROSS-CHECK (2026-08-19, COMPUTED, not cited): for a symmetric union det = det(K_+-)^2. det(7_1) = 7, determined as the torsion of H_1 of the 2-fold cyclic cover (snappy, gnottheorie_env; method calibrated on the counter-case 4_1 -> det 5). 7^2 = 49 = our own determinant, computed blind. The cited construction reproduces our number by an entirely different route.",
+   "CONSEQUENCE: ribbon => slice => g_4 = 0, smooth AND topological.",
+   "The necessary conditions were all satisfied anyway (tau = s = sigma = Arf = 0, det = 49 = 7^2) -- the receipt explains WHY instead of leaving it open.",
+   "LIMIT, explicitly: this is a LITERATURE RECEIPT for a property of a blindly identified knot, NOT a disc we built ourselves. As long as we have not constructed and checked the band presentation by our own hand, Lamm is the source."
   ],
   "belegt_am": "2026-08-19",
-  "belegt_von": "Werner Stanggassinger + Claude Code",
+  "belegt_von": "Werner Alois Stanggassinger + Claude Code",
   "quelle_oeffentlich": "C. Lamm, The search for non-symmetric ribbon knots, arXiv:1710.06909v2 (2019), Table 1 and appendix p. 18: symmetric union with partial knot 7₁ and axis parameters (1, −1). Ribbon ⇒ slice ⇒ g₄ = 0. Cross-check: det(7₁)² = 7² = 49, matching our independently computed determinant.",
   "quelle_url": "https://arxiv.org/abs/1710.06909"
  },
@@ -84,16 +84,16 @@
   "smooth_4_genus": 0,
   "topological_4_genus": 0,
   "beweis": [
-   "IDENTITAET BLIND GERECHNET: der Record 'mirror' wurde aus der eigenen .fseries als 5_2 # m5_2 bestimmt (crosscheck_knotinfo, distinct_knot_id), unabhaengig von allem hier.",
-   "STRUKTUR-ARGUMENT (kein Literatur-Beleg noetig): K # m(K) ist fuer INVERTIERBARES K stets ein Bandknoten -- man faltet das verknotete Band an einer Ebene auf sich selbst zurueck, die Faltung IST die Ribbon-Scheibe. Bei invertierbarem K ist m(K) das Konkordanz-Inverse von K, also ist K # m(K) der Nullelement-Vertreter.",
-   "INVERTIERBARKEIT VON 5_2 GERECHNET (2026-08-19, snappy, gnottheorie_env): symmetry_group() = Z/2 + Z/2, is_invertible_knot() = True, is_full_group() = True (also VOLLSTAENDIG bestimmt, kein Teilergebnis), is_amphicheiral() = False (5_2 ist chiral, m5_2 ist also wirklich ein anderer Summand).",
-   "HAENDIGKEIT UEBER DIE CHIRALITAETS-SENSITIVE GROESSE (Lehre aus Disc #557 / knots-of-love: det und Alexander sind chiralitaetsblind und duerfen die Haendigkeit NICHT tragen): sigma ist additiv unter Verbindungssumme. Gerechnet (snappy+sage, Singular auf PATH): sigma(5_2) = -2, sigma(m5_2) = +2. Damit sigma(5_2 # m5_2) = 0 = unser Record, waehrend gleichhaendig sigma(5_2 # 5_2) = -4 gaebe -- AUSGESCHLOSSEN. Der Spiegel-Pruefer wurde vorher am Kleeblatt geeicht (sigma(3_1)=+2, sigma(m3_1)=-2); ein erster Anlauf hatte still FALSCH gemessen, weil snappy .mirror() ein NEUES Objekt zurueckgibt statt in-place zu spiegeln -- die Eichung hat genau das gefangen.",
-   "ZAHLEN-GEGENPROBEN, alle unabhaengig gerechnet und alle bestanden: det(5_2)^2 = 7^2 = 49 = unser Record. Alexander(5_2)^2 = (2t^2-3t+2)^2 = 4t^4-12t^3+17t^2-12t+4 -- BIT-GENAU unser gespeichertes '4 x^4 - 12 x^3 + 17 x^2 - 12 x + 4' (nur regina-x- statt t-Notation, Footgun 15). Genus 2 = 2 * genus(5_2) = 2*1, konsistent.",
-   "FOLGERUNG: ribbon => slice => g_4 = 0, glatt UND topologisch. Alle notwendigen Bedingungen waren ohnehin erfuellt (tau=s=sigma=Arf=0, det=49=7^2) -- das Argument erklaert, WARUM.",
-   "GRENZE: das ist ein STRUKTUR-Argument aus der Bauform, keine von uns explizit gebaute und gepruefte Bandpraesentation. Es ist damit staerker belegt als die Lamm-Faelle (kein fremder Beleg noetig), aber es ersetzt den konstruktiven Zweig nicht."
+   "IDENTITY COMPUTED BLIND: the record 'mirror' was determined from our own .fseries as 5_2 # m5_2 (crosscheck_knotinfo, distinct_knot_id), independently of everything here.",
+   "STRUCTURAL ARGUMENT (no literature receipt needed): for INVERTIBLE K, K # m(K) is always a ribbon knot -- one folds the knotted band back onto itself at a plane, the fold IS the ribbon disc. For invertible K, m(K) is the concordance inverse of K, so K # m(K) represents the zero element.",
+   "INVERTIBILITY OF 5_2 COMPUTED (2026-08-19, snappy, gnottheorie_env): symmetry_group() = Z/2 + Z/2, is_invertible_knot() = True, is_full_group() = True (so COMPLETELY determined, not a partial result), is_amphicheiral() = False (5_2 is chiral, so m5_2 really is a different summand).",
+   "HANDEDNESS VIA THE CHIRALITY-SENSITIVE QUANTITY (lesson from Disc #557 / knots-of-love: det and Alexander are chirality-blind and must NOT carry the handedness): sigma is additive under connected sum. Computed (snappy+sage, Singular on PATH): sigma(5_2) = -2, sigma(m5_2) = +2. Hence sigma(5_2 # m5_2) = 0 = our record, whereas same-handed sigma(5_2 # 5_2) = -4 -- EXCLUDED. The mirror checker was calibrated beforehand on the trefoil (sigma(3_1)=+2, sigma(m3_1)=-2); a first attempt had silently measured WRONG because snappy .mirror() returns a NEW object instead of mirroring in place -- the calibration caught exactly that.",
+   "NUMBER CROSS-CHECKS, all computed independently and all passed: det(5_2)^2 = 7^2 = 49 = our record. Alexander(5_2)^2 = (2t^2-3t+2)^2 = 4t^4-12t^3+17t^2-12t+4 -- BIT-EXACTLY our stored '4 x^4 - 12 x^3 + 17 x^2 - 12 x + 4' (only regina's x instead of t notation, footgun 15). Genus 2 = 2 * genus(5_2) = 2*1, consistent.",
+   "CONSEQUENCE: ribbon => slice => g_4 = 0, smooth AND topological. All necessary conditions were satisfied anyway (tau=s=sigma=Arf=0, det=49=7^2) -- the argument explains WHY.",
+   "LIMIT: this is a STRUCTURAL argument from the construction, not a band presentation we built and checked explicitly. It is therefore better receipted than the Lamm cases (no outside receipt needed), but it does not replace the constructive branch."
   ],
   "quelle_oeffentlich": "Own result: the knot is K # m(K) with K = 5₂. We computed that 5₂ is invertible (SnapPy symmetry group Z/2+Z/2, full group), so m(5₂) is its concordance inverse and K # m(K) is a ribbon knot ⇒ slice ⇒ g₄ = 0. Handedness is fixed by the signature, which is chirality-sensitive: σ(5₂) = −2 and σ(m5₂) = +2 sum to 0, matching the record, whereas two same-handed summands would give −4.",
   "belegt_am": "2026-08-19",
-  "belegt_von": "Werner Stanggassinger + Claude Code"
+  "belegt_von": "Werner Alois Stanggassinger + Claude Code"
  }
 }

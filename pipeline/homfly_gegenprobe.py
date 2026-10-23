@@ -145,7 +145,7 @@ def pruefe_einen(recdatei, homfly_str, toleranz=1e-6):
         r['det_alexander'] = da
         r['zeugen'] = 3 if da == det_rec else 2
         if da != det_rec:
-            r['warnung'] = 'Alexander-Zeuge weicht vom Record-det ab'
+            r['warnung'] = 'Alexander witness differs from the record det'
     return r
 
 

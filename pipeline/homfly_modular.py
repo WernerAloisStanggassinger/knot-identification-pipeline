@@ -322,7 +322,7 @@ def eine_primzahl(word, n, z_grad_max, p, rng, laut=False):
     if k_soll <= 1:
         _seriell()
     elif not _importierbar:
-        _seriell(f"Modulname '{_zeile_mod.__module__}' nicht importierbar")
+        _seriell(f"module name '{_zeile_mod.__module__}' not importable")
     else:
         import concurrent.futures as _cf
         import multiprocessing as _mp
@@ -336,7 +336,7 @@ def eine_primzahl(word, n, z_grad_max, p, rng, laut=False):
                     if laut and NZ >= 6 and fertig % max(1, NZ // 4) == 0:
                         print(f'      {fertig}/{NZ} q sample points ({k_soll} cores)', flush=True)
         except Exception as ex_:
-            _seriell(f'Pool gescheitert ({type(ex_).__name__})')
+            _seriell(f'pool failed ({type(ex_).__name__})')
 
     MZ = [[pow(Z, J, p) for J in range(NZ)] for Z in Zs]
     X = loese_mod(MZ, V, p)                              # over J

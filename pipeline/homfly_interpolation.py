@@ -228,7 +228,7 @@ def interpoliere(word, n, z_grad_max, phase=0.31, laut=False, zwang_box=None,
     if k_soll <= 1:                       # counter-case path, bit-identical
         _seriell()
     elif not _importierbar:
-        _seriell(f"Modulname '{_zeile.__module__}' nicht importierbar")
+        _seriell(f"module name '{_zeile.__module__}' not importable")
         k_soll = 1
     else:
         import concurrent.futures as _cf
@@ -246,7 +246,7 @@ def interpoliere(word, n, z_grad_max, phase=0.31, laut=False, zwang_box=None,
                         print(f'    {fertig}/{NZ} z values, {time.time()-t0:.0f}s '
                               f'({k_soll} cores)', flush=True)
         except Exception as ex_:          # pool broken -> better slow than dead
-            _seriell(f'Pool gescheitert ({type(ex_).__name__})')
+            _seriell(f'pool failed ({type(ex_).__name__})')
             k_soll = 1
     t_hecke = time.time() - t0
 
@@ -358,10 +358,10 @@ def alexander_zeuge(p, evals):
     only determined up to ±t^a, an absolute comparison reports phantom errors).
     Decisive: the same k must fit at ALL points, otherwise it does not
     count. A single point could always be explained away.
-    The returned reason texts are data (written into records) and stay German."""
+    The returned reason texts are data (written into records)."""
     from fractions import Fraction
     if not evals:
-        return None, 'keine alexander_point_evals im Record'
+        return None, 'no alexander_point_evals in the record'
     paare = []
     for ts, soll in evals.items():
         try:
@@ -373,12 +373,12 @@ def alexander_zeuge(p, evals):
             continue
         paare.append((t, mein, Fraction(int(soll))))
     if len(paare) < 2:
-        return None, 'zu wenige brauchbare Stuetzwerte'
+        return None, 'too few usable sample values'
     for k in range(-80, 81):
         for vz in (1, -1):
             if all(mein == vz * Fraction(t) ** k * soll for t, mein, soll in paare):
-                return True, f'uebereinstimmend an {len(paare)} Punkten (Einheit {vz:+d}*t^{k})'
-    return False, f'an {len(paare)} Punkten durch keine Einheit ±t^k erklaerbar'
+                return True, f'agreeing at {len(paare)} points (unit {vz:+d}*t^{k})'
+    return False, f'at {len(paare)} points not explained by any unit ±t^k'
 
 
 # ── self-test: two known knots and two counter-cases ───────────────────
@@ -681,10 +681,10 @@ def mantissen_riegel(zgrad, ausschuss_max, exakt=False):
         return None
     erw = ausschuss_vorhersage(zgrad)
     dek = math.log10(erw / ausschuss_max)
-    return (f'Mantissen-Riegel: c={zgrad} > {c_wand:.0f}; erwarteter Ausschuss '
-            f'~1e{math.log10(erw):+.0f}, das sind {dek:.0f} Dekaden ueber '
-            f'{ausschuss_max:.0e} (gemessen an {MANTISSE_N} Laeufen). '
-            f'Gleitkomma kann das nicht darstellen — Weg: --exakt')
+    return (f'mantissa latch: c={zgrad} > {c_wand:.0f}; expected residue '
+            f'~1e{math.log10(erw):+.0f}, that is {dek:.0f} decades above '
+            f'{ausschuss_max:.0e} (measured over {MANTISSE_N} runs). '
+            f'Floating point cannot represent this — way out: --exakt')
 
 
 def bearbeite_ziel(t, ausschuss_max=1e-3, frisch_max=1e-8, exakt=False,
@@ -712,12 +712,12 @@ def bearbeite_ziel(t, ausschuss_max=1e-3, frisch_max=1e-8, exakt=False,
         if _r['pflichtliste']['ALGEBRA'].get('homfly_polynomial'):
             return {'name': t['name'], 'record': t['record'], 'n': t['n'],
                     'c': t.get('c'), 'zgrad': t.get('zgrad'), 'ok': False,
-                    'gruende': ['Record traegt inzwischen HOMFLY (anderer Weg '
-                                'war schneller) — nicht doppelt gerechnet'],
+                    'gruende': ['record meanwhile carries a HOMFLY (another route '
+                                'was faster) — not computed twice'],
                     'schon_da': True, 'riegel': True,
                     'det': None, 'det_record': None, 'det_alexander': None,
                     'alex_punkte': None, 'alex_punkte_text': '',
-                    'frisch': None, 'frisch_text': 'nicht gerechnet',
+                    'frisch': None, 'frisch_text': 'not computed',
                     'exakt': bool(exakt), 'sumabs': None, 'zeugen': 0,
                     'sek': round(time.time() - t0, 2), 'homfly': None,
                     'ausschuss': None, 'unbekannte': None, 'durchgaenge': None}
@@ -731,7 +731,7 @@ def bearbeite_ziel(t, ausschuss_max=1e-3, frisch_max=1e-8, exakt=False,
                     'gruende': [grund], 'riegel': True,
                     'det': None, 'det_record': None, 'det_alexander': None,
                     'alex_punkte': None, 'alex_punkte_text': '',
-                    'frisch': None, 'frisch_text': 'nicht gerechnet',
+                    'frisch': None, 'frisch_text': 'not computed',
                     'exakt': bool(exakt), 'sumabs': None, 'zeugen': 0,
                     'sek': round(time.time() - t0, 2), 'homfly': None,
                     'ausschuss': ausschuss_vorhersage(t.get('zgrad') or 0),
@@ -748,14 +748,14 @@ def bearbeite_ziel(t, ausschuss_max=1e-3, frisch_max=1e-8, exakt=False,
                 'durchgaenge': md['primzahlen'], 'stabil': md['stabil']}
         tr, ges = pruefe_frisch_mod(p, t['w'], t['n'])
         frisch = 0.0 if tr == ges else 1.0
-        frisch_text = f'{tr}/{ges} frische Punkte in F_p exakt gleich'
+        frisch_text = f'{tr}/{ges} fresh points exactly equal in F_p'
         if not md['stabil']:
             pass
     else:
         C, I0, J1, e, diag, _ = interpoliere(t['w'], t['n'], t['zgrad'])
         p = als_dict(C, I0)
         frisch = pruefe_frisch(p, t['w'], t['n'])
-        frisch_text = f'{frisch:.1e} (Gleitkomma)'
+        frisch_text = f'{frisch:.1e} (floating point)'
     rec = json.load(open(t['record']))
     d_rec = record_det(rec)
     d_int = det_exakt(p)
@@ -764,22 +764,22 @@ def bearbeite_ziel(t, ausschuss_max=1e-3, frisch_max=1e-8, exakt=False,
     sumabs = sum(abs(v) for v in p.values())
     gruende = []
     if exakt and not diag.get('stabil'):
-        gruende.append('CRT nicht stabil geworden (mehr Primzahlen noetig)')
+        gruende.append('CRT did not become stable (more primes needed)')
     if not exakt and diag['ausschuss'] > ausschuss_max:
-        gruende.append(f"Ausschuss {diag['ausschuss']:.1e} > {ausschuss_max:.0e}")
+        gruende.append(f"residue {diag['ausschuss']:.1e} > {ausschuss_max:.0e}")
     if (frisch > frisch_max) if not exakt else (frisch != 0.0):
-        gruende.append(f"frische Punkte: {frisch_text}")
+        gruende.append(f"fresh points: {frisch_text}")
     if d_rec is None:
-        gruende.append('keine Determinante im Record')
+        gruende.append('no determinant in the record')
     elif d_int != d_rec:
-        gruende.append(f'det {d_int} != Record {d_rec}')
+        gruende.append(f'det {d_int} != record {d_rec}')
     if d_alex is not None and d_rec is not None and d_alex != d_rec:
-        gruende.append(f'Alexander-Zeuge {d_alex} != Record {d_rec}')
+        gruende.append(f'Alexander witness {d_alex} != record {d_rec}')
     # witness 4: Alexander at several points, exact.
     evals = rec['pflichtliste']['ALGEBRA'].get('alexander_point_evals')
     az, az_text = alexander_zeuge(p, evals)
     if az is False:
-        gruende.append(f'Alexander-Punkte: {az_text}')
+        gruende.append(f'Alexander points: {az_text}')
     zeugen = 2 + (1 if (d_alex is not None and d_alex == d_rec) else 0) \
                + (1 if az else 0)
     return {'name': t['name'], 'record': t['record'], 'n': t['n'],
@@ -798,28 +798,28 @@ def schreibe(r, datum):
     rec['pflichtliste']['ALGEBRA']['homfly_polynomial'] = r['homfly']
     rec['homfly_herkunft'] = {
         'datum': datum,
-        'weg': ('Hecke-Spur am Punkt (hecke_homfly_fast) auf einem Gitter, '
-                'dann 2-D-Interpolation zum vollen Polynom '
+        'weg': ('Hecke trace at a point (hecke_homfly_fast) on a grid, '
+                'then 2-D interpolation to the full polynomial '
                 '(tools/homfly_interpolation.py)'),
-        'warum_nicht_regina': ('regina bleibt an diesem Diagramm an der '
-                               'SPEICHERWAND stehen (~3 GB je Prozess, teils '
-                               'von earlyoom abgeschossen, Disc #677) — nicht '
-                               'an der Zeit.'),
-        'konvention': 'regina AZ, Variablen gedruckt als x=a, y=z',
-        'box_gemessen': ('-e-n+1 <= a-Exponent <= -e+n-1, beide Achsen gerade, '
-                         'z-Grad <= c-1; an 178 frisch gerechneten Polynomen '
-                         'geprueft, 0 Verletzungen, 173 beruehren den Rand exakt'),
-        'eichung': ('20 Records mit vorhandenem regina-HOMFLY Term fuer Term '
-                    'reproduziert (c=21..54), 0 daneben'),
+        'warum_nicht_regina': ('regina stops at this diagram at the '
+                               'MEMORY WALL (~3 GB per process, partly '
+                               'killed by earlyoom, Disc #677) — not '
+                               'at the time.'),
+        'konvention': 'regina AZ, variables printed as x=a, y=z',
+        'box_gemessen': ('-e-n+1 <= a exponent <= -e+n-1, both axes even, '
+                         'z degree <= c-1; checked on 178 freshly computed polynomials, '
+                         '0 violations, 173 touch the boundary exactly'),
+        'eichung': ('20 records with an existing regina HOMFLY reproduced '
+                    'term by term (c=21..54), 0 off'),
         'ausschuss': r['ausschuss'],
-        'ausschuss_deutung': ('groesster Abstand eines Koeffizienten zur '
-                              'naechsten ganzen Zahl; gemessenes Gesetz '
-                              'Ausschuss ~ 1,2e-16 * Summe|Koeffizienten|'),
-        'zeuge_1': f"frische Punkte ausserhalb des Gitters: {r['frisch']:.2e}",
-        'zeuge_2': f"det aus HOMFLY |P(1,2i)| = {r['det']} = Record {r['det_record']}",
+        'ausschuss_deutung': ('largest distance of a coefficient from the '
+                              'nearest integer; measured law '
+                              'residue ~ 1.2e-16 * sum|coefficients|'),
+        'zeuge_1': f"fresh points outside the grid: {r['frisch']:.2e}",
+        'zeuge_2': f"det from HOMFLY |P(1,2i)| = {r['det']} = record {r['det_record']}",
         'zeuge_3': (f"|Alexander(-1)| = {r['det_alexander']}"
                     if r['det_alexander'] is not None else None),
-        'zeuge_4': (f"Alexander an mehreren Punkten (exakt, Brueche): "
+        'zeuge_4': (f"Alexander at several points (exact, fractions): "
                     f"{r['alex_punkte_text']}" if r.get('alex_punkte') else None),
         'zeugen_gesamt': r['zeugen'],
         'unbekannte': r['unbekannte'], 'gitter_durchgaenge': r['durchgaenge'],

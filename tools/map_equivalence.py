@@ -100,6 +100,33 @@ def looks_like_code(s):
 def template(js):
     return ''.join(v.value if isinstance(v, ast.Constant) else f'__FV{i}__' for i, v in enumerate(js.values))
 
+def argparse_dests(tree, acc):
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr == 'add_argument':
+            dest = next((k.value.value for k in n.keywords if k.arg == 'dest' and isinstance(k.value, ast.Constant)), None)
+            flags = [a.value for a in n.args if isinstance(a, ast.Constant) and isinstance(a.value, str)]
+            if dest is None and flags:
+                longf = [f for f in flags if f.startswith('--')]
+                dest = (longf[0] if longf else flags[0]).lstrip('-').replace('-', '_')
+            if dest: acc.add(dest)
+    return acc
+
+def repo_functions(tree, acc):
+    for n in ast.walk(tree):
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            acc[n.name] = {a.arg for a in n.args.args + n.args.kwonlyargs + n.args.posonlyargs}
+        elif isinstance(n, ast.ClassDef):
+            acc.setdefault(n.name, set())
+    return acc
+
+def keyword_callees(tree, acc):
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Call):
+            f = n.func; name = f.id if isinstance(f, ast.Name) else (f.attr if isinstance(f, ast.Attribute) else None)
+            for k in n.keywords:
+                if k.arg: acc.setdefault(k.arg, set()).add(name)
+    return acc
+
 class Walk:
     def __init__(self, fname): self.f = fname; self.idents = []; self.strings = []; self.errors = []
     def cmp(self, a, b, path='root'):
@@ -178,17 +205,36 @@ def main():
     for u, v, k, q, l in idents:
         if u is None or v is None: continue
         if fwd.setdefault(u, v) != v: errors.append(f'{q}:{l}: identifier {u!r} renamed to {v!r} here but to {fwd[u]!r} elsewhere')
-        if bwd.setdefault(v, u) != u: errors.append(f'{q}:{l}: two identifiers ({bwd[v]!r}, {u!r}) renamed to the same {v!r}')
+        if bwd.setdefault((q, v), u) != u: errors.append(f'{q}:{l}: two identifiers ({bwd[(q, v)]!r}, {u!r}) renamed to the same {v!r}')
     all_old_idents = {u for u, v, k, q, l in idents if u}
     defined = set()
     for t in old_trees.values(): defined_names(t, defined)
     ren = {u: v for u, v in fwd.items() if u != v}
+    per_file = {}
+    for u, v, k, q, l in idents:
+        if u: per_file.setdefault(q, set()).add(u)
+    for q, names in per_file.items():
+        for u in names:
+            v = ren.get(u)
+            if v and v in names and fwd.get(v, v) == v:
+                errors.append(f'{q}: identifier {u!r} -> {v!r}: {v!r} already exists in this file and keeps its name (collision)')
     for u, v in ren.items():
-        if v in all_old_idents and fwd.get(v, v) == v: errors.append(f'identifier {u!r} -> {v!r}: {v!r} already exists and keeps its name (collision)')
         if hasattr(builtins, v): errors.append(f'identifier {u!r} -> {v!r}: shadows a builtin')
         repo_modules = {os.path.basename(x)[:-3] for x in py_old}
         if u not in defined and u not in repo_modules:
             errors.append(f'identifier {u!r} -> {v!r}: not defined by the repository (third-party attribute or keyword?)')
+    # argparse: an attribute that is an argparse dest may only be renamed together with its flag
+    dests_old, dests_new, attrs_new = set(), set(), set()
+    for t in old_trees.values(): argparse_dests(t, dests_old)
+    for t in new_trees.values():
+        argparse_dests(t, dests_new); attrs_new |= {n.attr for n in ast.walk(t) if isinstance(n, ast.Attribute)}
+    for u, v in ren.items():
+        if u in dests_old and v not in dests_new: errors.append(f'identifier {u!r} -> {v!r}: {u!r} is an argparse dest, but no option now yields {v!r}')
+    for d in dests_old - dests_new:
+        if d in attrs_new: errors.append(f'argparse dest {d!r} is gone (option renamed) but the attribute {d!r} is still read')
+    # keyword arguments: renaming allowed only when every callee is a repository function with that parameter
+    funcs, kwc = {}, {}
+    for t in old_trees.values(): repo_functions(t, funcs); keyword_callees(t, kwc)
     # strings
     keys_old = set()
     for t in old_trees.values(): key_strings(t, keys_old)
@@ -199,6 +245,12 @@ def main():
         else: ledger.setdefault(u, v)
     for u, v in sfwd.items():
         if v in keys_old and sfwd.get(v, v) == v: errors.append(f'key {u!r} -> {v!r}: {v!r} already used as a key (collision)')
+    # (kwarg check needs the key renaming: dict(sorte=...) is a data key and may move only together with the key 'sorte')
+    for u, v in ren.items():
+        for callee in kwc.get(u, ()):
+            if (callee not in funcs or (u not in funcs[callee] and funcs[callee])) and sfwd.get(u) != v:
+                errors.append(f'keyword argument {u!r} -> {v!r} passed to {callee!r}, which is not a repository function with '
+                              f'that parameter (a data key? then rename the key {u!r} -> {v!r} too)')
     tracked = subprocess.run(['git', 'ls-files'], capture_output=True, text=True).stdout.split() + list(renames.values())
     for f in sorted(set(tracked)):
         if not f.endswith(('.py', '.sh', '.json')) or not os.path.exists(f) or f.startswith('tools/translation_table'): continue

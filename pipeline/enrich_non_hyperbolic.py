@@ -343,7 +343,7 @@ def main():
     args = ap.parse_args()
 
     if not args.pflicht_json.exists():
-        sys.exit(f"FEHLER: {args.pflicht_json} fehlt")
+        sys.exit(f"ERROR: {args.pflicht_json} missing")
 
     d = json.loads(args.pflicht_json.read_text())
     pl = d.get("pflichtliste", {})
@@ -408,7 +408,7 @@ def main():
         try:
             import sympy as sp
         except ImportError:
-            sys.exit("FEHLER: sympy nicht verfuegbar — enrich_non_hyperbolic braucht sympy")
+            sys.exit("ERROR: sympy not available — enrich_non_hyperbolic needs sympy")
         t = sp.symbols("t")
         target = parse_alex_string(alex_str, t)
         if target is not None and _alex_reducible_into_knot_factors(target, t):
@@ -439,7 +439,7 @@ def main():
         try:
             import sympy as sp
         except ImportError:
-            sys.exit("FEHLER: sympy nicht verfuegbar — enrich_non_hyperbolic braucht sympy")
+            sys.exit("ERROR: sympy not available — enrich_non_hyperbolic needs sympy")
 
         t = sp.symbols("t")
         target = parse_alex_string(alex_str, t)

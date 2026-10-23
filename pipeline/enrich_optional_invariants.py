@@ -244,7 +244,7 @@ def sage_extras(braid_word, n_strands):
             b = B({braid_word!r})
             K = Knot(b)
             out = {{}}
-            # Multivariable Alexander - fuer Knot identisch zum Standard-Alexander
+            # Multivariable Alexander - for a knot identical to the standard Alexander
             try:
                 out['multivariable_alexander'] = str(K.alexander_polynomial())
             except Exception as e:
@@ -257,8 +257,8 @@ def sage_extras(braid_word, n_strands):
                 out['seifert_matrix_nrows']   = int(S.nrows())
             except Exception as e:
                 out['seifert_matrix_err'] = str(e)
-            # Knot-Group-Generators: Anzahl der minimalen Wirtinger-Generatoren
-            # (untere Schranke fuer bridge_number)
+            # knot group generators: number of minimal Wirtinger generators
+            # (lower bound for bridge_number)
             try:
                 G = K.fundamental_group()
                 out['knot_group_generators_initial'] = int(G.ngens())
@@ -304,23 +304,23 @@ def snappy_extras(isosig):
             except Exception as e:
                 out['cusp_areas_err'] = str(e)
             try:
-                # cusp_neighborhood() startet bei displacement 0 -> volume(0) ist fuer
-                # JEDEN Ein-Cusp-Knoten dieselbe Konstante 0.324759526419 und misst den
-                # Knoten nicht (Disc #745, 648 Records mit einem einzigen Wert). Das
-                # Maximum steht erst nach set_displacement(stopping_displacement()).
+                # cusp_neighborhood() starts at displacement 0 -> volume(0) is the same constant
+                # 0.324759526419 for EVERY one-cusp knot and does not measure the knot
+                # (Disc #745, 648 records with one single value). The maximum is only
+                # there after set_displacement(stopping_displacement()).
                 cn = M.cusp_neighborhood()
                 _v0 = float(cn.volume(0))
                 cn.set_displacement(cn.stopping_displacement())
                 _vmax = float(cn.volume(0))
                 _vol = float(out['volume'])
-                # Kanarie: das Maximum kann nicht kleiner als der Displacement-0-Wert
-                # und nicht groesser als das Gesamtvolumen sein.
+                # canary: the maximum cannot be smaller than the displacement-0 value
+                # and not larger than the total volume.
                 if not (_vmax == _vmax) or _vmax <= 0:
-                    out['cusp_volume_err'] = 'unmoegliches Maximum %r' % _vmax
+                    out['cusp_volume_err'] = 'impossible maximum %r' % _vmax
                 elif _vmax < _v0 - 1e-9:
-                    out['cusp_volume_err'] = 'Maximum %r kleiner als displacement-0 %r' % (_vmax, _v0)
+                    out['cusp_volume_err'] = 'maximum %r smaller than displacement-0 %r' % (_vmax, _v0)
                 elif _vmax > _vol + 1e-6:
-                    out['cusp_volume_err'] = 'Cusp-Volumen %r groesser als Gesamtvolumen %r' % (_vmax, _vol)
+                    out['cusp_volume_err'] = 'cusp volume %r larger than total volume %r' % (_vmax, _vol)
                 else:
                     out['cusp_volume_max'] = _vmax
                     out['cusp_volume_at_displacement_0'] = _v0
@@ -392,7 +392,7 @@ def kauffman_via_knotpy(pd_code_str):
                 K = knotpy.from_pd_notation(crossings)
                 F = knotpy.kauffman(K)
                 s = str(F)
-                # Amphi-Symmetrie-Check: F(a) == F(1/a) ?
+                # amphichirality symmetry check: F(a) == F(1/a) ?
                 amphi_check = None
                 try:
                     import sympy
@@ -408,7 +408,7 @@ def kauffman_via_knotpy(pd_code_str):
                     'kauffman_polynomial_n_crossings_input': len(crossings),
                     'kauffman_polynomial_method': 'knotpy.kauffman state-sum (Discovery #106)',
                     'kauffman_polynomial_amphi_symmetry_check': amphi_check,
-                    'kauffman_polynomial_convention_note': 'knotpy state-sum; bei chiralen Knoten ggf. Mirror gegenueber KnotInfo (Discovery #106)',
+                    'kauffman_polynomial_convention_note': 'knotpy state-sum; for chiral knots possibly the mirror relative to KnotInfo (Discovery #106)',
                 }}))
         except Exception as e:
             import traceback
@@ -454,7 +454,7 @@ def derive_meridional_rank_and_bridge(report, optional):
     out = {}
     mr_upper = optional.get('knot_group_generators_simplified')
     if not isinstance(mr_upper, int):
-        return {'meridional_rank_note': 'kein knot_group_generators_simplified verfuegbar (Welle 2 Sage uebersprungen oder fehlgeschlagen)'}
+        return {'meridional_rank_note': 'no knot_group_generators_simplified available (wave 2 Sage skipped or failed)'}
 
     d = report['pflichtliste'].get('DIAGRAMM', {})
     a = report['pflichtliste'].get('ALGEBRA', {})
@@ -473,7 +473,7 @@ def derive_meridional_rank_and_bridge(report, optional):
     out['meridional_rank_upper_bound']         = mr_upper
     # Trivial lower bound: nontrivial knot ⇒ mr >= 2 (genus > 0 OR det > 1)
     out['meridional_rank_lower_bound']         = 2 if nichttrivial else 1
-    out['meridional_rank_method']              = 'Sage simplification_isomorphism().codomain().ngens() (Wirtinger-Heuristik wie Discovery #103)'
+    out['meridional_rank_method']              = 'Sage simplification_isomorphism().codomain().ngens() (Wirtinger heuristic as in Discovery #103)'
 
     # Berge status
     berge_proven = (isinstance(c_min, int) and c_min <= 12)
@@ -504,11 +504,11 @@ def derive_meridional_rank_and_bridge(report, optional):
     inconsistency_note = None
     if inherited_lo is not None and inherited_lo > mr_upper:
         inconsistency_note = (
-            f'Vorheriger lower-bound {inherited_lo} (vermutlich aus pflicht_extra '
+            f'Previous lower bound {inherited_lo} (probably from pflicht_extra '
             f'"Schubert b>=g+1") > meridional_rank_upper {mr_upper}. '
-            f'Diese Inequality ist KEIN allgemeiner Satz (Gegenbeispiel: '
-            f'(5,2)-Torusknoten g=2, b=2). Ueberschreibe mit fresh_lo={fresh_lo} '
-            f'aus First Principles. Siehe Discovery #109.'
+            f'This inequality is NOT a general theorem (counterexample: '
+            f'(5,2) torus knot g=2, b=2). Overwriting with fresh_lo={fresh_lo} '
+            f'from first principles. See Discovery #109.'
         )
         cur_lo = fresh_lo
     else:
@@ -520,7 +520,7 @@ def derive_meridional_rank_and_bridge(report, optional):
         new_hi = min(cur_hi, mr_upper)
         out['bridge_index']                    = [cur_lo, new_hi]
         out['bridge_index_upper_source']       = (
-            f'Berge-Theorem (c={c_min}<=12, BEWIESEN): b = mr <= {mr_upper}'
+            f'Berge theorem (c={c_min}<=12, PROVEN): b = mr <= {mr_upper}'
         )
     else:
         # Caution: not proven, hence do NOT narrow the interval,
@@ -528,8 +528,8 @@ def derive_meridional_rank_and_bridge(report, optional):
         out['bridge_index']                    = [cur_lo, cur_hi]
         out['bridge_index_berge_indicated']    = [cur_lo, mr_upper]
         out['bridge_index_upper_source']       = (
-            f'Trivial b<=c={c_min} (Berge-Vermutung c={c_min}>12 noch nicht bewiesen; '
-            f'Berge-indizierte Obergrenze: {mr_upper})'
+            f'Trivial b<=c={c_min} (Berge conjecture for c={c_min}>12 not yet proven; '
+            f'Berge-indicated upper bound: {mr_upper})'
         )
     out['bridge_index_lower_source'] = (
         f'fresh_lo={fresh_lo} = max(det>1=>2, 2-bridge-ausschluss=>3, '
@@ -663,8 +663,8 @@ def main():
                         alg['kauffman_polynomial_amphi_symmetry_check'] = kf_out.get('kauffman_polynomial_amphi_symmetry_check')
                         alg['kauffman_polynomial_convention_note']      = kf_out.get('kauffman_polynomial_convention_note')
                         alg['kauffman_polynomial_source_section']       = (
-                            'enrich_optional_invariants Welle 4 (Discovery #114b): '
-                            'Pflicht-Slot war leer, knotpy-Wert mit-gefuellt.'
+                            'enrich_optional_invariants wave 4 (Discovery #114b): '
+                            'mandatory slot was empty, filled with the knotpy value.'
                         )
                         print(f'  Discovery #114b: mandatory slot pflichtliste.ALGEBRA.kauffman_polynomial filled as well.')
             else:

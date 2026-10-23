@@ -74,22 +74,22 @@ def four_genus_verdict(a, slice_verdict_value=None):
 
     out = {
         'smooth_4_genus_lower_bound': int(unten_ganz),
-        'smooth_4_genus_lower_source': '; '.join(quellen) if quellen else 'keine Schranke berechenbar',
+        'smooth_4_genus_lower_source': '; '.join(quellen) if quellen else 'no bound computable',
         'smooth_4_genus_upper_bound': oben,
-        'smooth_4_genus_upper_source': ('g_3 = %s (Seifert-Flaeche in die 4-Kugel gedrueckt)' % oben)
-                                       if oben is not None else 'g_3 unbekannt',
+        'smooth_4_genus_upper_source': ('g_3 = %s (Seifert surface pushed into the 4-ball)' % oben)
+                                       if oben is not None else 'g_3 unknown',
     }
     if oben is not None and int(unten_ganz) == oben:
         out['smooth_4_genus'] = oben
-        out['smooth_4_genus_note'] = 'exakt: untere und obere Schranke fallen zusammen (%s)' % oben
+        out['smooth_4_genus_note'] = 'exact: lower and upper bound coincide (%s)' % oben
         out['smooth_4_genus_interval'] = [oben, oben]
     else:
         out['smooth_4_genus'] = None
         out['smooth_4_genus_interval'] = [int(unten_ganz), oben]
         out['smooth_4_genus_note'] = (
-            'unbestimmt: %s <= g_4 <= %s. Die Pipeline kennt nur Schranken; frueher stand hier |tau|, '
-            'das ist aber nur die UNTERE Schranke (2026-07-23).' % (int(unten_ganz), oben))
-    out['smooth_4_genus_method'] = 'four_genus_verdict.py (2026-07-23): Schranken, Wert nur bei Gleichheit'
+            'undetermined: %s <= g_4 <= %s. The pipeline only knows bounds; |tau| used to stand here, '
+            'but that is only the LOWER bound (2026-07-23).' % (int(unten_ganz), oben))
+    out['smooth_4_genus_method'] = 'four_genus_verdict.py (2026-07-23): bounds, a value only when they coincide'
 
     # topological: |signature|/2 <= g_4^top <= g_4^smooth ; tau and s do NOT bound it
     t_unten = int(-((-(abs(sig) / 2).numerator) // (abs(sig) / 2).denominator)) if sig is not None else 0
@@ -98,12 +98,12 @@ def four_genus_verdict(a, slice_verdict_value=None):
     out['topological_4_genus_upper_bound'] = t_oben
     if t_oben is not None and t_unten == t_oben:
         out['topological_4_genus'] = t_oben
-        out['topological_4_genus_note'] = 'exakt: |signature|/2 == obere Schranke'
+        out['topological_4_genus_note'] = 'exact: |signature|/2 == upper bound'
     else:
         out['topological_4_genus'] = None
         out['topological_4_genus_note'] = (
-            'unbestimmt: %s <= g_4^top <= %s (g_4^top <= g_4^smooth; tau und s schranken das '
-            'topologische Genus NICHT ein)' % (t_unten, t_oben))
+            'undetermined: %s <= g_4^top <= %s (g_4^top <= g_4^smooth; tau and s do NOT bound '
+            'the topological genus)' % (t_unten, t_oben))
     return out
 
 
@@ -116,8 +116,8 @@ def apply_to_algebra(a, slice_verdict_value=None, name=None, identitaet=None):
     if e is not None and 'smooth_4_genus' in e:
         a['smooth_4_genus'] = e['smooth_4_genus']
         a['smooth_4_genus_interval'] = [e['smooth_4_genus'], e['smooth_4_genus']]
-        a['smooth_4_genus_note'] = 'BELEGT (beweis_register.json): ' + ' '.join(e['beweis'])
-        a['smooth_4_genus_method'] = 'beweis_register.json, belegt am %s' % e.get('belegt_am', '?')
+        a['smooth_4_genus_note'] = 'RECEIPTED (beweis_register.json): ' + ' '.join(e['beweis'])
+        a['smooth_4_genus_method'] = 'beweis_register.json, receipted on %s' % e.get('belegt_am', '?')
         if 'topological_4_genus' in e:
             a['topological_4_genus'] = e['topological_4_genus']
             a['topological_4_genus_note'] = a['smooth_4_genus_note']

@@ -84,7 +84,7 @@ def main():
             a['unknotting_number_strict_lower'] = u_lower
             a['unknotting_number_strict_upper'] = None
             a['unknotting_number_note']         = (
-                f'u > {args.max_subset} auf diesem Diagramm')
+                f'u > {args.max_subset} on this diagram')
         else:
             progs = unk.get('progress', []) or []
             ks_searched = sorted({p['k'] for p in progs if 'k' in p})
@@ -110,22 +110,22 @@ def main():
                 a['unknotting_number_indicated']    = True
                 a['unknotting_number_assignment_basis'] = (
                     f'Discovery #114c: Stage-1-Witness {unk.get("witness_subset")} '
-                    f'(Regina simplify→0) bei k={u_upper}; k={ks_required} alle '
-                    f'exhaustiv ohne Treffer. diagram_u(K) = {u_upper} beweisbar; '
-                    f'globales u(K) koennte auf anderem Diagramm < {u_upper} sein, '
-                    f'daher strict_lower = {u_lower} bleibt formal.')
+                    f'(Regina simplify→0) at k={u_upper}; k={ks_required} all '
+                    f'exhaustive without hit. diagram_u(K) = {u_upper} provable; '
+                    f'global u(K) could be < {u_upper} on another diagram, '
+                    f'hence strict_lower = {u_lower} stays formal.')
             else:
                 a['unknotting_number']              = None
                 a['unknotting_number_strict_lower'] = u_lower
                 a['unknotting_number_strict_upper'] = u_upper
                 a['unknotting_number_assignment_basis'] = (
-                    f'k={ks_required} nicht vollstaendig getestet '
-                    f'(durchsuchte k={ks_searched}, mit Treffer={sorted(ks_with_hits)}); '
-                    f'kein Discovery-#114c-Auto-Assign.')
+                    f'k={ks_required} not completely tested '
+                    f'(searched k={ks_searched}, with hits={sorted(ks_with_hits)}); '
+                    f'no Discovery #114c auto-assign.')
 
             a['unknotting_number_note'] = (
                 f'{u_lower} <= u(K) <= {u_upper}; Witness-Subset '
-                f'{unk.get("witness_subset")} liefert Unknot via Crossing-Flip')
+                f'{unk.get("witness_subset")} gives the unknot via crossing flip')
         report['raw_subprocess_outputs']['unknotting'] = unk
 
         # Progress report

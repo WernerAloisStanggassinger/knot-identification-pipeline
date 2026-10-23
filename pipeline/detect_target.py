@@ -84,19 +84,19 @@ def main():
 
     rationale_parts = [
         f"target_count = min(n_cross) = {n_min} "
-        f"(Saturn/orbit-Pattern: optimaler Frame liefert minimales Diagramm).",
+        f"(Saturn/orbit pattern: the optimal frame gives the minimal diagram).",
         f"frame_cap = target+2 = {frame_cap}.",
         f"aggressive_simplify Range: [{agg_n_min}, {agg_n_max}] "
-        f"(min..q95={n_q95}; q75={n_q75} war zu eng — Saturn-c=12-Befund "
-        f"2026-05-10: 3%-reduktion-Frames liegen oft >q75).",
+        f"(min..q95={n_q95}; q75={n_q75} was too narrow — Saturn c=12 finding "
+        f"2026-05-10: frames with 3% reduction often lie above q75).",
     ]
     if all_even:
         rationale_parts.append(
-            "ALLE Frame-n_cross gerade ⇒ pi-Antisymmetrie-Signatur "
-            "(jeder echte Crossing erscheint 2x via antipodale Paare).")
+            "ALL frame n_cross even ⇒ pi-antisymmetry signature "
+            "(every real crossing appears twice via antipodal pairs).")
     elif all_odd:
         rationale_parts.append(
-            "ALLE Frame-n_cross ungerade ⇒ ungewoehnlich, manuell pruefen.")
+            "ALL frame n_cross odd ⇒ unusual, check by hand.")
 
     result = {
         "n_frames":          int(g.count()),

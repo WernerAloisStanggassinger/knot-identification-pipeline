@@ -82,13 +82,13 @@ def fox_milnor(alex_str):
     Note: the reason strings and the 'faktoren' key are returned data and stay German in this release."""
     P = parse_alexander(alex_str)
     if P is None:
-        return None, 'kein lesbares Alexander-Polynom', {}
+        return None, 'no readable Alexander polynomial', {}
     if P.total_degree() == 0:
-        return True, 'Delta ist konstant (= 1 bis auf Einheiten): Fox-Milnor trivial erfuellt', {}
+        return True, 'Delta is constant (= 1 up to units): Fox-Milnor trivially satisfied', {}
     try:
         _, faktoren = sp.factor_list(P.as_expr(), t)
     except Exception as e:
-        return None, 'Faktorisierung fehlgeschlagen: %s' % str(e)[:80], {}
+        return None, 'factorisation failed: %s' % str(e)[:80], {}
     mult = {}
     for f, e in faktoren:
         try:
@@ -105,10 +105,10 @@ def fox_milnor(alex_str):
         qs = _reziprok(q).as_expr()
         if sp.simplify(qs - k) == 0:
             if e % 2 == 1:
-                return False, ('selbst-reziproker Faktor (%s) mit UNGERADER Vielfachheit %d'
+                return False, ('self-reciprocal factor (%s) with ODD multiplicity %d'
                                % (sp.sstr(k), e)), details
         else:
             if mult.get(qs, 0) != e:
-                return False, ('Faktor (%s) hat Vielfachheit %d, sein Reziprokes (%s) aber %d'
+                return False, ('factor (%s) has multiplicity %d, but its reciprocal (%s) has %d'
                                % (sp.sstr(k), e, sp.sstr(qs), mult.get(qs, 0))), details
-    return True, 'Fox-Milnor erfuellt: Delta = f(t)*f(1/t) moeglich', details
+    return True, 'Fox-Milnor satisfied: Delta = f(t)*f(1/t) possible', details

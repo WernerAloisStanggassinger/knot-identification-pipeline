@@ -271,7 +271,7 @@ if __name__ == '__main__':
             try:
                 got = normiere(alexander_poly(pd, v))
             except Exception as e:
-                got = f'Fehler {type(e).__name__}'
+                got = f'error {type(e).__name__}'
             zeile.append(f'{name} {got}')
             ok &= (got == s_)
         print(f'  variant {v}: ' + ' · '.join(zeile) + ('   ✓✓' if ok else ''), flush=True)

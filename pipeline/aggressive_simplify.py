@@ -677,15 +677,15 @@ def main():
         for r in ho_results:
             size = r.get('size')
             reason = None
-            if r.get('err'):                      reason = f"fromPD-Fehler: {r['err']}"
-            elif not r.get('classical'):          reason = 'nicht klassisch'
-            elif not r.get('signed_gauss'):       reason = 'kein signedGauss'
+            if r.get('err'):                      reason = f"fromPD error: {r['err']}"
+            elif not r.get('classical'):          reason = 'not classical'
+            elif not r.get('signed_gauss'):       reason = 'no signedGauss'
             elif r.get('det') is None or r.get('det_ref') is None:
-                                                  reason = 'det nicht berechenbar'
+                                                  reason = 'det not computable'
             elif r['det'] != r['det_ref']:        reason = (f"det-GATE FAIL: {r['det']} != "
                                                             f"{r['det_ref']} (Referenz)")
             elif size is None or size >= handoff['size']:
-                                                  reason = f"nicht kleiner ({size} >= {handoff['size']})"
+                                                  reason = f"not smaller ({size} >= {handoff['size']})"
             if reason:
                 handoff_log.append({'t_step': r.get('t_step'), 'rejected': reason})
                 print(f"[AGG]   rejected t_step={r.get('t_step')}: {reason}")

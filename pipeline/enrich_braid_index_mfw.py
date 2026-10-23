@@ -77,17 +77,17 @@ def main():
     d['braid_index_mfw_v_spread']   = mfw['spread']
     if n_strands is not None:
         d['braid_index_mfw_note']   = (
-            f"MFW-Theorem: b(K) >= {mfw['lower_bound']} aus HOMFLY-v-Spread "
+            f"MFW theorem: b(K) >= {mfw['lower_bound']} from the HOMFLY v-spread "
             f"{mfw['spread']} (v-exp ∈ [{mfw['min_v_exp']}, {mfw['max_v_exp']}]); "
-            f"obere Grenze = aktuelle Sage-Braid-Straenge = {n_strands} "
-            f"(NICHT garantiert minimal — Markov-Reduktion NP-schwer, "
-            f"Discovery #56). Wenn lower_bound == upper_bound, ist b(K) "
-            f"exakt bestimmt.")
+            f"upper bound = current Sage braid strands = {n_strands} "
+            f"(NOT guaranteed minimal — Markov reduction is NP-hard, "
+            f"Discovery #56). If lower_bound == upper_bound, b(K) "
+            f"is determined exactly.")
     else:
         d['braid_index_mfw_note']   = (
-            f"MFW-Theorem: b(K) >= {mfw['lower_bound']} aus HOMFLY-v-Spread "
+            f"MFW theorem: b(K) >= {mfw['lower_bound']} from the HOMFLY v-spread "
             f"{mfw['spread']} (v-exp ∈ [{mfw['min_v_exp']}, {mfw['max_v_exp']}]); "
-            f"obere Grenze offen — kein Braid-Wort im JSON (plat-closure-Knoten).")
+            f"upper bound open — no braid word in the JSON (plat-closure knot).")
 
     out_path = p if args.in_place else p.with_suffix('.enriched.json')
     with out_path.open('w') as f:

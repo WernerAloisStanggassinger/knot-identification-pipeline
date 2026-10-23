@@ -810,7 +810,7 @@ def unknotting_via_signed_gauss_flip(signed_gauss, max_subset=4, processes=12):
                                'unknot_jones_only':    n_jones1}}), flush=True)
             if n_simp > 0 or n_jones1 > 0:
                 u_found = k
-                # Witness: bevorzugt simplify→0, sonst jones==1
+                # witness: preferably simplify→0, otherwise jones==1
                 ex_idx = next(i for i, r in enumerate(results) if r == 1) if n_simp > 0 \
                          else next(i for i, r in enumerate(results) if r == 2)
                 u_witness = list(subsets[ex_idx])

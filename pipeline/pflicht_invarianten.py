@@ -543,7 +543,7 @@ def knotjob_khovanov(pd_code, name='knot'):
         return {'error': f'pd parse: {e}'}
     all_ids = [aid for cr in pd_list for aid in cr]
     if not all_ids:
-        return {'error': 'pd_list leer (regina lieferte PD[] — Diagramm degeneriert)'}
+        return {'error': 'pd_list empty (regina returned PD[] — degenerate diagram)'}
     shift = 1 if min(all_ids) == 0 else 0
     pd_1 = [tuple(a + shift for a in cr) for cr in pd_list]
     pd_str = ','.join(f'[{a},{b},{c},{d}]' for (a, b, c, d) in pd_1)
@@ -582,7 +582,7 @@ def knotjob_s(pd_code, name='knot'):
         return {'error': f'pd parse: {e}'}
     all_ids = [aid for cr in pd_list for aid in cr]
     if not all_ids:
-        return {'error': 'pd_list leer (regina lieferte PD[] — Diagramm degeneriert)'}
+        return {'error': 'pd_list empty (regina returned PD[] — degenerate diagram)'}
     shift = 1 if min(all_ids) == 0 else 0
     pd_1 = [tuple(a + shift for a in cr) for cr in pd_list]
     pd_str = ','.join(f'[{a},{b},{c},{d}]' for (a, b, c, d) in pd_1)

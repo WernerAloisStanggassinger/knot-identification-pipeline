@@ -353,8 +353,8 @@ def main():
         "alexander_consistency": {
             "pipeline_alexander": alex_pipeline,
             "theta_delta1":       alex_theta,
-            "note": ("Variablen-/Vorzeichen-/Mirror-Konventionen koennen "
-                     "abweichen; harter String-Match nur indikativ."),
+            "note": ("variable/sign/mirror conventions can "
+                     "differ; a hard string match is only indicative."),
             "string_equal_after_normalize": _alex_match(alex_pipeline, alex_theta),
         },
         "determinant_gate": {

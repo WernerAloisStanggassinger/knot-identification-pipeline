@@ -147,10 +147,10 @@ def _brute(points, ring_skip):
     return float(_seg_seg_dist(a[I], b[I], a[J], b[J]).min())
 
 
-def eichen():
+def calibrate():
     """Against analytics, against brute force and against the scipy reference."""
     print('CALIBRATION clearance_numpy — five counter-cases\n')
-    fehler = 0
+    failures = 0
 
     print('1) THE SEGMENT FUNCTION AGAINST ANALYTICS — two offset circles, distance = dz')
     print('   (as ONE closed curve this does not work: the jump edges between the')
@@ -161,7 +161,7 @@ def eichen():
         d = float(_seg_seg_dist(k1, np.roll(k1, -1, 0), k2, np.roll(k2, -1, 0)).min())
         ok = abs(d - dz) < 1e-9
         print(f'   {"OK " if ok else "ERROR"} dz={dz:<8} measured {d:.12f}')
-        fehler += (not ok)
+        failures += (not ok)
 
     print('\n2) THE SHARP ONE — segment beats point at coarse, twisted sampling')
     k1 = _circle(16, 1.0, 0.0)
@@ -170,7 +170,7 @@ def eichen():
     d_pkt = float(np.linalg.norm(k1[:, None, :] - k2[None, :, :], axis=2).min())
     ok = d_seg < d_pkt and abs(d_seg - 0.01) < 1e-3
     print(f'   {"OK " if ok else "ERROR"} segment {d_seg:.6f} · point {d_pkt:.6f} · true 0.010000')
-    fehler += (not ok)
+    failures += (not ok)
 
     print('\n3) THE GRID MUST NOT LOSE A PAIR — against brute force over ALL pairs')
     print('   (the real counter-case of this version: a cell that is too small would miss the')
@@ -185,7 +185,7 @@ def eichen():
             worst_k += 1
             print(f'   ERROR polygon {k}: grid {g:.12f} vs brute {bf:.12f}')
     print(f'   {"OK " if worst_k == 0 else "ERROR"} {12 - worst_k}/12 polygons bit-identical to brute force')
-    fehler += (worst_k != 0)
+    failures += (worst_k != 0)
 
     print('\n4) LOWER BOUND — segment must never be LARGER than the point distance')
     worst_k = 0
@@ -196,7 +196,7 @@ def eichen():
         if ds > dp + 1e-12:
             worst_k += 1
     print(f'   {"OK " if worst_k == 0 else "ERROR"} {20 - worst_k}/20 hold the bound')
-    fehler += (worst_k != 0)
+    failures += (worst_k != 0)
 
     print('\n5) AGAINST THE scipy REFERENCE — the same number to 1e-12')
     try:
@@ -212,19 +212,19 @@ def eichen():
                 worst_k += 1
                 print(f'   ERROR polygon {k}: numpy {mine:.12f} · scipy {ref:.12f}')
         print(f'   {"OK " if worst_k == 0 else "ERROR"} {5 - worst_k}/5 polygons bit-identical to the scipy reference')
-        fehler += (worst_k != 0)
+        failures += (worst_k != 0)
     except ImportError as e:
         print(f'   SKIPPED — scipy reference not importable ({e})')
         print('     (run in gnottheorie_env, scipy is there)')
 
-    print('\n' + ('ALL COUNTER-CASES PASSED' if fehler == 0 else f'{fehler} ERRORS'))
-    return fehler
+    print('\n' + ('ALL COUNTER-CASES PASSED' if failures == 0 else f'{failures} ERRORS'))
+    return failures
 
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('--eichen', action='store_true')
+    ap.add_argument('--calibrate', action='store_true')
     args = ap.parse_args()
-    if args.eichen:
-        sys.exit(1 if eichen() else 0)
+    if args.calibrate:
+        sys.exit(1 if calibrate() else 0)
     ap.print_help()

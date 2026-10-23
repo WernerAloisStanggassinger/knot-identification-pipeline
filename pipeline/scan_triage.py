@@ -44,19 +44,19 @@ def one_curve(pq):
     try:
         df = pd.read_parquet(pq, columns=['t_step'])
     except Exception as e:
-        return dict(pq=pq, fehler=str(e)[:80])
+        return dict(pq=pq, failures=str(e)[:80])
     if len(df) == 0:
-        return dict(pq=pq, n=0, frames=0, minc=0, medc=0, nullanteil=1.0, sorte='UNKNOTEN')
+        return dict(pq=pq, n=0, frames=0, minc=0, medc=0, zero_fraction=1.0, triage_kind='UNKNOT')
     ts = df['t_step'].to_numpy()
     n_frames = int(ts.max()) + 1
     full = np.bincount(ts, minlength=n_frames)
     null = float((full == 0).mean())
     minc = int(full.min())
-    sorte = 'UNKNOTEN' if minc == 0 else 'VERSCHMIERT'
+    triage_kind = 'UNKNOT' if minc == 0 else 'SMEARED'
     return dict(pq=pq, n=int(len(df)), frames=n_frames, minc=minc,
-                medc=int(np.median(full)), nullanteil=null, sorte=sorte)
+                medc=int(np.median(full)), zero_fraction=null, triage_kind=triage_kind)
 
-def selbsttest():
+def self_test():
     """Counter-case built in: the test must catch both kinds AND a mix-up."""
     import tempfile
     ok = 0; total = 0
@@ -70,30 +70,30 @@ def selbsttest():
         # (1) curve with a crossing-free projection ⟹ UNKNOTEN
         p1 = os.path.join(d, 'a.parquet')
         pd.DataFrame({'t_step': [0,0,0, 2,2, 3]}).to_parquet(p1)   # frame 1 empty
-        check('empty frame ⟹ UNKNOTEN', one_curve(p1)['sorte'], 'UNKNOTEN')
+        check('empty frame ⟹ UNKNOTEN', one_curve(p1)['triage_kind'], 'UNKNOT')
         # (2) every projection carries crossings ⟹ VERSCHMIERT
         p2 = os.path.join(d, 'b.parquet')
         pd.DataFrame({'t_step': [0,0, 1,1, 2,2, 3,3]}).to_parquet(p2)
-        check('no empty frame ⟹ VERSCHMIERT', one_curve(p2)['sorte'], 'VERSCHMIERT')
+        check('no empty frame ⟹ VERSCHMIERT', one_curve(p2)['triage_kind'], 'SMEARED')
         # (3) COUNTER-CASE: a single gap must be enough to flip (2) —
         #     otherwise the test measures the amount instead of the minimum.
         p3 = os.path.join(d, 'c.parquet')
         pd.DataFrame({'t_step': [0]*500 + [1]*500 + [3]*500}).to_parquet(p3)
-        check('ONE gap among 1500 points flips it', one_curve(p3)['sorte'], 'UNKNOTEN')
+        check('ONE gap among 1500 points flips it', one_curve(p3)['triage_kind'], 'UNKNOT')
         # (4) empty file ⟹ UNKNOTEN, no crash
         p4 = os.path.join(d, 'e.parquet')
         pd.DataFrame({'t_step': pd.Series([], dtype='int64')}).to_parquet(p4)
-        check('empty file ⟹ UNKNOTEN', one_curve(p4)['sorte'], 'UNKNOTEN')
+        check('empty file ⟹ UNKNOTEN', one_curve(p4)['triage_kind'], 'UNKNOT')
         # (5) canary: a result that must NOT be true
         check('canary (must be red if the test is blind)',
-              one_curve(p2)['sorte'] == 'UNKNOTEN', False)
+              one_curve(p2)['triage_kind'] == 'UNKNOT', False)
     print(f"\n  {ok}/{total} probes")
     return 0 if ok == total else 1
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument('wurzel', nargs='?')
-    ap.add_argument('--selbsttest', action='store_true')
+    ap.add_argument('--self-test', action='store_true')
     ap.add_argument('--gate', metavar='CROSSINGS.PARQUET',
                     help='gate mode for the pipeline: exit 0 = UNKNOTEN (unknot) '
                          '(there is a crossing-free projection), '
@@ -101,15 +101,15 @@ if __name__ == '__main__':
     ap.add_argument('--workers', type=int, default=8)
     ap.add_argument('--json', help='write the result here')
     a = ap.parse_args()
-    if a.selbsttest:
-        sys.exit(selbsttest())
+    if a.self_test:
+        sys.exit(self_test())
     if a.gate:
         r = one_curve(a.gate)
-        if 'fehler' in r:
-            print(f"[GATE] unreadable: {r['fehler']}", file=sys.stderr)
+        if 'failures' in r:
+            print(f"[GATE] unreadable: {r['failures']}", file=sys.stderr)
             sys.exit(2)
-        if r['sorte'] == 'UNKNOTEN':
-            print(f"[GATE] UNKNOTEN — {r['nullanteil']*100:.1f}% of the {r['frames']:,} "
+        if r['triage_kind'] == 'UNKNOT':
+            print(f"[GATE] UNKNOTEN — {r['zero_fraction']*100:.1f}% of the {r['frames']:,} "
                   f"projections are crossing-free (min/frame = {r['minc']}). "
                   f"A closed curve with a crossing-free projection is embedded in the "
                   f"plane.")
@@ -119,12 +119,12 @@ if __name__ == '__main__':
               f"This is NO proof that it is a knot (the test is one-sided); "
               f"it only means: lowering the threshold is allowed, the pipeline decides.")
         sys.exit(1)
-    if not a.wurzel:
+    if not a.root:
         ap.error('wurzel, --gate or --selbsttest is required')
 
     pqs = []
-    for d in sorted(glob.glob(os.path.join(a.wurzel, '*/'))):
-        if glob.glob(os.path.join(d, '*_pflicht_invarianten_complete.json')):
+    for d in sorted(glob.glob(os.path.join(a.root, '*/'))):
+        if glob.glob(os.path.join(d, '*_mandatory_invariants_complete.json')):
             continue
         g = glob.glob(os.path.join(d, '*_crossings.parquet'))
         if g:
@@ -132,17 +132,17 @@ if __name__ == '__main__':
     print(f"{len(pqs)} candidates without a record, with scanner output")
     with ProcessPoolExecutor(a.workers) as ex:
         res = list(ex.map(one_curve, pqs))
-    res = [r for r in res if 'fehler' not in r]
+    res = [r for r in res if 'failures' not in r]
     for r in res:
-        r['stamm'] = os.path.basename(os.path.dirname(r['pq']))
-    for sorte in ('UNKNOTEN', 'VERSCHMIERT'):
-        part = sorted([r for r in res if r['sorte'] == sorte],
+        r['record_stem'] = os.path.basename(os.path.dirname(r['pq']))
+    for triage_kind in ('UNKNOT', 'SMEARED'):
+        part = sorted([r for r in res if r['triage_kind'] == triage_kind],
                       key=lambda r: -r['n'])
-        print(f"\n=== {sorte}: {len(part)} ===")
+        print(f"\n=== {triage_kind}: {len(part)} ===")
         print(f"  {'stem':<44}{'crossings':>11}{'min/frame':>10}{'med':>6}{'zero frames':>13}")
         for r in part:
-            print(f"  {r['stamm']:<44}{r['n']:>11,}{r['minc']:>10}{r['medc']:>6}"
-                  f"{r['nullanteil']*100:>12.1f}%")
+            print(f"  {r['record_stem']:<44}{r['n']:>11,}{r['minc']:>10}{r['medc']:>6}"
+                  f"{r['zero_fraction']*100:>12.1f}%")
     if a.json:
         json.dump(res, open(a.json, 'w'), indent=1)
         print(f"\n→ {a.json}")

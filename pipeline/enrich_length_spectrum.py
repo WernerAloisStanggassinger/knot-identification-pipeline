@@ -30,7 +30,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from pflicht_invarianten_extra import length_spectrum_via_canonize
+from mandatory_invariants_extra import length_spectrum_via_canonize
 
 
 def main():
@@ -45,8 +45,8 @@ def main():
     with p.open() as f:
         report = json.load(f)
 
-    h = report['pflichtliste']['HYPERBOLISCH']
-    d = report['pflichtliste']['DIAGRAMM']
+    h = report['mandatory_list']['HYPERBOLIC']
+    d = report['mandatory_list']['DIAGRAM']
     pd = d.get('pd_code')
     isosig = h.get('canonical_retriangulation') or \
              report.get('raw_subprocess_outputs', {}).get('snappy', {}).get('isosig')

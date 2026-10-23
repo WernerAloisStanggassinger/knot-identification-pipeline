@@ -8,10 +8,10 @@
 """
 enrich_bridge_number_bounds.py
 ==============================
-Standalone enrichment: reads an existing pflicht_invarianten_*.json
+Standalone enrichment: reads an existing mandatory_invariants_*.json
 and adds bridge-number bounds to the DIAGRAMM block, plus the trivial
 upper bound and the alternating heuristic. Imports bridge_number_bounds() from
-pflicht_invarianten_extra (shared logic).
+mandatory_invariants_extra (shared logic).
 
 Background:
   Discovery #102: 'bridge_number' from cyclic O-blocks of the signed Gauss code
@@ -32,7 +32,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from pflicht_invarianten_extra import bridge_number_bounds
+from mandatory_invariants_extra import bridge_number_bounds
 
 
 def main():
@@ -45,8 +45,8 @@ def main():
     with p.open() as f:
         report = json.load(f)
 
-    a = report['pflichtliste']['ALGEBRA']
-    d = report['pflichtliste']['DIAGRAMM']
+    a = report['mandatory_list']['ALGEBRA']
+    d = report['mandatory_list']['DIAGRAM']
     g = a.get('genus') or a.get('knot_floer_homology', {}).get('seifert_genus')
     c = d.get('crossing_number_min')
     det = a.get('determinant_sage') or a.get('determinant')

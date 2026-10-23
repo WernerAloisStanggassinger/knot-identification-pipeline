@@ -25,8 +25,8 @@
 #   2. knot_tracker_dbscan.py            → <knot>_tracks_dbscan.parquet
 #   3. kinematic_resolve.py              → <knot>_kinematic_result.json
 #   4. aggressive_simplify.py            → <knot>_aggressive_simplify.json
-#   5. pflicht_invarianten.py            → <knot>_pflicht_invarianten.json
-#   6. pflicht_invarianten_extra.py      → <knot>_pflicht_invarianten_complete.json
+#   5. mandatory_invariants.py            → <knot>_mandatory_invariants.json
+#   6. mandatory_invariants_extra.py      → <knot>_mandatory_invariants_complete.json
 #   7. 7x enrich_*.py + repair          (in place on complete.json,
 #                                        incl. enrich_non_hyperbolic for
 #                                        torus + connected-sum classification,
@@ -95,7 +95,7 @@ run_stage9() {
     # If stage 9 moved the folder, find the new PFLC/SUMMARY
     if [ -n "${PFLC:-}" ] && [ ! -f "$PFLC" ] && [ -n "${KNOT:-}" ]; then
         local NEW_PFLC
-        NEW_PFLC=$(find "$(python3 -I "$SC_PY" --get GENERATED_KNOTS_DIR)" -name "*${KNOT}*_pflicht_invarianten*_complete.json" 2>/dev/null | head -1)
+        NEW_PFLC=$(find "$(python3 -I "$SC_PY" --get GENERATED_KNOTS_DIR)" -name "*${KNOT}*_mandatory_invariants*_complete.json" 2>/dev/null | head -1)
         if [ -n "$NEW_PFLC" ] && [ -f "$NEW_PFLC" ]; then
             log "Folder moved → new PFLC: $NEW_PFLC"
             PFLC=$NEW_PFLC
@@ -166,8 +166,8 @@ CROSS=$PROJ_DIR/${KNOT}_crossings.parquet
 TRACKS=$PROJ_DIR/${KNOT}_tracks_dbscan.parquet
 KIN=$PROJ_DIR/${KNOT}_kinematic_result.json
 AGG=$PROJ_DIR/${KNOT}_aggressive_simplify.json
-PFL=$PROJ_DIR/${KNOT}_pflicht_invarianten.json
-PFLC=$PROJ_DIR/${KNOT}_pflicht_invarianten_complete.json
+PFL=$PROJ_DIR/${KNOT}_mandatory_invariants.json
+PFLC=$PROJ_DIR/${KNOT}_mandatory_invariants_complete.json
 SUMMARY=$PROJ_DIR/${KNOT}_summary.md
 PREFLIGHT_JSON=$PROJ_DIR/${KNOT}_preflight.json
 DETECT_JSON=$PROJ_DIR/${KNOT}_detect_target.json
@@ -312,7 +312,7 @@ for MC in ${MIN_CELL:-2000 1000 500 300 200 100}; do
     if conda run -n gnottheorie_env python "$TRIAGE" --gate "$CROSS"; then
         err "Stage 2: UNKNOT — the threshold is not too high, the curve is unknotted."
         err "         No retry. Write the label with"
-        err "         claude_setup_v2/tools/unknot_etikett.py (Disc #670)."
+        err "         pipeline/unknot_label.py (Disc #670)."
         exit 3
     fi
     log "Tracker without active cells at --min-cell-count $MC — the curve IS knotted, lowering further."
@@ -459,7 +459,7 @@ else
     # Discovery #91 / 2026-05-10 Saturn finding: aggressive_simplify often finds
     # a smaller diagram than kinematic_resolve (single-frame
     # stagnation). Patch kinematic_result.json with the aggressive best, if
-    # better, BEFORE pflicht_invarianten.py (stage 5) starts. Otherwise
+    # better, BEFORE mandatory_invariants.py (stage 5) starts. Otherwise
     # stage 5 computes on the non-minimal diagram and reports a wrong
     # crossing_number_min.
     stage "4a" "MERGE-AGGRESSIVE — mandatory selection Discovery #91"
@@ -471,7 +471,7 @@ fi
 fi  # Ende POLYGON_PD-Verzweigung (Rezept #3)
 
 # ─────────────────────────────────────────────
-# 5. Mandatory invariants (pflicht_invarianten; level 4 in the doctrine)
+# 5. Mandatory invariants (mandatory_invariants; level 4 in the doctrine)
 # ─────────────────────────────────────────────
 # STAGE 5 POINT-EVAL CAP (Werner's go 2026-06-17, Disc #248 doctrine "value instead of symbol"):
 # regina homfly/jones/bracket + snappy HFK + sage symbolic homfly/jones + Khovanov are
@@ -486,20 +486,20 @@ fi  # Ende POLYGON_PD-Verzweigung (Rezept #3)
 # first (POLYGON_PD has no regina field -> simplified_size=None -> the cap NEVER fired), fallback regina.
 C5=$(python3 -c "import json;d=json.load(open('$KIN'));c=d.get('chosen',{}).get('n_cross_simplified');c=c if c is not None else d.get('regina',{}).get('simplified_size');print(int(c) if c is not None else 0)" 2>/dev/null || echo 0)
 case "$C5" in (*[!0-9]*) C5=0;; esac
-PFLICHT_PE_ARG=""
+MANDATORY_PE_ARG=""
 if [ "${STAGE5_CMAX:-0}" -gt 0 ] && [ "$C5" -gt "${STAGE5_CMAX}" ]; then
     log "Stage 5 POINT-EVAL mode — c=$C5 > STAGE5_CMAX=${STAGE5_CMAX} (Disc #248: homfly/jones/bracket/HFK/khovanov skipped; det via Alexander+Goeritz+Seifert)"
-    PFLICHT_PE_ARG="--point-eval"
+    MANDATORY_PE_ARG="--point-eval"
 fi
 
 stage "5" "PFLICHT-INVARIANTEN (mandatory invariants) — multi-env orchestrator"
 T5=$(date +%s)
-conda run -n gnottheorie_env python "$PIPE/pflicht_invarianten.py" \
+conda run -n gnottheorie_env python "$PIPE/mandatory_invariants.py" \
     --kinematic-result "$KIN" \
     --name "$KNOT" \
     --output "$PFL" \
     ${SKIP_KNOTJOB:+--skip-knotjob} \
-    ${PFLICHT_PE_ARG} \
+    ${MANDATORY_PE_ARG} \
     || { err "Stage 5 (Pflicht) failed"; exit 3; }
 ok "Mandatory invariants done in $(($(date +%s)-T5))s"
 
@@ -522,17 +522,17 @@ if [ "${STOP_AFTER_PFLICHT:-0}" = "1" ]; then
 fi
 
 # ─────────────────────────────────────────────
-# 6. Mandatory invariants, extra (pflicht_invarianten_extra)
+# 6. Mandatory invariants, extra (mandatory_invariants_extra)
 # ─────────────────────────────────────────────
 stage "6" "PFLICHT-EXTRA — khovanov, length_spectrum, s, unknotting, kauffman"
 T6=$(date +%s)
 # OOM brake (hole A, OOM 2026-07-01, Hard Rule 6 exception = documented path):
-# the unknotting pool in pflicht_invarianten_extra grows on densified
+# the unknotting pool in mandatory_invariants_extra grows on densified
 # high-c knots to 5-9 GB/worker → 12 workers are guaranteed to blow 32 Gi. Throttle
-# the worker count by crossing number (TARGET≈c). Env PFLICHT_EXTRA_PROCESSES
+# the worker count by crossing number (TARGET≈c). Env MANDATORY_EXTRA_PROCESSES
 # (e.g. via r3_reresolve) overrides and also wins inside the script itself.
-if [ -n "${PFLICHT_EXTRA_PROCESSES:-}" ]; then
-    PE_PROC="$PFLICHT_EXTRA_PROCESSES"          # only for the log; the script reads the env itself
+if [ -n "${MANDATORY_EXTRA_PROCESSES:-}" ]; then
+    PE_PROC="$MANDATORY_EXTRA_PROCESSES"          # only for the log; the script reads the env itself
 elif ! [[ "${TARGET:-}" =~ ^[0-9]+$ ]]; then
     PE_PROC=12                                   # TARGET unbekannt → alter Default
 elif [ "$TARGET" -gt 36 ]; then
@@ -545,7 +545,7 @@ else
     PE_PROC=12
 fi
 log "Pflicht-Extra unknotting pool: $PE_PROC workers (TARGET-c=${TARGET:-?})"
-conda run -n gnottheorie_env python "$PIPE/pflicht_invarianten_extra.py" "$PFL" \
+conda run -n gnottheorie_env python "$PIPE/mandatory_invariants_extra.py" "$PFL" \
     --max-unknotting-subset "${R3_MAX_UNKNOT:-4}" \
     --processes "$PE_PROC" \
     || { err "Stage 6 (Pflicht-Extra) failed"; exit 3; }
@@ -669,13 +669,13 @@ def cl(o):
             n+=1
             if x is not None and x!='' and x!=[] and x!={}: p+=1
     rec(o); return p,n
-pp,pn = cl(d['pflichtliste'])
+pp,pn = cl(d['mandatory_list'])
 op,on = cl(d['optional_invariants'])
 print(f'  Pflichtliste:        {pp}/{pn} populated  ({pp/pn*100:.1f}%)')
 print(f'  Optional:            {op}/{on} populated  ({op/on*100:.1f}%)')
-print(f'  Konsistenz:          {\"OK\" if d.get(\"konsistenz_consistent\") else \"FAIL\"}')
+print(f'  Konsistenz:          {\"OK\" if d.get(\"consistency_ok\") else \"FAIL\"}')
 print()
-alg = d['pflichtliste']['ALGEBRA']; diag = d['pflichtliste']['DIAGRAMM']; hyp = d['pflichtliste']['HYPERBOLISCH']
+alg = d['mandatory_list']['ALGEBRA']; diag = d['mandatory_list']['DIAGRAM']; hyp = d['mandatory_list']['HYPERBOLIC']
 print(f'  c={diag.get(\"crossing_number_min\")}, det={alg.get(\"determinant\")}, '
       f'vol={hyp.get(\"hyperbolic_volume\"):.6f}, sym={hyp.get(\"symmetry_group\")}, '
       f'amphi={hyp.get(\"is_amphicheiral\")}, fibered={alg.get(\"fibered\")}')

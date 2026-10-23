@@ -8,7 +8,7 @@
 """slice_verdict.py — the ONE verdict on slice knots, for the pipeline and the catch-up sweep.
 
 WHY THIS EXISTS (2026-07-23, pipeline_error_log [SLICE-FELD]):
-pflicht_invarianten.py set `slice = (tau == 0 and seifert_genus is not None)`. tau = 0 is a
+mandatory_invariants.py set `slice = (tau == 0 and seifert_genus is not None)`. tau = 0 is a
 NECESSARY, not a sufficient condition -- so EVERY tau=0 knot was declared a slice knot.
 213 records affected, 29 of them provably wrong, 78 live on the website. Noticed on
 gtwr_1.9375: tau=0, but det=629 is not a perfect square, so by Fox-Milnor definitely not slice.
@@ -32,17 +32,17 @@ import json
 import os
 from math import isqrt
 
-_REGISTER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'beweis_register.json')
+_REGISTER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'proof_register.json')
 _REGISTER = None
 
 
 def proof_entry(name, identity=None):
-    """Receipt-backed override from beweis_register.json — ONLY with a non-empty 'beweis' (proof).
+    """Receipt-backed override from proof_register.json — ONLY with a non-empty 'beweis' (proof).
     An entry without proof text is ignored; the register must not become a back door.
 
     Lookup order (2026-08-19):
       1. `name`        — the record stem, e.g. 'double-3'    (specific beats general)
-      2. `identitaet`  — the distinct_knot_id, e.g. '12a_1019'
+      2. `identity`    — the distinct_knot_id, e.g. '12a_1019'
       3. prefix of `name` before '__' — applies under the naming doctrine `<classical>__<original>`,
          i.e. '12a_1019__kf221_sh+1.875_tw+1.5' -> '12a_1019'. A freshly generated record thereby
          inherits the identity receipts automatically, even without a corpus join.
@@ -61,7 +61,7 @@ def proof_entry(name, identity=None):
         if not k:
             continue
         e = _REGISTER.get(k)
-        if isinstance(e, dict) and e.get('beweis'):
+        if isinstance(e, dict) and e.get('proof'):
             return e
     return None
 
@@ -147,20 +147,20 @@ def apply_to_algebra(a, name=None, identity=None):
     e = proof_entry(name, identity) if (name or identity) else None
     if e is not None and 'slice' in e:
         a['slice'] = e['slice']
-        a['slice_note'] = 'RECEIPTED (beweis_register.json): ' + ' '.join(e['beweis'])
+        a['slice_note'] = 'RECEIPTED (proof_register.json): ' + ' '.join(e['proof'])
         a['slice_obstructions'] = []
-        a['slice_method'] = 'beweis_register.json, receipted on %s' % e.get('belegt_am', '?')
+        a['slice_method'] = 'proof_register.json, receipted on %s' % e.get('receipted_on', '?')
         if 'ribbon' in e:
             a['ribbon'] = e['ribbon']
         # Publicly citable source (2026-08-19). The internal slice_method only says
-        # "beweis_register.json" -- that is not a source citation for the website. Whoever ships a
+        # "proof_register.json" -- that is not a source citation for the website. Whoever ships a
         # claim ships the receipt with it; that is why it goes into the record.
-        if e.get('quelle_oeffentlich'):
-            a['slice_source'] = e['quelle_oeffentlich']
-        if e.get('quelle_url'):
-            a['slice_source_url'] = e['quelle_url']
+        if e.get('source_public'):
+            a['slice_source'] = e['source_public']
+        if e.get('public_source_url'):
+            a['slice_source_url'] = e['public_source_url']
         if 'is_amphicheiral' in e:
-            a['is_amphicheiral_belegt'] = e['is_amphicheiral']
+            a['is_amphicheiral_receipted'] = e['is_amphicheiral']
         return e['slice']
     v, note, obstr = slice_verdict(a)
     a['slice'] = v

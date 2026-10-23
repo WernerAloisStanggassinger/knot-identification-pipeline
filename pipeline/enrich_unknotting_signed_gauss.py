@@ -9,7 +9,7 @@
 enrich_unknotting_signed_gauss.py
 =================================
 Standalone enrichment: runs the signed-Gauss crossing-flip brute force
-(Discovery #100) on an existing pflicht_invarianten_*.json and
+(Discovery #100) on an existing mandatory_invariants_*.json and
 writes unknotting_number_{lower,upper}_bound + the witness subset back.
 
 Background:
@@ -29,12 +29,12 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from pflicht_invarianten_extra import unknotting_via_signed_gauss_flip
+from mandatory_invariants_extra import unknotting_via_signed_gauss_flip
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('json_path', help='pflicht_invarianten_*.json')
+    ap.add_argument('json_path', help='mandatory_invariants_*.json')
     ap.add_argument('--max-subset', type=int, default=4)
     ap.add_argument('--processes',  type=int, default=12)
     ap.add_argument('--in-place',   action='store_true',
@@ -49,7 +49,7 @@ def main():
     if not sg:
         print('ERROR: signed_gauss is missing from the JSON.', file=sys.stderr)
         sys.exit(2)
-    a = report['pflichtliste']['ALGEBRA']
+    a = report['mandatory_list']['ALGEBRA']
     det = a.get('determinant_sage') or a.get('determinant')
     jones = (a.get('jones_polynomial') or '').strip()
 
@@ -78,7 +78,7 @@ def main():
         a['unknotting_method']             = unk.get('method')
         a['unknotting_number_searched_to'] = unk.get('searched_up_to_subset_size')
         # Discovery #114c: unknotting_number = upper_bound for a stage-1 witness
-        # (kept in sync with pflicht_invarianten_extra.py, Discovery #114c).
+        # (kept in sync with mandatory_invariants_extra.py, Discovery #114c).
         if u_upper is None:
             a['unknotting_number']              = None
             a['unknotting_number_strict_lower'] = u_lower

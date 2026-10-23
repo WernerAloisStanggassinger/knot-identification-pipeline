@@ -13,7 +13,7 @@ smaller crossing_number.
 Background: Discovery #91 declares aggressive_simplify MANDATORY after
 kinematic_resolve, because single-frame stagnation is typical (~3% of the frames
 find the Reidemeister-3 sequence that leads to further reduction).
-The pipeline stage pflicht_invarianten.py, however, takes kinematic_result.json
+The pipeline stage mandatory_invariants.py, however, takes kinematic_result.json
 as input, NOT aggressive_simplify.json — so this step must be inserted before
 stage 5.
 
@@ -100,7 +100,7 @@ def main():
         if rstat.get('partial'):          reason.append('regina_partial')
         if agg.get('no_classical_found'): reason.append('no_classical_found')
         if agg.get('stage4_partial'):     reason.append('stage4_partial')
-        reason = reason or ['kein_brauchbares_best']
+        reason = reason or ['no_usable_best']
         print(f'[MERGE] aggressive_simplify without usable best ({",".join(reason)}) '
               f'⇒ fallback to kinematic diagram (size={kin_size}); stage 5 continues.')
         if rstat:

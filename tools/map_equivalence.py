@@ -221,6 +221,7 @@ def main():
     defined = set()
     for t in old_trees.values(): defined_names(t, defined)
     ren = {u: v for u, v in fwd.items() if u != v}
+    undefined = []   # decided after the keys are known: an argparse dest or a data key renamed together is the repository's own
     per_file = {}
     for u, v, k, q, l in idents:
         if u: per_file.setdefault(q, set()).add(u)
@@ -233,7 +234,17 @@ def main():
         if hasattr(builtins, v): errors.append(f'identifier {u!r} -> {v!r}: shadows a builtin')
         repo_modules = {os.path.basename(x)[:-3] for x in py_old}
         if u not in defined and u not in repo_modules:
-            errors.append(f'identifier {u!r} -> {v!r}: not defined by the repository (third-party attribute or keyword?)')
+            undefined.append((u, v))
+    # imports of repository modules must point at a module file that exists in the working tree
+    mods_old = {os.path.basename(x)[:-3] for x in py_old}
+    mods_new = {os.path.basename(renames.get(x, x))[:-3] for x in py_old if os.path.exists(renames.get(x, x))}
+    for q, t in new_trees.items():
+        for n in ast.walk(t):
+            names = [a.name.split('.')[0] for a in n.names] if isinstance(n, ast.Import) else \
+                    ([n.module.split('.')[0]] if isinstance(n, ast.ImportFrom) and n.module and n.level == 0 else [])
+            for m in names:
+                if m in mods_old and m not in mods_new:
+                    errors.append(f'{q}:{n.lineno}: imports {m!r}, but that module file no longer exists (renamed?)')
     # argparse: an attribute that is an argparse dest may only be renamed together with its flag
     dests_old, dests_new, attrs_new = set(), set(), set()
     for t in old_trees.values(): argparse_dests(t, dests_old)
@@ -270,6 +281,9 @@ def main():
             if (callee not in funcs or (u not in funcs[callee] and funcs[callee])) and sfwd.get(u) != v:
                 errors.append(f'keyword argument {u!r} -> {v!r} passed to {callee!r}, which is not a repository function with '
                               f'that parameter (a data key? then rename the key {u!r} -> {v!r} too)')
+    for u, v in undefined:
+        if u in dests_old or sfwd.get(u) == v: continue
+        errors.append(f'identifier {u!r} -> {v!r}: not defined by the repository (third-party attribute or keyword?)')
     tracked = subprocess.run(['git', 'ls-files'], capture_output=True, text=True).stdout.split() + list(renames.values())
     for f in sorted(set(tracked)):
         if not f.endswith(('.py', '.sh', '.json')) or not os.path.exists(f) or f.startswith('tools/translation_table'): continue

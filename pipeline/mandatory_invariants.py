@@ -6,7 +6,7 @@
 # Full license: LICENSE.txt at repository root (GNU General Public License v3 or later).
 # Part of the Knot-Identification Pipeline.
 """
-pflicht_invarianten.py
+mandatory_invariants.py
 ======================
 signed Gauss code → complete mandatory list ("Pflichtliste") of knot invariants
 
@@ -35,7 +35,7 @@ import textwrap
 # Disc #222 (2026-05-21) / Disc #586 (2026-07-27): subprocess.run + conda run -> orphans on
 # timeout. The kill only hits `conda`; the grandchildren (`python`, `sage`, `sage-eval`) keep running.
 # pipeline_subprocess.run_capture_with_group_kill kills the whole process group.
-# pflicht_invarianten_extra.py and enrich_optional_invariants.py have used it since 21.05. —
+# mandatory_invariants_extra.py and enrich_optional_invariants.py have used it since 21.05. —
 # THIS file never got it, and exactly that caused the memory drain on 27.07.
 # (MemAvailable 19894 -> 1236 MB, earlyoom, reboot). Approved by Werner 27.07. 22:2x.
 from pipeline_subprocess import (
@@ -260,7 +260,7 @@ def alex_det(alex_str):
     return abs(int(v)) if v.denominator == 1 else abs(float(v))
 
 
-def point_alexander_det(pd_str, variante=6):
+def point_alexander_det(pd_str, variant=6):
     """FALLBACK when regina cannot manage the algebra (approved by Werner 2026-08-22).
 
     WHY: regina's Alexander doubles every ~16 crossings — measured on our own
@@ -283,11 +283,11 @@ def point_alexander_det(pd_str, variante=6):
         _sieve = site_config.KAWAUCHI_SIEVE_DIR
         if _sieve not in _sys.path:
             _sys.path.insert(0, _sieve)
-        from alex_punkt import parse_pd, alexander_poly, normalise
+        from alex_point import parse_pd, alexander_poly, normalise
         pd = parse_pd(pd_str)
         if not pd:
             return None
-        co = normalise(alexander_poly(pd, variante))
+        co = normalise(alexander_poly(pd, variant))
         return abs(sum(c * ((-1) ** i) for i, c in enumerate(co)))
     except Exception as e:
         print(f"  Point Alexander not possible: {type(e).__name__}: {e}")
@@ -346,7 +346,7 @@ def snappy_full(pd_code, point_eval=False):
     point_eval=True: HFK (knot_floer_homology, exponential) is skipped;
     geometry (vol/sym/cusp) + Seifert det/signature (numerical) stay."""
     code = SEAL_PRELUDE + textwrap.dedent(f"""
-        # --- Laengenspektrum: EIN Schema ---
+        # --- length spectrum: ONE schema ---
         def _lspec_eintrag(g):
             # ONE schema for the length spectrum (finding 2026-08-24). The fallback paths used
             # to write strings, the main path floats — whoever read 'length_real'
@@ -642,15 +642,15 @@ def homfly_fallback_level(report, point_eval):
       2. fresh points in F_p that were not on the grid
       3. det = |P(1,2i)| against the determinant in the record
       4. Alexander at several points, up to the unit ±t^k
-    And if one breaks: `homfly_luecke` ("gap") says WHY. A labelled gap
+    And if one breaks: `homfly_gap` says WHY. A labelled gap
     is a finding, an empty one is a trap.
     """
-    a = report['pflichtliste']['ALGEBRA']
-    d = report['pflichtliste']['DIAGRAMM']
+    a = report['mandatory_list']['ALGEBRA']
+    d = report['mandatory_list']['DIAGRAM']
     if a.get('homfly_polynomial'):
         return                                   # regina delivered
     if os.environ.get('HOMFLY_FALLBACK', '1') == '0':
-        a['homfly_luecke'] = {'grund': 'per HOMFLY_FALLBACK=0 abgeschaltet'}
+        a['homfly_gap'] = {'cause': 'per HOMFLY_FALLBACK=0 abgeschaltet'}
         return
 
     w, n = d.get('braid_word'), d.get('braid_n_strands')
@@ -661,31 +661,31 @@ def homfly_fallback_level(report, point_eval):
             w = None
     n_max = int(os.environ.get('HOMFLY_FALLBACK_NMAX', 10))
     if not w or not n:
-        a['homfly_luecke'] = {'grund': 'no braid word in the record — the Hecke trace '
-                                       'needs one', 'weg': 'hecke_f_p'}
+        a['homfly_gap'] = {'cause': 'no braid word in the record — the Hecke trace '
+                                       'needs one', 'route': 'hecke_f_p'}
         return
     if int(n) > n_max:
-        a['homfly_luecke'] = {
-            'grund': f'strand number n={int(n)} > {n_max}: the Hecke trace costs ~n!, '
+        a['homfly_gap'] = {
+            'cause': f'strand number n={int(n)} > {n_max}: the Hecke trace costs ~n!, '
                      f'from n=11 on it takes hours (representation dimension 2310, '
                      f'7700 at n=12)',
-            'weg': 'hecke_f_p', 'n': int(n),
-            'hinweis': 'can be filled later with HOMFLY_FALLBACK_NMAX=12 or '
+            'route': 'hecke_f_p', 'n': int(n),
+            'hint': 'can be filled later with HOMFLY_FALLBACK_NMAX=12 or '
                        'tools/homfly_interpolation.py --ziele --exakt'}
         return
 
     zg = d.get('crossing_number_min')
     if not zg:
-        a['homfly_luecke'] = {'grund': 'no crossing number — without it the '
+        a['homfly_gap'] = {'cause': 'no crossing number — without it the '
                                        'z axis of the interpolation box is not fixed',
-                              'weg': 'hecke_f_p'}
+                              'route': 'hecke_f_p'}
         return
 
     latch = int(os.environ.get('HOMFLY_FALLBACK_TIMEOUT', 1800))
     cmd = [site_config.PYTHON_MAIN,
            os.path.join(HOMFLY_FALLBACK_TOOLS, 'homfly_modular.py'),
-           '--wort', json.dumps([int(g) for g in w]),
-           '--n', str(int(n)), '--zgrad', str(int(zg))]
+           '--braid-word', json.dumps([int(g) for g in w]),
+           '--n', str(int(n)), '--zdeg', str(int(zg))]
     ev = a.get('alexander_point_evals')
     if ev:
         cmd += ['--alex-evals', json.dumps(ev)]
@@ -695,37 +695,37 @@ def homfly_fallback_level(report, point_eval):
     try:
         res = subprocess.run(cmd, capture_output=True, text=True, timeout=latch)
     except subprocess.TimeoutExpired:
-        a['homfly_luecke'] = {'grund': f'Riegel {latch}s erreicht',
-                              'weg': 'hecke_f_p'}
+        a['homfly_gap'] = {'cause': f'Riegel {latch}s erreicht',
+                              'route': 'hecke_f_p'}
         print(f"  Time limit {latch}s reached — gap labelled, run continues")
         return
     try:
         out = json.loads(res.stdout.strip().splitlines()[-1])
     except Exception:
-        a['homfly_luecke'] = {'grund': 'fallback level returned no JSON',
-                              'weg': 'hecke_f_p',
+        a['homfly_gap'] = {'cause': 'fallback level returned no JSON',
+                              'route': 'hecke_f_p',
                               'stderr': (res.stderr or '')[-400:]}
         print("  no JSON returned — gap labelled")
         return
     if out.get('error'):
-        a['homfly_luecke'] = {'grund': out['error'], 'weg': 'hecke_f_p'}
+        a['homfly_gap'] = {'cause': out['error'], 'route': 'hecke_f_p'}
         print(f"  Error: {out['error'][:120]} — gap labelled")
         return
 
     det_rec = (a.get('determinant') if a.get('determinant') is not None
                else a.get('determinant_alexander'))
     reasons = []
-    if not out.get('stabil'):
+    if not out.get('stable'):
         reasons.append('CRT did not become stable (more primes needed)')
-    if out.get('frisch_treffer') != out.get('frisch_gesamt'):
-        reasons.append(f"fresh points {out.get('frisch_treffer')}/"
-                       f"{out.get('frisch_gesamt')} in F_p")
+    if out.get('fresh_hits') != out.get('fresh_total'):
+        reasons.append(f"fresh points {out.get('fresh_hits')}/"
+                       f"{out.get('fresh_total')} in F_p")
     if det_rec is not None and out.get('det') != int(det_rec):
         reasons.append(f"det {out.get('det')} != record {int(det_rec)}")
-    if out.get('alexander_punkte') is False:
-        reasons.append(f"Alexander points: {out.get('alexander_punkte_text')}")
+    if out.get('alexander_points') is False:
+        reasons.append(f"Alexander points: {out.get('alexander_points_text')}")
     if reasons:
-        a['homfly_luecke'] = {'grund': '; '.join(reasons), 'weg': 'hecke_f_p',
+        a['homfly_gap'] = {'cause': '; '.join(reasons), 'route': 'hecke_f_p',
                               'sek': round(time.time() - t0, 1)}
         print(f"  Witnesses disagree ⟹ NOTHING written: {'; '.join(reasons)[:160]}")
         return
@@ -733,26 +733,26 @@ def homfly_fallback_level(report, point_eval):
     a['homfly_polynomial'] = out['homfly']
     if not a.get('conway_polynomial'):
         a['conway_polynomial'] = conway_from_homfly(out['homfly'])
-    a.pop('homfly_luecke', None)
-    report['homfly_herkunft'] = {
+    a.pop('homfly_gap', None)
+    report['homfly_provenance'] = {
         'datum': time.strftime('%Y-%m-%d'),
-        'weg': ('Hecke trace over F_p on a grid + CRT, then '
-                '2-D interpolation (claude_setup_v2/tools/homfly_modular.py)'),
-        'warum_nicht_regina': ('point_eval mode: regina\'s exponential lines '
+        'route': ('Hecke trace over F_p on a grid + CRT, then '
+                '2-D interpolation (pipeline/homfly_modular.py)'),
+        'why_not_regina': ('point_eval mode: regina\'s exponential lines '
                                '(homfly/jones/bracket) were not sent along'
                                if point_eval else
                                'regina returned no homfly (time or memory)'),
-        'konvention': 'regina AZ, variables printed as x=a, y=z',
-        'primzahlen': out.get('primzahlen'), 'terme': out.get('terme'),
-        'zeuge_1': 'CRT stable (one more prime changes nothing)',
-        'zeuge_2': f"fresh points in F_p: {out.get('frisch_treffer')}/"
-                   f"{out.get('frisch_gesamt')} exactly equal",
-        'zeuge_3': f"det |P(1,2i)| = {out.get('det')} = record {det_rec}",
-        'zeuge_4': out.get('alexander_punkte_text'),
-        'sekunden': round(time.time() - t0, 1),
+        'convention': 'regina AZ, variables printed as x=a, y=z',
+        'primes': out.get('primes'), 'terms': out.get('terms'),
+        'witness_1': 'CRT stable (one more prime changes nothing)',
+        'witness_2': f"fresh points in F_p: {out.get('fresh_hits')}/"
+                   f"{out.get('fresh_total')} exactly equal",
+        'witness_3': f"det |P(1,2i)| = {out.get('det')} = record {det_rec}",
+        'witness_4': out.get('alexander_points_text'),
+        'seconds': round(time.time() - t0, 1),
     }
-    print(f"  ✅ HOMFLY filled in ({out.get('terme')} terms, "
-          f"{out.get('primzahlen')} primes, det {out.get('det')}, "
+    print(f"  ✅ HOMFLY filled in ({out.get('terms')} terms, "
+          f"{out.get('primes')} primes, det {out.get('det')}, "
           f"{time.time()-t0:.1f}s)")
 
 
@@ -855,24 +855,24 @@ def jones_at_i(jones_str):
 
 def main():
     # Hole B (OOM 2026-07-01): pass an external kill through to the conda/sage grandchildren, otherwise
-    # they survive as RAM-eating orphans. As in pflicht_invarianten_extra.py:857.
+    # they survive as RAM-eating orphans. As in mandatory_invariants_extra.py:857.
     install_signal_killer()
     parser = argparse.ArgumentParser(description='Full mandatory list of knot invariants.')
     parser.add_argument('--signed-gauss', help='Signed Gauss code string')
     parser.add_argument('--kinematic-result',
                         help='kinematic_result.json (extracts signed_gauss from chosen)')
     parser.add_argument('--name', default='knot', help='Name for reporting')
-    parser.add_argument('--output', default='pflicht_invarianten.json')
+    parser.add_argument('--output', default='mandatory_invariants.json')
     parser.add_argument('--skip-sage', action='store_true', help='Skip Sage (slow)')
     parser.add_argument('--skip-snappy', action='store_true')
     parser.add_argument('--skip-knotjob', action='store_true')
     parser.add_argument('--point-eval', action='store_true',
                         help='High-c cap (Disc #248): omit homfly/jones/bracket/HFK/khovanov; '
                              'det via Alexander(-1)+Goeritz+Seifert (polynomial time). '
-                             'Alternatively ENV PFLICHT_POINT_EVAL=1.')
+                             'Alternatively ENV MANDATORY_POINT_EVAL=1.')
     args = parser.parse_args()
 
-    point_eval = args.point_eval or os.environ.get('PFLICHT_POINT_EVAL') == '1'
+    point_eval = args.point_eval or os.environ.get('MANDATORY_POINT_EVAL') == '1'
     if point_eval:
         print("[PFLICHT] POINT-EVAL mode (Disc #248): homfly/jones/bracket/HFK/khovanov "
               "skipped — value instead of symbol. det via Alexander(-1)+Goeritz+Seifert.")
@@ -894,10 +894,10 @@ def main():
     report = {
         'name':         args.name,
         'signed_gauss': signed_gauss,
-        'pflichtliste': {
-            'DIAGRAMM':     {},
+        'mandatory_list': {
+            'DIAGRAM':     {},
             'ALGEBRA':      {},
-            'HYPERBOLISCH': {},
+            'HYPERBOLIC': {},
         },
         'raw_subprocess_outputs': {},
     }
@@ -908,8 +908,8 @@ def main():
     report['raw_subprocess_outputs']['regina'] = reg
     print(f"  → {time.time()-t0:.1f}s")
     if reg.get('parsed') and reg.get('classical'):
-        d = report['pflichtliste']['DIAGRAMM']
-        a = report['pflichtliste']['ALGEBRA']
+        d = report['mandatory_list']['DIAGRAM']
+        a = report['mandatory_list']['ALGEBRA']
         d['gauss_code_reduced'] = reg.get('gauss_code_reduced')
         d['signed_gauss_reduced'] = reg.get('signed_gauss_reduced')
         d['oriented_gauss']     = reg.get('oriented_gauss')
@@ -949,26 +949,26 @@ def main():
                 print(f"  ↻ PD taken over from stage 4: {source_name}")
                 # 2026-08-23: the replacement PD must also go INTO THE REPORT, not only into
                 # the local variable. The fallback of 22.08. rescued stage 5
-                # (det witness), but stage 6 reads pflichtliste.DIAGRAMM.pd_code —
+                # (det witness), but stage 6 reads mandatory_list.DIAGRAMM.pd_code —
                 # that field is only set in the regina branch. Result: 11 runs
                 # died with "FEHLER: pd_code fehlt im Input" (pd_code missing in input) AFTER stage 5
                 # had computed for 20+ minutes and the PD was lying right next to it.
                 # Deliberately NOT set: crossing_number_min. This PD is a
                 # simplified diagram; its size is an UPPER BOUND, not a
                 # minimum (Disc #231: honest bound "<=N", never report it as c).
-                report['pflichtliste']['DIAGRAMM']['pd_code'] = ersatz_pd
-                report['pd_code_herkunft'] = {
-                    'quelle': source_name,
-                    'grund': 'regina_failed — PD from stage 4 (aggressive_simplify)',
-                    'warnung': ('diagram size is an upper bound for the '
+                report['mandatory_list']['DIAGRAM']['pd_code'] = ersatz_pd
+                report['pd_code_provenance'] = {
+                    'origin': source_name,
+                    'cause': 'regina_failed — PD from stage 4 (aggressive_simplify)',
+                    'warning': ('diagram size is an upper bound for the '
                                 'crossing number, not a minimum.')}
             t_pk = time.time()
             d_pk = point_alexander_det(ersatz_pd)
             if d_pk is not None:
-                report['pflichtliste']['ALGEBRA']['determinant_punkt'] = d_pk
-                report['punkt_alexander'] = {
-                    'det': d_pk, 'quelle': source_name, 'variante': 6,
-                    'sekunden': round(time.time() - t_pk, 2),
+                report['mandatory_list']['ALGEBRA']['determinant_point'] = d_pk
+                report['point_alexander'] = {
+                    'det': d_pk, 'origin': source_name, 'variant': 6,
+                    'seconds': round(time.time() - t_pk, 2),
                     'note': ('geeicht alex_eichung.py Variante 6; '
                              '557/557 Korpus-Determinanten getroffen, 0 Abweichungen')}
                 print(f"  ✓ Point Alexander (fallback): |det| = {d_pk} "
@@ -999,9 +999,9 @@ def main():
         report['raw_subprocess_outputs']['snappy'] = snp
         report['pd_list_str'] = pd_list_str
         print(f"  → {time.time()-t0:.1f}s")
-        h = report['pflichtliste']['HYPERBOLISCH']
-        a = report['pflichtliste']['ALGEBRA']
-        d = report['pflichtliste']['DIAGRAMM']
+        h = report['mandatory_list']['HYPERBOLIC']
+        a = report['mandatory_list']['ALGEBRA']
+        d = report['mandatory_list']['DIAGRAM']
         h['hyperbolic_volume']   = snp.get('volume')
         h['chern_simons']        = snp.get('chern_simons')
         h['cusp_shape']          = snp.get('cusp_shape')
@@ -1034,8 +1034,8 @@ def main():
             # (675/675 measured, Disc #582) and stays alongside so that the provenance
             # is checkable. WITNESS FOR |sigma| — not for the sign.
             a['signature_seifert'] = -snp['signature']
-            a['signature_seifert_roh_spherogram'] = snp['signature']
-            a['signature_seifert_konvention'] = snp.get('signature_konvention')
+            a['signature_seifert_raw_spherogram'] = snp['signature']
+            a['signature_seifert_convention'] = snp.get('signature_convention')
         if 'det_via_seifert' in snp:
             a['determinant_seifert'] = snp['det_via_seifert']
             a['determinant_seifert_method'] = snp.get('det_via_seifert_method')
@@ -1052,8 +1052,8 @@ def main():
         sage_out = sage_invariants(pd_list_str, point_eval=point_eval)
         report['raw_subprocess_outputs']['sage'] = sage_out
         print(f"  → {time.time()-t0:.1f}s")
-        a = report['pflichtliste']['ALGEBRA']
-        d = report['pflichtliste']['DIAGRAMM']
+        a = report['mandatory_list']['ALGEBRA']
+        d = report['mandatory_list']['DIAGRAM']
         a['signature']   = sage_out.get('signature')
         a['arf_invariant'] = sage_out.get('arf_invariant')
         a['determinant_sage'] = sage_out.get('determinant')
@@ -1072,9 +1072,9 @@ def main():
     try:
         homfly_fallback_level(report, point_eval)
     except Exception as _e:
-        report['pflichtliste']['ALGEBRA']['homfly_luecke'] = {
-            'grund': 'fallback level itself failed: ' + repr(_e)[:200],
-            'weg': 'hecke_f_p'}
+        report['mandatory_list']['ALGEBRA']['homfly_gap'] = {
+            'cause': 'fallback level itself failed: ' + repr(_e)[:200],
+            'route': 'hecke_f_p'}
         print(f"  Fallback failed: {_e!r} — gap labelled, "
               f"run continues")
 
@@ -1087,7 +1087,7 @@ def main():
         kj = knotjob_khovanov(pd_list_str, args.name)
         report['raw_subprocess_outputs']['knotjob'] = kj
         print(f"  → Khovanov {time.time()-t0:.1f}s")
-        report['pflichtliste']['ALGEBRA']['khovanov_stdout_tail'] = (
+        report['mandatory_list']['ALGEBRA']['khovanov_stdout_tail'] = (
             kj.get('khovanov_stdout_tail', '')[-1500:])
         t0 = time.time()
         ks = knotjob_s(pd_list_str, args.name)
@@ -1095,7 +1095,7 @@ def main():
         print(f"  → Rasmussen-s {time.time()-t0:.1f}s: "
               f"{ks.get('rasmussen_s', ks.get('error', '?'))}")
         if ks.get('rasmussen_s') is not None:
-            report['pflichtliste']['ALGEBRA']['rasmussen_s'] = ks['rasmussen_s']
+            report['mandatory_list']['ALGEBRA']['rasmussen_s'] = ks['rasmussen_s']
 
     # Consistency quartet (Discovery #76, stratified per Discovery #112)
     # ----------------------------------------------------------------------
@@ -1109,8 +1109,8 @@ def main():
     # ⇒ rank=det. orbit is non-alternating (Khov width=6) ⇒ rank>det
     # with even difference is the correct observation.
     print(f"\n[PFLICHT] (5) Consistency quartet (Discovery #76, stratified #112):")
-    a = report['pflichtliste']['ALGEBRA']
-    diag = report['pflichtliste'].get('DIAGRAMM', {})
+    a = report['mandatory_list']['ALGEBRA']
+    diag = report['mandatory_list'].get('DIAGRAM', {})
 
     det_paths = {
         'jones_at_i':          a.get('determinant'),
@@ -1118,7 +1118,7 @@ def main():
         'sage_determinant':    a.get('determinant_sage'),
         'seifert_determinant': a.get('determinant_seifert'),
         # fourth witness, only populated when regina failed (fallback 2026-08-22)
-        'punkt_alexander':     a.get('determinant_punkt'),
+        'point_alexander':     a.get('determinant_point'),
     }
     det_paths = {k: v for k, v in det_paths.items() if v is not None}
     hfk_rank = (a.get('knot_floer_homology', {}).get('total_rank')
@@ -1171,7 +1171,7 @@ def main():
 
     overall_consistent = det_consistent and (hfk_rank_ok is None or hfk_rank_ok is True)
 
-    report['konsistenz_quartett']  = {
+    report['consistency_quartet']  = {
         'det_paths':          det_paths,
         'det_value':          det_value,
         'det_paths_consistent': det_consistent,
@@ -1182,15 +1182,15 @@ def main():
         'hfk_thin_note':      'rank==det is NOT delta-thinness: it only forces equal Maslov parity per Alexander grading, delta and delta-2 are compatible with it (measured 2026-09-18 on kf304_gtw_1.75pi: rank 243 = det, deltas {-1:32, +1:211}). Real thinness is measured by claude_setup_v2/tools/pruef_hfk_thin.py; hfk_delta_thin stays None as long as it has not been computed for this knot. Disc #797.',
         'alternating':        is_alt,
     }
-    report['konsistenz_consistent'] = overall_consistent
+    report['consistency_ok'] = overall_consistent
 
     # === SLICE VERDICT (error log 2026-07-23 [SLICE-FELD]) ===
     # Here and not earlier: only now are tau, s, signature, Arf and determinant all available.
     # The pipeline can REFUTE slice, not prove it -> False / None, True only for the unknot.
     try:
         from slice_verdict import apply_to_algebra as _slice_apply
-        _v = _slice_apply(report['pflichtliste']['ALGEBRA'], report.get('name'))
-        print(f"  slice verdict: {_v} — {report['pflichtliste']['ALGEBRA']['slice_note'][:110]}")
+        _v = _slice_apply(report['mandatory_list']['ALGEBRA'], report.get('name'))
+        print(f"  slice verdict: {_v} — {report['mandatory_list']['ALGEBRA']['slice_note'][:110]}")
     except Exception as _e:
         print(f"  ⚠ slice verdict failed: {type(_e).__name__}: {_e}")
         _v = None
@@ -1200,8 +1200,8 @@ def main():
     # A number only when the bounds coincide (torus knots etc.), otherwise an interval.
     try:
         from four_genus_verdict import apply_to_algebra as _g4_apply
-        _g4 = _g4_apply(report['pflichtliste']['ALGEBRA'], _v, report.get('name'))
-        _iv = report['pflichtliste']['ALGEBRA'].get('smooth_4_genus_interval')
+        _g4 = _g4_apply(report['mandatory_list']['ALGEBRA'], _v, report.get('name'))
+        _iv = report['mandatory_list']['ALGEBRA'].get('smooth_4_genus_interval')
         print(f"  4-genus: {_g4 if _g4 is not None else 'undetermined'} (interval {_iv})")
     except Exception as _e:
         print(f"  ⚠ 4-genus verdict failed: {type(_e).__name__}: {_e}")
@@ -1221,18 +1221,18 @@ def main():
     # bound stays true, so a re-run must not overwrite it.
     # Only LOWERING is allowed; raising is refused and logged.
     try:
-        _new = report['pflichtliste']['DIAGRAMM'].get('crossing_number_min')
+        _new = report['mandatory_list']['DIAGRAM'].get('crossing_number_min')
         # Read both sources: the stage-5 report of the PREVIOUS run and the record
         # (complete.json) — bound sweeps lower c only in complete.json, so the guard
         # must look there too, otherwise a re-run silently raises it again.
         _candidates = []
         for _p in (args.output,
-                   args.output.replace('_pflicht_invarianten.json',
-                                       '_pflicht_invarianten_complete.json')):
+                   args.output.replace('_mandatory_invariants.json',
+                                       '_mandatory_invariants_complete.json')):
             if _p and os.path.exists(_p):
                 try:
                     with open(_p) as _f:
-                        _v = ((json.load(_f).get('pflichtliste') or {}).get('DIAGRAMM') or {}) \
+                        _v = ((json.load(_f).get('mandatory_list') or {}).get('DIAGRAM') or {}) \
                             .get('crossing_number_min')
                     if isinstance(_v, int):
                         _candidates.append(_v)
@@ -1241,13 +1241,13 @@ def main():
         if isinstance(_new, int) and _candidates:
             _alt = min(_candidates)
             if _alt < _new:
-                report['pflichtliste']['DIAGRAMM']['crossing_number_min'] = _alt
+                report['mandatory_list']['DIAGRAM']['crossing_number_min'] = _alt
                 report['_C_BOUND_KEPT_FROM_PREVIOUS'] = {
                     'kept': _alt, 'this_run_found': _new,
                     'reason': ('c is an upper bound (Disc #231) — the smaller bound receipted '
                                'earlier stays valid; stage-4 sampling is stochastic, '
                                'a worse run must not raise it (Disc #562).'),
-                    'diagramm_felder': ('pd_code/dt/writhe/knot_sig belong to the diagram of THIS '
+                    'diagram_fields': ('pd_code/dt/writhe/knot_sig belong to the diagram of THIS '
                                         'run — only the bound is the old one.'),
                     'when': '2026-07-25',
                 }
@@ -1264,7 +1264,7 @@ def main():
     print(f"\n{'='*60}")
     print(f"PFLICHTLISTE — {args.name}")
     print(f"{'='*60}")
-    for category, items in report['pflichtliste'].items():
+    for category, items in report['mandatory_list'].items():
         print(f"\n=== {category} ===")
         for k, v in items.items():
             if v is None:
@@ -1280,9 +1280,9 @@ def main():
     # Minimum population = at least ONE det witness (jones_at_i / sage /
     # seifert). Without it the report is empty and all later stages are hopeless.
     # The report has already been written above (diagnosis is preserved).
-    # PFLICHT_ALLOW_EMPTY=1 = deliberate diagnostic run without this gate
+    # MANDATORY_ALLOW_EMPTY=1 = deliberate diagnostic run without this gate
     # (same one-line switch mechanism as REGINA_TIMEOUT).
-    if not det_paths and os.environ.get('PFLICHT_ALLOW_EMPTY') != '1':
+    if not det_paths and os.environ.get('MANDATORY_ALLOW_EMPTY') != '1':
         print(f"\n[PFLICHT] ERROR: minimum population violated — no det witness "
               f"(regina_failed={report.get('regina_failed', False)}). "
               f"Report kept for diagnosis in {args.output}. Exit 4.")

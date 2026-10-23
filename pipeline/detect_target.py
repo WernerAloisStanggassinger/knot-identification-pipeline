@@ -103,7 +103,7 @@ def main():
         "n_crossings_total": int(g.sum()),
         "per_frame_n_cross": {
             "min": n_min, "max": n_max, "median": n_median, "mean": n_mean,
-            "modus": n_modus, "q05": n_q05, "q25": n_q25, "q75": n_q75, "q95": n_q95,
+            "mode_name": n_modus, "q05": n_q05, "q25": n_q25, "q75": n_q75, "q95": n_q95,
         },
         "all_even_n_cross":  all_even,
         "all_odd_n_cross":   all_odd,

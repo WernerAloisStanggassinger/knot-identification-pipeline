@@ -6,7 +6,7 @@
 # Full license: LICENSE.txt at repository root (GNU General Public License v3 or later).
 # Part of the Knot-Identification Pipeline.
 """
-summary_writer.py — Reads pflicht_invarianten_complete.json and writes a
+summary_writer.py — Reads mandatory_invariants_complete.json and writes a
 compact Markdown overview (knot_summary.md).
 
 Usage:
@@ -48,12 +48,12 @@ def main():
         f'{name}_summary.md'
     )
 
-    pf = d.get('pflichtliste', {})
-    diag = pf.get('DIAGRAMM', {})
+    pf = d.get('mandatory_list', {})
+    diag = pf.get('DIAGRAM', {})
     alg  = pf.get('ALGEBRA', {})
-    hyp  = pf.get('HYPERBOLISCH', {})
+    hyp  = pf.get('HYPERBOLIC', {})
     opt  = d.get('optional_invariants', {})
-    quart = d.get('konsistenz_quartett', {})
+    quart = d.get('consistency_quartet', {})
 
     # Field balance (populated vs. total leaves)
     def count_leaf(obj):
@@ -142,7 +142,7 @@ def main():
         lines.append(f"- **{k}**: `{fmt(v, 200)}`")
 
     lines.append(f"\n## Consistency\n")
-    lines.append(f"- Pipeline consistency: **{'OK' if d.get('konsistenz_consistent') else 'FAIL'}**")
+    lines.append(f"- Pipeline consistency: **{'OK' if d.get('consistency_ok') else 'FAIL'}**")
     lines.append(f"- det paths: `{quart.get('det_paths')}` → det = {quart.get('det_value')}")
     lines.append(f"- HFK-rank check: rank={quart.get('hfk_rank_check', {}).get('rank')}, "
                  f"diff={quart.get('hfk_rank_check', {}).get('diff_rank_minus_det')}, "

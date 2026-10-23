@@ -171,7 +171,7 @@ def signs(pd):
     return sg
 
 
-def alexander_matrix(pd, t: int, variante: int, p: int):
+def alexander_matrix(pd, t: int, variant: int, p: int):
     """One row per crossing, one column per ARC; last row + column deleted.
 
     `variante` selects the role assignment at the crossing. Which one is right is decided
@@ -189,13 +189,13 @@ def alexander_matrix(pd, t: int, variante: int, p: int):
         # have the same sign. The figure-eight knot has 2 positive and 2 negative ones
         # and thus came out as t^2-t+1 (det 3) instead of t^2-3t+1 (det 5).
         # At a NEGATIVE crossing the roles of incoming and outgoing swap.
-        if sg[row] < 0 and (variante & 2):
+        if sg[row] < 0 and (variant & 2):
             u_in, u_out = u_out, u_in
-        if variante & 4:
+        if variant & 4:
             wo, wi, wu = (1 - t) % p, t % p, (-1) % p
         else:
             wo, wi, wu = (t - 1) % p, t % p, (-1) % p
-        if variante & 1:
+        if variant & 1:
             wi, wu = wu, wi
         A[row, over] = (A[row, over] + wo) % p
         A[row, u_in] = (A[row, u_in] + wi) % p
@@ -203,18 +203,18 @@ def alexander_matrix(pd, t: int, variante: int, p: int):
     return A[:-1, :-1]
 
 
-def alexander_at(pd, t: int, variante: int, p: int) -> int:
-    return det_mod_p(alexander_matrix(pd, t, variante, p), p)
+def alexander_at(pd, t: int, variant: int, p: int) -> int:
+    return det_mod_p(alexander_matrix(pd, t, variant, p), p)
 
 
-def alexander_poly(pd, variante: int):
+def alexander_poly(pd, variant: int):
     """Integer coefficients (ascending) of det A(t), up to a unit."""
     n = len(pd)
     deg = n + 2                      # safe bound for the degree
     xs = list(range(1, deg + 2))     # sample points
     per_prime = []
     for p in PRIMES:
-        ys = [alexander_at(pd, x, variante, p) for x in xs]
+        ys = [alexander_at(pd, x, variant, p) for x in xs]
         per_prime.append(lagrange_mod_p([x % p for x in xs], ys, p))
     L = len(per_prime[0])
     return [crt_lift([per_prime[i][k] for i in range(len(PRIMES))], PRIMES) for k in range(L)]
@@ -262,8 +262,8 @@ FIG8 = parse_pd('X[4,2,5,1] X[8,6,1,5] X[6,3,7,2] X[2,7,3,8]')
 
 if __name__ == '__main__':
     print('=== CALIBRATION: which crossing convention reproduces known results? ===', flush=True)
-    expected = {'Kleeblatt': (TREFOIL, normalise(parse_regina('x^2 - x + 1'))),
-            'Achterknoten': (FIG8, normalise(parse_regina('x^2 - 3 x + 1')))}
+    expected = {'trefoil': (TREFOIL, normalise(parse_regina('x^2 - x + 1'))),
+            'figure-eight': (FIG8, normalise(parse_regina('x^2 - 3 x + 1')))}
     good = []
     for v in range(8):
         table_row, ok = [], True

@@ -207,10 +207,10 @@ CORES = None    # global; set from --kerne, otherwise EICH_KERNE (see below)
 # higher, not inside the single knot.
 #
 # Override: --kerne <n> always wins; without the argument
-# HOMFLY_KERNE from the environment applies; only then this value. On another
+# HOMFLY_CORES from the environment applies; only then this value. On another
 # box, re-calibrate (kern_eichung2.py), do not estimate.
 # ---------------------------------------------------------------------------
-CALIBRATION_CORES = int(os.environ.get("HOMFLY_KERNE", 6))
+CALIBRATION_CORES = int(os.environ.get("HOMFLY_CORES", 6))
 
 
 
@@ -229,7 +229,7 @@ def _row_mod(task):
     return l, [P_mod(word, n, a, q, p, pre=cs) for a in as_]
 
 
-def one_prime(word, n, z_grad_max, p, rng, laut=False):
+def one_prime(word, n, z_grad_max, p, rng, verbose=False):
     """Coefficients C[J][m] in F_p. A=a^2, Z=z^2 (both exponents even)."""
     I0, I1, J1, e = _box(word, n, z_grad_max)
     NA, NZ = I1 - I0 + 1, J1 + 1
@@ -281,12 +281,12 @@ def one_prime(word, n, z_grad_max, p, rng, laut=False):
     k_target = min(CORES if CORES else CALIBRATION_CORES, NZ)
 
     def _serial(reason=None):
-        if laut and reason:
+        if verbose and reason:
             print(f'      {reason} — serial', flush=True)
-        for auf in tasks:
-            l, row_values = _row_mod(auf)
+        for task_i in tasks:
+            l, row_values = _row_mod(task_i)
             V[l] = row_values
-            if laut and NZ >= 6 and (l + 1) % max(1, NZ // 4) == 0:
+            if verbose and NZ >= 6 and (l + 1) % max(1, NZ // 4) == 0:
                 print(f'      {l+1}/{NZ} q sample points', flush=True)
 
     _mod = sys.modules.get(_row_mod.__module__)
@@ -308,14 +308,14 @@ def one_prime(word, n, z_grad_max, p, rng, laut=False):
         rest = tasks[1:]
         serial_rest = _je * len(rest)
         if serial_rest < POOL_COST * 2:
-            if laut:
+            if verbose:
                 print(f'      {_je*1000:.0f} ms per sample point, remaining {serial_rest:.1f}s '
                       f'— pool not worth it', flush=True)
             k_target = 1
             tasks = rest
         else:
             tasks = rest
-            if laut:
+            if verbose:
                 print(f'      {_je*1000:.0f} ms per sample point, remaining serial would be '
                       f'{serial_rest:.0f}s — pool with {k_target} cores', flush=True)
 
@@ -333,7 +333,7 @@ def one_prime(word, n, z_grad_max, p, rng, laut=False):
                 for l, row_values in ex.map(_row_mod, tasks, chunksize=1):
                     V[l] = row_values
                     n_done += 1
-                    if laut and NZ >= 6 and n_done % max(1, NZ // 4) == 0:
+                    if verbose and NZ >= 6 and n_done % max(1, NZ // 4) == 0:
                         print(f'      {n_done}/{NZ} q sample points ({k_target} cores)', flush=True)
         except Exception as ex_:
             _serial(f'pool failed ({type(ex_).__name__})')
@@ -348,14 +348,14 @@ def one_prime(word, n, z_grad_max, p, rng, laut=False):
     return C, I0, J1, e
 
 
-def interpolate_exact(word, n, z_grad_max, max_prim=12, seed=23, laut=False):
+def interpolate_exact(word, n, z_grad_max, max_prim=12, seed=23, verbose=False):
     """Add primes until the CRT result stays fixed."""
     rng = random.Random(seed)
     residues, used = [], []
     before = None
     t0 = time.time()
     for pi, p in enumerate(PRIMES[:max_prim]):
-        C, I0, J1, e = one_prime(word, n, z_grad_max, p, rng, laut)
+        C, I0, J1, e = one_prime(word, n, z_grad_max, p, rng, verbose)
         residues.append(C); used.append(p)
         if len(used) < 2:
             continue
@@ -366,20 +366,20 @@ def interpolate_exact(word, n, z_grad_max, max_prim=12, seed=23, laut=False):
                 v = crt([r[J][m] for r in residues], used)
                 if v:
                     now[(2 * (I0 + m), 2 * J)] = v
-        if laut:
+        if verbose:
             print(f'    {len(used)} primes, {len(now)} terms, '
                   f'{time.time()-t0:.0f}s', flush=True)
         if before is not None and now == before:
-            return now, I0, J1, e, {'primzahlen': len(used),
+            return now, I0, J1, e, {'primes': len(used),
                                       'sek': round(time.time() - t0, 1),
-                                      'stabil': True}
+                                      'stable': True}
         before = now
-    return (before or {}), I0, J1, e, {'primzahlen': len(used),
+    return (before or {}), I0, J1, e, {'primes': len(used),
                                        'sek': round(time.time() - t0, 1),
-                                       'stabil': False}
+                                       'stable': False}
 
 
-def selbsttest():
+def self_test():
     """Two known knots exactly, plus three counter-cases."""
     from homfly_interpolation import det_exact, as_regina_string
     ok = True
@@ -388,9 +388,9 @@ def selbsttest():
             ('Achterknoten 4_1', [1, -2, 1, -2], 3, 4, 5, None)]:
         p, I0, J1, e, d = interpolate_exact(w, n, zg)
         det = det_exact(p)
-        good = (det == det_expected and d['stabil'])
-        print(f'  {nm:<18} det={det} (expected {det_expected}) · {d["primzahlen"]} '
-              f'primes · stable={d["stabil"]} · {d["sek"]}s '
+        good = (det == det_expected and d['stable'])
+        print(f'  {nm:<18} det={det} (expected {det_expected}) · {d["primes"]} '
+              f'primes · stable={d["stable"]} · {d["sek"]}s '
               f'{"✅" if good else "🔴"}')
         print(f'     {as_regina_string(p)}')
         if expected_str:
@@ -413,9 +413,9 @@ def selbsttest():
 
     # COUNTER-CASE 2: CRT with ONE prime must not count as "stable"
     _, _, _, _, d1 = interpolate_exact([1, 1, 1], 2, 3, max_prim=1)
-    print(f'  COUNTER-CASE 1 prime      : stable={d1["stabil"]} '
-          f'(must be False) {"✅" if not d1["stabil"] else "🔴"}')
-    ok &= not d1['stabil']
+    print(f'  COUNTER-CASE 1 prime      : stable={d1["stable"]} '
+          f'(must be False) {"✅" if not d1["stable"] else "🔴"}')
+    ok &= not d1['stable']
 
     # COUNTER-CASE 3: the symmetric CRT representative must give negative numbers
     neg = crt([(-7) % p for p in PRIMES[:3]], PRIMES[:3])
@@ -434,10 +434,10 @@ def as_json(word, n, z_grad_max, max_prim=12):
     p, I0, J1, e, md = interpolate_exact(word, n, z_grad_max, max_prim=max_prim)
     tr, total_pts = check_fresh_mod(p, word, n)
     return {'homfly': as_regina_string(p), 'det': det_exact(p),
-            'primzahlen': md['primzahlen'], 'stabil': md['stabil'],
-            'frisch_treffer': tr, 'frisch_gesamt': total_pts,
-            'terme': len(p), 'sek': round(time.time() - t0, 1),
-            'alexander_punkte': None}
+            'primes': md['primes'], 'stable': md['stable'],
+            'fresh_hits': tr, 'fresh_total': total_pts,
+            'terms': len(p), 'sek': round(time.time() - t0, 1),
+            'alexander_points': None}
 
 
 def check_fresh_mod(p_coef, word, n, count_n=3, seed=777):
@@ -479,26 +479,26 @@ def check_fresh_mod(p_coef, word, n, count_n=3, seed=777):
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('--selbsttest', action='store_true')
-    ap.add_argument('--wort', help='braid word as a JSON list')
+    ap.add_argument('--self-test', action='store_true')
+    ap.add_argument('--braid-word', help='braid word as a JSON list')
     ap.add_argument('--n', type=int)
-    ap.add_argument('--zgrad', type=int)
+    ap.add_argument('--zdeg', type=int)
     ap.add_argument('--max-prim', type=int, default=12)
     ap.add_argument('--alex-evals', help='alexander_point_evals as JSON')
     a = ap.parse_args()
-    if a.selbsttest:
-        sys.exit(selbsttest())
-    if a.wort:
+    if a.self_test:
+        sys.exit(self_test())
+    if a.braid_word:
         from homfly_interpolation import alexander_witness
         try:
-            w = json.loads(a.wort)
-            out = as_json([int(g) for g in w], a.n, a.zgrad, a.max_prim)
+            w = json.loads(a.braid_word)
+            out = as_json([int(g) for g in w], a.n, a.zdeg, a.max_prim)
             if a.alex_evals:
-                from homfly_eichung import parse_homfly
+                from homfly_calibration import parse_homfly
                 pp = parse_homfly(out['homfly'])
                 az, txt = alexander_witness(pp, json.loads(a.alex_evals))
-                out['alexander_punkte'] = az
-                out['alexander_punkte_text'] = txt
+                out['alexander_points'] = az
+                out['alexander_points_text'] = txt
         except Exception as ex:
             out = {'error': repr(ex)[:400]}
         print(json.dumps(out))

@@ -100,9 +100,9 @@ def _point_mca(points, ring_skip):
         k = min(k * 2, n)
 
 
-def selbsttest():
+def self_test():
     print('SELF-TEST clearance_segment — four counter-cases\n')
-    fehler = 0
+    failures = 0
 
     print('1) TWO OFFSET CIRCLES — analytically known distance')
     #   Circle in the xy plane and a second one, shifted by dz: distance = dz.
@@ -114,7 +114,7 @@ def selbsttest():
         d = _seg_seg_dist(k1, np.roll(k1, -1, 0), k2, np.roll(k2, -1, 0)).min()
         ok = abs(d - dz) < 1e-9
         print(f'   {"✅" if ok else "🔴"} dz={dz:<7} measured {d:.12f}')
-        fehler += (not ok)
+        failures += (not ok)
 
     print('\n2) THE SHARP ONE: segment beats point at coarse sampling')
     #   Two circles, sampled TWISTED against each other: no pair of points faces
@@ -127,7 +127,7 @@ def selbsttest():
     d_pkt = np.linalg.norm(k1[:, None, :] - k2[None, :, :], axis=2).min()
     better = d_seg < d_pkt and abs(d_seg - 0.01) < 1e-3
     print(f'   {"✅" if better else "🔴"} segment {d_seg:.6f} · point {d_pkt:.6f} · true 0.010000')
-    fehler += (not better)
+    failures += (not better)
 
     print('\n3) LOWER BOUND — segment must never be LARGER than point')
     rng = np.random.default_rng(7)
@@ -139,7 +139,7 @@ def selbsttest():
         if ds > dp + 1e-12:
             worst_k += 1
     print(f'   {"✅" if worst_k == 0 else f"🔴 {worst_k}/20 violated"} 20 random polygons')
-    fehler += bool(worst_k)
+    failures += bool(worst_k)
 
     print('\n4) CIRCLE AGAINST THE ANALYTIC NUMBER')
     #   🔴 The first draft expected ~2 here ("the circle approaches itself only across the
@@ -162,20 +162,20 @@ def selbsttest():
     ok_s = lower * 0.97 <= d_seg <= chord
     print(f'   {"✅" if ok_p else "🔴"} point   {d_pkt:.9f} against analytic {chord:.9f}')
     print(f'   {"✅" if ok_s else "🔴"} segment {d_seg:.9f} — below the chord, above {lower:.9f} ({npairs} pairs)')
-    fehler += (not ok_p) + (not ok_s)
+    failures += (not ok_p) + (not ok_s)
 
-    print(f'\n{"✅ ALL COUNTER-CASES PASSED" if fehler == 0 else f"🔴 {fehler} ERRORS"}')
-    return 0 if fehler == 0 else 1
+    print(f'\n{"✅ ALL COUNTER-CASES PASSED" if failures == 0 else f"🔴 {failures} ERRORS"}')
+    return 0 if failures == 0 else 1
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('fseries', nargs='?')
     ap.add_argument('--n', type=int, nargs='+', default=[1024, 4096, 16384])
-    ap.add_argument('--selbsttest', action='store_true')
+    ap.add_argument('--self-test', action='store_true')
     a = ap.parse_args()
-    if a.selbsttest:
-        sys.exit(selbsttest())
+    if a.self_test:
+        sys.exit(self_test())
     if not a.fseries:
         ap.error('fseries missing (or --selbsttest)')
 

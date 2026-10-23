@@ -76,10 +76,10 @@ CORES = None   # global, set from --kerne; otherwise EICH_KERNE (see below)
 # higher, not inside the single knot.
 #
 # Override: --kerne <n> always wins; without the argument
-# HOMFLY_KERNE from the environment applies; only then this value. On another
+# HOMFLY_CORES from the environment applies; only then this value. On another
 # box recalibrate (kern_eichung2.py), do not estimate.
 # ---------------------------------------------------------------------------
-CALIBRATION_CORES = int(os.environ.get("HOMFLY_KERNE", 6))
+CALIBRATION_CORES = int(os.environ.get("HOMFLY_CORES", 6))
 
 import numpy as np
 
@@ -138,7 +138,7 @@ def chis(word, n, q):
 def norm_K(a, q):
     """The norm that the author of the Hecke trace left out on purpose
     ('×common norm K'); found from the data on 23.08. and calibrated on 56 probes
-    at 4 points (homfly_eichung.py --pruefen)."""
+    at 4 points (homfly_calibration.py --check-mode)."""
     return (q - 1 / q) / (a - 1 / a)
 
 
@@ -182,8 +182,8 @@ def _row(task):
 
 
 # ── Interpolation ───────────────────────────────────────────────────────────
-def interpolate(word, n, z_grad_max, phase=0.31, laut=False, forced_box=None,
-                 kerne=None):
+def interpolate(word, n, z_grad_max, phase=0.31, verbose=False, forced_box=None,
+                 cores=None):
     """Returns (C, I0, J1, diag). C[J, m] = coefficient of A^(I0+m) Z^J.
 
     kerne=None -> os.cpu_count(); kerne=1 -> serial (counter-case path)."""
@@ -197,24 +197,24 @@ def interpolate(word, n, z_grad_max, phase=0.31, laut=False, forced_box=None,
     Zs = [rotZ * cmath.exp(2j * cmath.pi * l / NZ) for l in range(NZ)]
     As = [rotA * cmath.exp(2j * cmath.pi * k / NA) for k in range(NA)]
 
-    if laut:
+    if verbose:
         print(f'  Box A^{I0}..A^{I1} ({NA}) x Z^0..Z^{J1} ({NZ}) '
               f'= {NA*NZ} unknowns, but only {NZ} matrix passes',
               flush=True)
 
     V = np.zeros((NZ, NA), dtype=complex)
     t0 = time.time()
-    k_target = CALIBRATION_CORES if kerne is None else max(1, int(kerne))
+    k_target = CALIBRATION_CORES if cores is None else max(1, int(cores))
     k_target = min(k_target, NZ)
     tasks = [(l, Z, word, n, As) for l, Z in enumerate(Zs)]
 
     def _serial(reason=None):
-        if laut and reason:
+        if verbose and reason:
             print(f'    {reason} — serial', flush=True)
-        for auf in tasks:
-            l, row_values = _row(auf)
+        for task_i in tasks:
+            l, row_values = _row(task_i)
             V[l, :] = row_values
-            if laut and NZ >= 6 and (l + 1) % max(1, NZ // 6) == 0:
+            if verbose and NZ >= 6 and (l + 1) % max(1, NZ // 6) == 0:
                 print(f'    {l+1}/{NZ} z values, {time.time()-t0:.0f}s', flush=True)
 
     # Latch: spawn children import the module under its name. If it was
@@ -242,7 +242,7 @@ def interpolate(word, n, z_grad_max, phase=0.31, laut=False, forced_box=None,
                 for l, row_values in ex.map(_row, tasks, chunksize=1):
                     V[l, :] = row_values
                     n_done += 1
-                    if laut and NZ >= 6 and n_done % max(1, NZ // 6) == 0:
+                    if verbose and NZ >= 6 and n_done % max(1, NZ // 6) == 0:
                         print(f'    {n_done}/{NZ} z values, {time.time()-t0:.0f}s '
                               f'({k_target} cores)', flush=True)
         except Exception as ex_:          # pool broken -> better slow than dead
@@ -258,9 +258,9 @@ def interpolate(word, n, z_grad_max, phase=0.31, laut=False, forced_box=None,
 
     Cr = np.rint(C.real)
     residue = float(np.max(np.abs(C - Cr))) if C.size else 0.0
-    diag = {'kond_Z': float(kZ), 'kond_A': float(kA),
-            'ausschuss': residue, 'sek_hecke': round(t_hecke, 1),
-            'unbekannte': int(NA * NZ), 'durchgaenge': int(NZ),
+    diag = {'cond_Z': float(kZ), 'cond_A': float(kA),
+            'residue': residue, 'sek_hecke': round(t_hecke, 1),
+            'unknowns': int(NA * NZ), 'passes': int(NZ),
             'imag_max': float(np.max(np.abs(C.imag))) if C.size else 0.0}
     return Cr.astype(object), I0, J1, e, diag, (As, Zs, V)
 
@@ -382,19 +382,19 @@ def alexander_witness(p, evals):
 
 
 # ── self-test: two known knots and two counter-cases ───────────────────
-def selbsttest():
+def self_test():
     ok = True
-    faelle = [('Kleeblatt 3_1', [1, 1, 1], 2, 3, 3),
+    cases = [('Kleeblatt 3_1', [1, 1, 1], 2, 3, 3),
               ('Achterknoten 4_1', [1, -2, 1, -2], 3, 4, 5)]
-    for nm, w, n, c, det_expected in faelle:
+    for nm, w, n, c, det_expected in cases:
         C, I0, J1, e, diag, _ = interpolate(w, n, c)
         p = as_dict(C, I0)
         d = det_exact(p)
         fresh = check_fresh(p, w, n)
-        good = (d == det_expected and fresh < 1e-8 and diag['ausschuss'] < 1e-6)
+        good = (d == det_expected and fresh < 1e-8 and diag['residue'] < 1e-6)
         print(f'  {nm:<18} det={d} (expected {det_expected}) · fresh {fresh:.1e} · '
-              f'residue {diag["ausschuss"]:.1e} · cond {diag["kond_A"]:.2f}/'
-              f'{diag["kond_Z"]:.2f}  {"✅" if good else "🔴"}')
+              f'residue {diag["residue"]:.1e} · cond {diag["cond_A"]:.2f}/'
+              f'{diag["cond_Z"]:.2f}  {"✅" if good else "🔴"}')
         print(f'     {as_regina_string(p)}')
         ok &= good
 
@@ -403,18 +403,18 @@ def selbsttest():
     # and fresh points must break.
     C, I0, J1, e, d1, _ = interpolate([1, 1, 1], 2, 3, forced_box=(-2, -1, 0))
     f1 = check_fresh(as_dict(C, I0), [1, 1, 1], 2)
-    fa1 = (f1 > 1e-6) or (d1['ausschuss'] > 1e-6)
+    fa1 = (f1 > 1e-6) or (d1['residue'] > 1e-6)
     print(f'  COUNTER-CASE z axis too short: fresh {f1:.1e} · '
-          f'residue {d1["ausschuss"]:.1e}  '
+          f'residue {d1["residue"]:.1e}  '
           f'{"✅ detected" if fa1 else "🔴 slips through"}')
     ok &= fa1
 
     # COUNTER-CASE 1b: a axis shifted (box sits beside the support)
     C, I0, J1, e, d2, _ = interpolate([1, 1, 1], 2, 3, forced_box=(2, 3, 1))
     f2 = check_fresh(as_dict(C, I0), [1, 1, 1], 2)
-    fa2 = (f2 > 1e-6) or (d2['ausschuss'] > 1e-6)
+    fa2 = (f2 > 1e-6) or (d2['residue'] > 1e-6)
     print(f'  COUNTER-CASE a axis off    : fresh {f2:.1e} · '
-          f'residue {d2["ausschuss"]:.1e}  '
+          f'residue {d2["residue"]:.1e}  '
           f'{"✅ detected" if fa2 else "🔴 slips through"}')
     ok &= fa2
 
@@ -458,7 +458,7 @@ def selbsttest():
 
     # (1) the four MEASURED GREEN ones must NEVER be rejected
     for c_green in (48, 54, 60, 63):
-        g = mantissa_latch(c_green, 1e-3, exakt=False)
+        g = mantissa_latch(c_green, 1e-3, exact=False)
         good = g is None
         rg &= good
         print(f'  LATCH c={c_green:>3} (measured green) : '
@@ -466,7 +466,7 @@ def selbsttest():
 
     # (2) the two aborted targets MUST be rejected
     for c_rot in (149, 151):
-        g = mantissa_latch(c_rot, 1e-3, exakt=False)
+        g = mantissa_latch(c_rot, 1e-3, exact=False)
         good = g is not None
         rg &= good
         print(f'  LATCH c={c_rot} (17 decades above): '
@@ -474,15 +474,15 @@ def selbsttest():
 
     # (3) THE LOAD-BEARING COUNTER-CASE: in --exakt there is no cancellation.
     #     If the latch fires there, it chokes exactly the path that can do it.
-    g = mantissa_latch(151, 1e-3, exakt=True)
+    g = mantissa_latch(151, 1e-3, exact=True)
     good = g is None
     rg &= good
     print(f'  LATCH c=151 but --exakt        : '
           f'{"lets through ✅ (no floating point, no wall)" if good else "🔴 CHOKES THE EXACT PATH"}')
 
     # (4) the wall must MOVE with the bound, not be nailed down
-    high = mantissa_latch(75, 1e-0, exakt=False)
-    tight = mantissa_latch(75, 1e-6, exakt=False)
+    high = mantissa_latch(75, 1e-0, exact=False)
+    tight = mantissa_latch(75, 1e-6, exact=False)
     good = (high is None) and (tight is not None)
     rg &= good
     print(f'  LATCH c=75 at bound 1e0 / 1e-6: '
@@ -499,7 +499,7 @@ def selbsttest():
             if not m:
                 continue
             was_green = m.group(1) == '✅'
-            g = mantissa_latch(int(m.group(2)), 1e-3, exakt=False)
+            g = mantissa_latch(int(m.group(2)), 1e-3, exact=False)
             green += was_green; rot += (not was_green)
             if was_green and g:
                 false_pos += 1
@@ -517,20 +517,20 @@ def selbsttest():
     # (6) COUNTER-CASE for the double-computation guard: it may only fire when
     #     the field is REALLY filled — otherwise it chokes every run.
     import tempfile as _tf
-    def _mini(mit_homfly):
-        d = {'pflichtliste': {'ALGEBRA': {'homfly_polynomial':
-                              'x^2 - y^2' if mit_homfly else None},
-                              'DIAGRAMM': {}}}
+    def _mini(with_homfly):
+        d = {'mandatory_list': {'ALGEBRA': {'homfly_polynomial':
+                              'x^2 - y^2' if with_homfly else None},
+                              'DIAGRAM': {}}}
         p = _tf.NamedTemporaryFile('w', suffix='.json', delete=False)
         json.dump(d, p); p.close(); return p.name
     full, empty = _mini(True), _mini(False)
-    t_full = {'name': 'X', 'record': full, 'n': 3, 'c': 10, 'zgrad': 10}
-    t_empty = {'name': 'Y', 'record': empty, 'n': 3, 'c': 10, 'zgrad': 10}
+    t_full = {'name': 'X', 'record': full, 'n': 3, 'c': 10, 'zdeg': 10}
+    t_empty = {'name': 'Y', 'record': empty, 'n': 3, 'c': 10, 'zdeg': 10}
     r1 = process_target(t_full)
-    gut1 = r1.get('schon_da') is True
+    gut1 = r1.get('already_there') is True
     try:
         r2 = process_target(t_empty)
-        gut2 = not r2.get('schon_da')
+        gut2 = not r2.get('already_there')
     except Exception:
         gut2 = True          # starts computing and fails on the braid word — correct
     _os.unlink(full); _os.unlink(empty)
@@ -544,57 +544,57 @@ def selbsttest():
 
 
 # ── calibration against records whose HOMFLY regina has already delivered ─────────
-def calibrate_against_records(entries, laut=True):
+def calibrate_against_records(entries, verbose=True):
     """The decisive test: does the interpolation reproduce what regina
     computed independently — term by term? A tool that only
     LOOKS convincing is decoration (Footgun 16)."""
-    from homfly_eichung import parse_homfly
+    from homfly_calibration import parse_homfly
     ok = misses = 0
     rows = []
     for e in entries:
         rec = json.load(open(e['record']))
-        D = rec['pflichtliste']['DIAGRAMM']
+        D = rec['mandatory_list']['DIAGRAM']
         w = as_list(D.get('braid_word'))
         n = D.get('braid_n_strands')
-        expected = rec['pflichtliste']['ALGEBRA'].get('homfly_polynomial')
+        expected = rec['mandatory_list']['ALGEBRA'].get('homfly_polynomial')
         if not w or not n or not expected:
             continue
         zg = int(e.get('size_simplified') or D.get('crossing_number_min') or 0)
         t0 = time.time()
-        C, I0, J1, ee, diag, _ = interpolate(w, int(n), zg, kerne=CORES)
+        C, I0, J1, ee, diag, _ = interpolate(w, int(n), zg, cores=CORES)
         p = as_dict(C, I0)
         ps = parse_homfly(expected)
         equal = ps is not None and all(
             p.get(k, 0) == ps.get(k, 0) for k in set(p) | set(ps))
         fresh = check_fresh(p, w, int(n))
-        z = {'name': e['name'], 'n': int(n), 'c': e.get('c'), 'zgrad': zg,
-             'gleich': bool(equal), 'frisch': fresh,
-             'ausschuss': diag['ausschuss'], 'sek': round(time.time() - t0, 1),
-             'unbekannte': diag['unbekannte'], 'durchgaenge': diag['durchgaenge']}
+        z = {'name': e['name'], 'n': int(n), 'c': e.get('c'), 'zdeg': zg,
+             'equal': bool(equal), 'fresh': fresh,
+             'residue': diag['residue'], 'sek': round(time.time() - t0, 1),
+             'unknowns': diag['unknowns'], 'passes': diag['passes']}
         rows.append(z)
         if equal:
             ok += 1
         else:
             misses += 1
-        if laut:
+        if verbose:
             print(f"  {'✅' if equal else '🔴'} {e['name'][:32]:<32} n={int(n):>2} "
-                  f"c={e.get('c')} · residue {diag['ausschuss']:.1e} · "
+                  f"c={e.get('c')} · residue {diag['residue']:.1e} · "
                   f"fresh {fresh:.1e} · {z['sek']}s "
-                  f"({diag['durchgaenge']} passes)", flush=True)
+                  f"({diag['passes']} passes)", flush=True)
     return ok, misses, rows
 
 
 
 # ── targets: the records where regina stands at the memory wall ───────────
-def _path_index(liste):
+def _path_index(target_list):
     """name → record file. Needed because older wall runs wrote the path only
     on success — a missing field is not a missing record."""
     idx = {}
-    if not liste or not os.path.exists(liste):
+    if not target_list or not os.path.exists(target_list):
         return idx
-    for x in json.load(open(liste)):
-        p = os.path.join(site_config.ROOT, x['pfad'])
-        for cand_k in (f"{x['name']}_pflicht_invarianten_complete.json",
+    for x in json.load(open(target_list)):
+        p = os.path.join(site_config.ROOT, x['file_path'])
+        for cand_k in (f"{x['name']}_mandatory_invariants_complete.json",
                      f"{x['name']}_pflicht_complete.json"):
             f = os.path.join(p, cand_k)
             if os.path.exists(f):
@@ -603,30 +603,30 @@ def _path_index(liste):
     return idx
 
 
-def target_entries(wall_file, n_max=12, liste=None):
+def target_entries(wall_file, n_max=12, target_list=None):
     d = json.load(open(wall_file))
-    idx = _path_index(liste)
+    idx = _path_index(target_list)
     out = []
     for e in d:
-        if e.get('status') not in ('SPEICHERWAND', 'RIEGEL', 'FEHLER'):
+        if e.get('status') not in ('MEMORY_WALL', 'LATCH', 'FAILED'):
             continue
         rec_path = e.get('record') or idx.get(e['name'])
         if not rec_path or not os.path.exists(rec_path):
             continue
         rec = json.load(open(rec_path))
-        D = rec['pflichtliste']['DIAGRAMM']
+        D = rec['mandatory_list']['DIAGRAM']
         w = as_list(D.get('braid_word'))
         n = D.get('braid_n_strands')
         if not w or not n or int(n) > n_max:
             continue
-        if rec['pflichtliste']['ALGEBRA'].get('homfly_polynomial'):
+        if rec['mandatory_list']['ALGEBRA'].get('homfly_polynomial'):
             continue
         zg = int(D.get('crossing_number_min') or e.get('c') or 0)
         if zg <= 0:
             continue
         out.append({'name': e['name'], 'record': rec_path, 'w': w,
-                    'n': int(n), 'zgrad': zg, 'c': e.get('c')})
-    out.sort(key=lambda z: (z['n'], z['zgrad']))
+                    'n': int(n), 'zdeg': zg, 'c': e.get('c')})
+    out.sort(key=lambda z: (z['n'], z['zdeg']))
     return out
 
 
@@ -663,31 +663,31 @@ MANTISSA_SD = 0.252          # scatter of the residuals, decades
 MANTISSA_N = 40              # runs this rests on
 
 
-def residue_prediction(zgrad):
+def residue_prediction(zdeg):
     """Expected residue in floating point at crossing number zgrad."""
-    return 10.0 ** (MANTISSA_A * zgrad + MANTISSA_B)
+    return 10.0 ** (MANTISSA_A * zdeg + MANTISSA_B)
 
 
-def mantissa_latch(zgrad, ausschuss_max, exakt=False):
+def mantissa_latch(zdeg, residue_max, exact=False):
     """Returns a REASON if floating point no longer carries this crossing
     number — otherwise None. In --exakt there is no cancellation, hence
     no latch either (the counter-case without which this latch would choke
     exactly the path that works)."""
-    if exakt or not zgrad:
+    if exact or not zdeg:
         return None
     import math
-    c_wand = (math.log10(ausschuss_max) - MANTISSA_B + 3 * MANTISSA_SD) / MANTISSA_A
-    if zgrad < c_wand:
+    c_wand = (math.log10(residue_max) - MANTISSA_B + 3 * MANTISSA_SD) / MANTISSA_A
+    if zdeg < c_wand:
         return None
-    expected_residue = residue_prediction(zgrad)
-    decades = math.log10(expected_residue / ausschuss_max)
-    return (f'mantissa latch: c={zgrad} > {c_wand:.0f}; expected residue '
+    expected_residue = residue_prediction(zdeg)
+    decades = math.log10(expected_residue / residue_max)
+    return (f'mantissa latch: c={zdeg} > {c_wand:.0f}; expected residue '
             f'~1e{math.log10(expected_residue):+.0f}, that is {decades:.0f} decades above '
-            f'{ausschuss_max:.0e} (measured over {MANTISSA_N} runs). '
+            f'{residue_max:.0e} (measured over {MANTISSA_N} runs). '
             f'Floating point cannot represent this — way out: --exakt')
 
 
-def process_target(t, ausschuss_max=1e-3, fresh_max=1e-8, exakt=False,
+def process_target(t, residue_max=1e-3, fresh_max=1e-8, exact=False,
                    no_latch=False):
     # ausschuss_max deliberately WITHIN the measurement: term-by-term equality
     # with regina is receipted up to 2.1e-3 (34 calibration records, 0 off).
@@ -699,7 +699,7 @@ def process_target(t, ausschuss_max=1e-3, fresh_max=1e-8, exakt=False,
        4. |Alexander(-1)| from the stored Alexander polynomial
     If one breaks, NOTHING is written and the reason is given.
     The reason texts in 'gruende' and 'frisch_text' are data (returned/stored) and stay German."""
-    from homfly_gegenprobe import record_det, record_alexander, det_from_alexander
+    from homfly_crosscheck import record_det, record_alexander, det_from_alexander
     t0 = time.time()
     # The target list is frozen at START. If a second path runs alongside
     # (regina, --exakt), it fills records in the meantime — and this
@@ -709,50 +709,50 @@ def process_target(t, ausschuss_max=1e-3, fresh_max=1e-8, exakt=False,
     # Costs one file access, saves hours.
     try:
         _r = json.load(open(t['record']))
-        if _r['pflichtliste']['ALGEBRA'].get('homfly_polynomial'):
+        if _r['mandatory_list']['ALGEBRA'].get('homfly_polynomial'):
             return {'name': t['name'], 'record': t['record'], 'n': t['n'],
-                    'c': t.get('c'), 'zgrad': t.get('zgrad'), 'ok': False,
-                    'gruende': ['record meanwhile carries a HOMFLY (another route '
+                    'c': t.get('c'), 'zdeg': t.get('zdeg'), 'ok': False,
+                    'reasons': ['record meanwhile carries a HOMFLY (another route '
                                 'was faster) — not computed twice'],
-                    'schon_da': True, 'riegel': True,
+                    'already_there': True, 'latch': True,
                     'det': None, 'det_record': None, 'det_alexander': None,
-                    'alex_punkte': None, 'alex_punkte_text': '',
-                    'frisch': None, 'frisch_text': 'not computed',
-                    'exakt': bool(exakt), 'sumabs': None, 'zeugen': 0,
+                    'alex_points': None, 'alex_points_text': '',
+                    'fresh': None, 'fresh_text': 'not computed',
+                    'exact': bool(exact), 'sumabs': None, 'witnesses': 0,
                     'sek': round(time.time() - t0, 2), 'homfly': None,
-                    'ausschuss': None, 'unbekannte': None, 'durchgaenge': None}
+                    'residue': None, 'unknowns': None, 'passes': None}
     except Exception:
         pass
     if not no_latch:
-        reason = mantissa_latch(t.get('zgrad'), ausschuss_max, exakt)
+        reason = mantissa_latch(t.get('zdeg'), residue_max, exact)
         if reason:
             return {'name': t['name'], 'record': t['record'], 'n': t['n'],
-                    'c': t.get('c'), 'zgrad': t.get('zgrad'), 'ok': False,
-                    'gruende': [reason], 'riegel': True,
+                    'c': t.get('c'), 'zdeg': t.get('zdeg'), 'ok': False,
+                    'reasons': [reason], 'latch': True,
                     'det': None, 'det_record': None, 'det_alexander': None,
-                    'alex_punkte': None, 'alex_punkte_text': '',
-                    'frisch': None, 'frisch_text': 'not computed',
-                    'exakt': bool(exakt), 'sumabs': None, 'zeugen': 0,
+                    'alex_points': None, 'alex_points_text': '',
+                    'fresh': None, 'fresh_text': 'not computed',
+                    'exact': bool(exact), 'sumabs': None, 'witnesses': 0,
                     'sek': round(time.time() - t0, 2), 'homfly': None,
-                    'ausschuss': residue_prediction(t.get('zgrad') or 0),
-                    'unbekannte': None, 'durchgaenge': None}
-    if exakt:
+                    'residue': residue_prediction(t.get('zdeg') or 0),
+                    'unknowns': None, 'passes': None}
+    if exact:
         import homfly_modular as _hm
         from homfly_modular import interpolate_exact, check_fresh_mod
         # pass --kerne through into the EXACT path. Without this line the
         # expensive path stayed serial while the floating-point path ran in parallel — exactly the
         # half that matters (25.08.).
         _hm.CORES = CORES
-        p, I0, J1, e, md = interpolate_exact(t['w'], t['n'], t['zgrad'], laut=t.get('laut', False))
-        diag = {'ausschuss': 0.0, 'unbekannte': len(p),
-                'durchgaenge': md['primzahlen'], 'stabil': md['stabil']}
+        p, I0, J1, e, md = interpolate_exact(t['w'], t['n'], t['zdeg'], verbose=t.get('verbose', False))
+        diag = {'residue': 0.0, 'unknowns': len(p),
+                'passes': md['primes'], 'stable': md['stable']}
         tr, total_pts = check_fresh_mod(p, t['w'], t['n'])
         fresh = 0.0 if tr == total_pts else 1.0
         fresh_text = f'{tr}/{total_pts} fresh points exactly equal in F_p'
-        if not md['stabil']:
+        if not md['stable']:
             pass
     else:
-        C, I0, J1, e, diag, _ = interpolate(t['w'], t['n'], t['zgrad'])
+        C, I0, J1, e, diag, _ = interpolate(t['w'], t['n'], t['zdeg'])
         p = as_dict(C, I0)
         fresh = check_fresh(p, t['w'], t['n'])
         fresh_text = f'{fresh:.1e} (floating point)'
@@ -763,11 +763,11 @@ def process_target(t, ausschuss_max=1e-3, fresh_max=1e-8, exakt=False,
     d_alex = det_from_alexander(alex) if alex else None
     sumabs = sum(abs(v) for v in p.values())
     reasons = []
-    if exakt and not diag.get('stabil'):
+    if exact and not diag.get('stable'):
         reasons.append('CRT did not become stable (more primes needed)')
-    if not exakt and diag['ausschuss'] > ausschuss_max:
-        reasons.append(f"residue {diag['ausschuss']:.1e} > {ausschuss_max:.0e}")
-    if (fresh > fresh_max) if not exakt else (fresh != 0.0):
+    if not exact and diag['residue'] > residue_max:
+        reasons.append(f"residue {diag['residue']:.1e} > {residue_max:.0e}")
+    if (fresh > fresh_max) if not exact else (fresh != 0.0):
         reasons.append(f"fresh points: {fresh_text}")
     if d_rec is None:
         reasons.append('no determinant in the record')
@@ -776,54 +776,54 @@ def process_target(t, ausschuss_max=1e-3, fresh_max=1e-8, exakt=False,
     if d_alex is not None and d_rec is not None and d_alex != d_rec:
         reasons.append(f'Alexander witness {d_alex} != record {d_rec}')
     # witness 4: Alexander at several points, exact.
-    evals = rec['pflichtliste']['ALGEBRA'].get('alexander_point_evals')
+    evals = rec['mandatory_list']['ALGEBRA'].get('alexander_point_evals')
     az, az_text = alexander_witness(p, evals)
     if az is False:
         reasons.append(f'Alexander points: {az_text}')
     witnesses = 2 + (1 if (d_alex is not None and d_alex == d_rec) else 0) \
                + (1 if az else 0)
     return {'name': t['name'], 'record': t['record'], 'n': t['n'],
-            'c': t['c'], 'zgrad': t['zgrad'], 'ok': not reasons,
-            'gruende': reasons, 'det': d_int, 'det_record': d_rec,
-            'det_alexander': d_alex, 'alex_punkte': az, 'alex_punkte_text': az_text,
-            'frisch': fresh, 'frisch_text': fresh_text,
-            'exakt': bool(exakt), 'sumabs': sumabs, 'zeugen': witnesses,
+            'c': t['c'], 'zdeg': t['zdeg'], 'ok': not reasons,
+            'reasons': reasons, 'det': d_int, 'det_record': d_rec,
+            'det_alexander': d_alex, 'alex_points': az, 'alex_points_text': az_text,
+            'fresh': fresh, 'fresh_text': fresh_text,
+            'exact': bool(exact), 'sumabs': sumabs, 'witnesses': witnesses,
             'sek': round(time.time() - t0, 1), 'homfly': as_regina_string(p),
-            **{k: diag[k] for k in ('ausschuss', 'unbekannte', 'durchgaenge')}}
+            **{k: diag[k] for k in ('residue', 'unknowns', 'passes')}}
 
 
 def write_record(r, datum):
     f = r['record']
     rec = json.load(open(f))
-    rec['pflichtliste']['ALGEBRA']['homfly_polynomial'] = r['homfly']
-    rec['homfly_herkunft'] = {
+    rec['mandatory_list']['ALGEBRA']['homfly_polynomial'] = r['homfly']
+    rec['homfly_provenance'] = {
         'datum': datum,
-        'weg': ('Hecke trace at a point (hecke_homfly_fast) on a grid, '
+        'route': ('Hecke trace at a point (hecke_homfly_fast) on a grid, '
                 'then 2-D interpolation to the full polynomial '
                 '(tools/homfly_interpolation.py)'),
-        'warum_nicht_regina': ('regina stops at this diagram at the '
+        'why_not_regina': ('regina stops at this diagram at the '
                                'MEMORY WALL (~3 GB per process, partly '
                                'killed by earlyoom, Disc #677) — not '
                                'at the time.'),
-        'konvention': 'regina AZ, variables printed as x=a, y=z',
-        'box_gemessen': ('-e-n+1 <= a exponent <= -e+n-1, both axes even, '
+        'convention': 'regina AZ, variables printed as x=a, y=z',
+        'box_measured': ('-e-n+1 <= a exponent <= -e+n-1, both axes even, '
                          'z degree <= c-1; checked on 178 freshly computed polynomials, '
                          '0 violations, 173 touch the boundary exactly'),
-        'eichung': ('20 records with an existing regina HOMFLY reproduced '
+        'calibration_check': ('20 records with an existing regina HOMFLY reproduced '
                     'term by term (c=21..54), 0 off'),
-        'ausschuss': r['ausschuss'],
-        'ausschuss_deutung': ('largest distance of a coefficient from the '
+        'residue': r['residue'],
+        'residue_meaning': ('largest distance of a coefficient from the '
                               'nearest integer; measured law '
                               'residue ~ 1.2e-16 * sum|coefficients|'),
-        'zeuge_1': f"fresh points outside the grid: {r['frisch']:.2e}",
-        'zeuge_2': f"det from HOMFLY |P(1,2i)| = {r['det']} = record {r['det_record']}",
-        'zeuge_3': (f"|Alexander(-1)| = {r['det_alexander']}"
+        'witness_1': f"fresh points outside the grid: {r['fresh']:.2e}",
+        'witness_2': f"det from HOMFLY |P(1,2i)| = {r['det']} = record {r['det_record']}",
+        'witness_3': (f"|Alexander(-1)| = {r['det_alexander']}"
                     if r['det_alexander'] is not None else None),
-        'zeuge_4': (f"Alexander at several points (exact, fractions): "
-                    f"{r['alex_punkte_text']}" if r.get('alex_punkte') else None),
-        'zeugen_gesamt': r['zeugen'],
-        'unbekannte': r['unbekannte'], 'gitter_durchgaenge': r['durchgaenge'],
-        'sekunden': r['sek'],
+        'witness_4': (f"Alexander at several points (exact, fractions): "
+                    f"{r['alex_points_text']}" if r.get('alex_points') else None),
+        'witnesses_total': r['witnesses'],
+        'unknowns': r['unknowns'], 'grid_passes': r['passes'],
+        'seconds': r['sek'],
     }
     tmp = f + '.tmp'
     json.dump(rec, open(tmp, 'w'), indent=1)
@@ -832,32 +832,32 @@ def write_record(r, datum):
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('--eichen', help='JSON list (from homfly_wand.py) with record/name')
+    ap.add_argument('--calibrate', help='JSON list (from homfly_wand.py) with record/name')
     ap.add_argument('--n-max', type=int, default=8)
     ap.add_argument('--limit', type=int, default=12)
     ap.add_argument('--out')
-    ap.add_argument('--liste', help='n_gross.json, to look up record paths')
-    ap.add_argument('--ziele', help='wand_alle.json — takes the SPEICHERWAND (memory wall) cases')
-    ap.add_argument('--ziel-n-max', type=int, default=12)
-    ap.add_argument('--ziel-limit', type=int)
-    ap.add_argument('--exakt', action='store_true',
+    ap.add_argument('--target-list', help='n_gross.json, to look up record paths')
+    ap.add_argument('--targets', help='wand_alle.json — takes the MEMORY_WALL cases')
+    ap.add_argument('--target-n-max', type=int, default=12)
+    ap.add_argument('--target-limit', type=int)
+    ap.add_argument('--exact', action='store_true',
                     help='Hecke trace over F_p + CRT instead of floating point')
-    ap.add_argument('--ausschuss-max', type=float, default=1e-3)
-    ap.add_argument('--kein-mantissen-riegel', action='store_true',
+    ap.add_argument('--residue-max', type=float, default=1e-3)
+    ap.add_argument('--no-mantissa-latch', action='store_true',
                     help='compute high c despite the measured floating-point wall')
     ap.add_argument('--datum', default='2026-08-23')
-    ap.add_argument('--schreiben', action='store_true')
-    ap.add_argument('--selbsttest', action='store_true')
+    ap.add_argument('--write-records', action='store_true')
+    ap.add_argument('--self-test', action='store_true')
     ap.add_argument('--record', help='path to a *_complete.json')
-    ap.add_argument('--laut', action='store_true')
-    ap.add_argument('--kerne', type=int, default=None,
+    ap.add_argument('--verbose', action='store_true')
+    ap.add_argument('--cores', type=int, default=None,
                     help='workers for the z loop (default: all cores; 1 = serial)')
     a = ap.parse_args()
-    globals()['CORES'] = a.kerne     # also takes effect in functions without their own parameter
-    if a.selbsttest:
-        sys.exit(selbsttest())
-    if a.eichen:
-        d = json.load(open(a.eichen))
+    globals()['CORES'] = a.cores     # also takes effect in functions without their own parameter
+    if a.self_test:
+        sys.exit(self_test())
+    if a.calibrate:
+        d = json.load(open(a.calibrate))
         d = [x for x in d if x.get('status') == 'OK' and x.get('record')]
         # draw over the whole range, not only the cheap ones
         d = [x for x in d if (x.get('n') or 99) <= a.n_max]
@@ -870,39 +870,39 @@ if __name__ == '__main__':
         if a.out:
             json.dump(rows, open(a.out, 'w'), indent=1)
         sys.exit(0 if misses == 0 else 1)
-    if a.ziele:
-        z = target_entries(a.ziele, a.ziel_n_max, a.liste)
-        if a.ziel_limit:
-            z = z[:a.ziel_limit]
-        print(f'{len(z)} targets (memory wall in regina, n <= {a.ziel_n_max})',
+    if a.targets:
+        z = target_entries(a.targets, a.target_n_max, a.target_list)
+        if a.target_limit:
+            z = z[:a.target_limit]
+        print(f'{len(z)} targets (memory wall in regina, n <= {a.target_n_max})',
               flush=True)
         erg, good = [], 0
         for i, t in enumerate(z, 1):
-            r = process_target(t, a.ausschuss_max, exakt=a.exakt,
-                               no_latch=a.kein_mantissen_riegel)
+            r = process_target(t, a.residue_max, exact=a.exact,
+                               no_latch=a.no_mantissa_latch)
             erg.append(r)
-            mark = '✅' if r['ok'] else ('⛔' if r.get('riegel') else '🔴')
+            mark = '✅' if r['ok'] else ('⛔' if r.get('latch') else '🔴')
             print(f"[{i}/{len(z)}] {mark} {t['name'][:30]:<30} n={t['n']:>2} "
-                  f"c={t['c']} · {'REJECTED' if r.get('riegel') else ('exact/' + str(r['durchgaenge']) + ' primes' if r.get('exakt') else 'residue %.1e' % r['ausschuss'])} · "
-                  f"fresh {r['frisch_text']} · det {r['det']}"
-                  f"{'' if r['ok'] else '  ⟵ ' + '; '.join(r['gruende'])}"
+                  f"c={t['c']} · {'REJECTED' if r.get('latch') else ('exact/' + str(r['passes']) + ' primes' if r.get('exact') else 'residue %.1e' % r['residue'])} · "
+                  f"fresh {r['fresh_text']} · det {r['det']}"
+                  f"{'' if r['ok'] else '  ⟵ ' + '; '.join(r['reasons'])}"
                   f" · {r['sek']}s", flush=True)
             if r['ok']:
                 good += 1
-                if a.schreiben:
+                if a.write_records:
                     write_record(r, a.datum)
             if a.out:
                 json.dump(erg, open(a.out, 'w'), indent=1)
         print(f"\n{good}/{len(z)} through all four hurdles"
-              f"{' — WRITTEN' if a.schreiben else ' (dry run)'}")
+              f"{' — WRITTEN' if a.write_records else ' (dry run)'}")
         sys.exit(0)
     if a.record:
         rec = json.load(open(a.record))
-        D = rec['pflichtliste']['DIAGRAMM']
+        D = rec['mandatory_list']['DIAGRAM']
         w = as_list(D.get('braid_word')); n = int(D.get('braid_n_strands'))
         zg = int(D.get('crossing_number_min') or 0) + 4
-        C, I0, J1, e, diag, _ = interpolate(w, n, zg, laut=a.laut, kerne=a.kerne)
+        C, I0, J1, e, diag, _ = interpolate(w, n, zg, verbose=a.verbose, cores=a.cores)
         p = as_dict(C, I0)
         print(json.dumps({'det': det_exact(p),
-                          'frisch': check_fresh(p, w, n), **diag}, indent=1))
+                          'fresh': check_fresh(p, w, n), **diag}, indent=1))
         print(as_regina_string(p))

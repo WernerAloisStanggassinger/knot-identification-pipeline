@@ -9,7 +9,7 @@
 repair_khovanov_parsing.py
 ==========================
 Standalone repair/enrichment: reads an existing
-pflicht_invarianten_*.json with an (old, faulty or incomplete)
+mandatory_invariants_*.json with an (old, faulty or incomplete)
 Khovanov evaluation, applies the corrected parser to the stored
 raw_subprocess_outputs.knotjob.raw_stdout and writes structured
 fields back.
@@ -29,7 +29,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from pflicht_invarianten_extra import parse_knotjob_khovanov_stdout
+from mandatory_invariants_extra import parse_knotjob_khovanov_stdout
 
 
 def main():
@@ -56,14 +56,14 @@ def main():
         sys.exit(0)
 
     # Old values for the diff
-    old_kh = report.get('pflichtliste', {}).get('ALGEBRA', {}).get('khovanov_homology', {})
+    old_kh = report.get('mandatory_list', {}).get('ALGEBRA', {}).get('khovanov_homology', {})
     old_terms = old_kh.get('terms_t_q', {}) or {}
     old_width = old_kh.get('width')
     old_thin  = old_kh.get('thin')
     old_torsion = old_kh.get('torsion')
     old_reduced = old_kh.get('reduced_polynomial')
 
-    # Reparse via helper (same logic as the main() path in pflicht_invarianten_extra.py)
+    # Reparse via helper (same logic as the main() path in mandatory_invariants_extra.py)
     parsed = parse_knotjob_khovanov_stdout(raw_stdout)
     if not parsed.get('polynomial'):
         # Disc #289: raw_stdout present, but no parsable Khovanov block
@@ -93,7 +93,7 @@ def main():
         'reduced_width':                parsed.get('reduced_width'),
         'reduced_thin':                 parsed.get('reduced_thin'),
     }
-    report['pflichtliste']['ALGEBRA']['khovanov_homology'] = new_kh
+    report['mandatory_list']['ALGEBRA']['khovanov_homology'] = new_kh
 
     # Synchronise raw_subprocess_outputs.knotjob
     knotjob.update({k: v for k, v in parsed.items() if k != 'raw_stdout'})

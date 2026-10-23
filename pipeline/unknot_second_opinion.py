@@ -4,7 +4,7 @@
 # Authored in collaboration with Claude Code (Anthropic).
 # Contact: stanggassinger@stainlesssteel4u.de
 # Full license: LICENSE.txt at repository root (GNU General Public License v3 or later).
-"""unknot_zweitmeinung.py — independent second opinion on "is this .fseries an unknot?"
+"""unknot_second_opinion.py — independent second opinion on "is this .fseries an unknot?"
 
 The FIRST opinion comes from the kinematic scanner (scan_triage.py: is there a
 crossing-free projection?). This one comes from a completely different corner:
@@ -37,10 +37,10 @@ def one_curve(path):
                     reduced=int(rc), unknot=(rc == 0))
     except Exception as e:
         return dict(path=path, stem=os.path.basename(path)[:-len('.fseries')],
-                    fehler=str(e)[:120])
+                    failures=str(e)[:120])
 
 
-def selbsttest():
+def self_test():
     """A tool that is meant to confirm UNKNOT needs the case built in
     that it must REJECT (Footgun 16). Otherwise green is worthless.
     Note: the probe names passed to pruef() are data for the gate and stay German."""
@@ -68,24 +68,24 @@ def selbsttest():
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument('fseries', nargs='*')
-    ap.add_argument('--selbsttest', action='store_true')
+    ap.add_argument('--self-test', action='store_true')
     ap.add_argument('--workers', type=int, default=12)
     ap.add_argument('--json')
     a = ap.parse_args()
-    if a.selbsttest:
-        sys.exit(selbsttest())
+    if a.self_test:
+        sys.exit(self_test())
     if not a.fseries:
         ap.error('fseries paths or --selbsttest')
     with ProcessPoolExecutor(a.workers) as ex:
         res = list(ex.map(one_curve, a.fseries))
     u = [r for r in res if r.get('unknot')]
     k = [r for r in res if r.get('unknot') is False]
-    f = [r for r in res if 'fehler' in r]
+    f = [r for r in res if 'failures' in r]
     print(f"UNKNOTS {len(u)} · KNOTS {len(k)} · ERRORS {len(f)} of {len(res)}")
     for r in sorted(k, key=lambda r: -r['reduced']):
         print(f"  🔴 KNOT    {r['stem']:<40} reduced={r['reduced']}")
     for r in f:
-        print(f"  ❔ ERROR   {r['stem']:<40} {r['fehler']}")
+        print(f"  ❔ ERROR   {r['stem']:<40} {r['failures']}")
     if a.json:
         json.dump(res, open(a.json, 'w'), indent=1)
         print(f"→ {a.json}")

@@ -278,8 +278,8 @@ def alex_equal(pipeline_alex: str, knotinfo_alex: str) -> bool:
 
 def load_mandatory(path: Path) -> dict:
     d = json.loads(path.read_text())
-    pl = d["pflichtliste"]
-    D, A, H = pl["DIAGRAMM"], pl["ALGEBRA"], pl["HYPERBOLISCH"]
+    pl = d["mandatory_list"]
+    D, A, H = pl["DIAGRAM"], pl["ALGEBRA"], pl["HYPERBOLIC"]
     snappy_raw = d.get("raw_subprocess_outputs", {}).get("snappy", {}) or {}
     # genus: prefer 3_genus, else seifert_genus, else genus
     genus = A.get("3_genus") or A.get("seifert_genus") or A.get("genus")
@@ -787,7 +787,7 @@ def snappy_census_match(inv: dict, env_name: str = "snappy_env", tol: float = 1e
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("pflicht_json", type=Path)
+    ap.add_argument("mandatory_json", type=Path)
     ap.add_argument("--output", type=Path, default=None)
     ap.add_argument("--snappy-env", default="snappy_env",
                     help="conda env name for the snappy subprocess (default: snappy_env)")
@@ -801,7 +801,7 @@ def main():
     records = json.loads(KI_RECORDS.read_text())
     fremlin = json.loads(FREMLIN_CACHE.read_text()) if FREMLIN_CACHE.exists() else []
 
-    inv = load_mandatory(args.pflicht_json)
+    inv = load_mandatory(args.mandatory_json)
     ki = knotinfo_match(inv, idx, records)
     fr = fremlin_match(inv, ki, fremlin)
     if args.skip_snappy:
@@ -874,7 +874,7 @@ def main():
 
     result = {
         "name": inv["name"],
-        "source_pflicht_json": inv["_source"],
+        "source_mandatory_json": inv["_source"],
         "input_invariants": {
             "c": inv["c"], "det": inv["det"], "sig": inv["sig"],
             "fib": inv["fib"], "alt": inv["alt"], "amphi": inv["amphi"],
@@ -888,8 +888,8 @@ def main():
         "novelty_status": nov,
     }
 
-    out_path = args.output or args.pflicht_json.with_name(
-        args.pflicht_json.stem.replace("_pflicht_invarianten_complete", "") + "_crosscheck.json"
+    out_path = args.output or args.mandatory_json.with_name(
+        args.mandatory_json.stem.replace("_mandatory_invariants_complete", "") + "_crosscheck.json"
     )
     out_path.write_text(json.dumps(result, indent=2, ensure_ascii=False))
     print(f"{inv['name']:<22} | {summary}  →  {out_path.name}")

@@ -4,7 +4,7 @@
 # Authored in collaboration with Claude Code (Anthropic).
 # Contact: stanggassinger@stainlesssteel4u.de
 # Full license: LICENSE.txt at repository root (GNU General Public License v3 or later).
-"""homfly_gegenprobe.py — checks a freshly computed HOMFLY against the record
+"""homfly_crosscheck.py — checks a freshly computed HOMFLY against the record
 BEFORE it is written into it.
 
 Two witnesses, otherwise nothing is written (the same doctrine as
@@ -21,7 +21,7 @@ the same value — then there are three witnesses.
 import sys, os, json, argparse, cmath
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from homfly_eichung import parse_homfly, eval_homfly
+from homfly_calibration import parse_homfly, eval_homfly
 
 
 def det_from_homfly(homfly_str):
@@ -102,16 +102,16 @@ def record_det(d):
     consistency quartet carries the value (seen on 46 records on 23.08.: the too
     narrow searcher reported 'no det', it was not the mathematics that was red, Footgun 15).
     Order = reliability, first hit wins."""
-    pf = d.get('pflichtliste', {})
+    pf = d.get('mandatory_list', {})
     raw = d.get('raw_subprocess_outputs', {})
     cand_k = [
         pf.get('ALGEBRA', {}).get('determinant'),
-        pf.get('KLASSISCH', {}).get('determinant'),
+        pf.get('CLASSICAL', {}).get('determinant'),
         pf.get('ALGEBRA', {}).get('determinant_alexander'),
         pf.get('ALGEBRA', {}).get('determinant_sage'),
-        (d.get('konsistenz_quartett') or {}).get('det_value'),
+        (d.get('consistency_quartet') or {}).get('det_value'),
         raw.get('sage', {}).get('determinant'),
-        raw.get('seifert_zeuge', {}).get('determinant_seifert'),
+        raw.get('seifert_witness', {}).get('determinant_seifert'),
     ]
     for v in cand_k:
         if v is not None:
@@ -120,7 +120,7 @@ def record_det(d):
 
 
 def record_alexander(d):
-    pf = d.get('pflichtliste', {})
+    pf = d.get('mandatory_list', {})
     v = pf.get('ALGEBRA', {}).get('alexander_polynomial')
     if v:
         return v
@@ -134,22 +134,22 @@ def check_single(rec_file, homfly_str, tolerance=1e-6):
     alex = record_alexander(d)
     da = det_from_alexander(alex) if alex else None
     if dh is None:
-        return {'ok': False, 'grund': 'homfly_unparsbar'}
+        return {'ok': False, 'cause': 'homfly_unparsbar'}
     if det_rec is None:
-        return {'ok': False, 'grund': 'kein_det_im_record', 'det_homfly': dh}
+        return {'ok': False, 'cause': 'no_det_in_record', 'det_homfly': dh}
     ab = abs(dh - det_rec) / max(det_rec, 1)
     ok = ab < tolerance
     r = {'ok': ok, 'det_record': det_rec, 'det_homfly': dh, 'rel': ab,
-         'zeugen': 2}
+         'witnesses': 2}
     if da is not None:
         r['det_alexander'] = da
-        r['zeugen'] = 3 if da == det_rec else 2
+        r['witnesses'] = 3 if da == det_rec else 2
         if da != det_rec:
-            r['warnung'] = 'Alexander witness differs from the record det'
+            r['warning'] = 'Alexander witness differs from the record det'
     return r
 
 
-def selbsttest():
+def self_test():
     """Counter-case duty (Footgun 16): a checker that can only confirm
     is decoration. Four probes, two of them MUST be rejected."""
     ok = True
@@ -183,10 +183,10 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument('--wand', help='result JSON of homfly_wand.py')
     ap.add_argument('--out')
-    ap.add_argument('--selbsttest', action='store_true')
+    ap.add_argument('--self-test', action='store_true')
     a = ap.parse_args()
-    if a.selbsttest:
-        sys.exit(selbsttest())
+    if a.self_test:
+        sys.exit(self_test())
     erg = json.load(open(a.wand))
     good = bad = 0
     out_list = []
@@ -201,11 +201,11 @@ if __name__ == '__main__':
             good += 1
         else:
             bad += 1
-            print(f"  🔴 {e['name'][:40]:<40} {r.get('grund','det-mismatch')} "
+            print(f"  🔴 {e['name'][:40]:<40} {r.get('cause','det-mismatch')} "
                   f"rec={r.get('det_record')} homfly={r.get('det_homfly')}")
     print(f"\n{good} passed, {bad} failed "
           f"(of {len(out_list)} checked).")
-    three = sum(1 for r in out_list if r.get('zeugen') == 3)
+    three = sum(1 for r in out_list if r.get('witnesses') == 3)
     print(f"of these with THREE witnesses (det + Alexander + HOMFLY): {three}")
     if a.out:
         json.dump(out_list, open(a.out, 'w'), indent=1)

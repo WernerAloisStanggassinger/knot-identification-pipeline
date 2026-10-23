@@ -6,9 +6,9 @@
 # Full license: LICENSE.txt at repository root (GNU General Public License v3 or later).
 # Part of the Knot-Identification Pipeline.
 """
-pflicht_invarianten_extra.py
+mandatory_invariants_extra.py
 ============================
-Computes the 6 mandatory invariants that `pflicht_invarianten.py` did not
+Computes the 6 mandatory invariants that `mandatory_invariants.py` did not
 cover:
   1. khovanov_homology   — KnotJob -kb0
   2. length_spectrum_short — snappy with canonize() fallback (Discovery: the Dirichlet construction fails on the default triangulation)
@@ -17,7 +17,7 @@ cover:
   5. unknotting_number   — Sage brute-force braid with multiprocessing.Pool(12) (Discovery #60)
   6. kauffman_polynomial — Sage CHA Markov trace n≤4 (Discovery #55); for n>4 the KeyError is documented
 
-Loads an existing pflicht_invarianten.json, adds the 6 fields,
+Loads an existing mandatory_invariants.json, adds the 6 fields,
 writes to <name>_complete.json.
 
 Full hardware use:
@@ -309,7 +309,7 @@ def length_spectrum_via_canonize(pd_code, n_geos=10, timeout=300, isosig=None):
 
         out = {{'volume': float(M.volume()), 'isosig_used': bool(iso)}}
 
-        # --- Laengenspektrum: EIN Schema ---
+        # --- length spectrum: ONE schema ---
         def _lspec_eintrag(g):
             # ONE schema for the length spectrum (finding 2026-08-24). The fallback paths used
             # to write strings, the main path floats — whoever read 'length_real'
@@ -615,15 +615,15 @@ def _unknot_too_large(measure, value, limit, what):
     """Labelled rejection instead of a silent gap — an empty cell looks
     like a finding and is none (Disc #674/#680)."""
     return {'unknotting_number': None,
-            'unknotting_uebersprungen': True,
-            'grund': (f'{what} {value} > {limit} ({measure}). The brute force is '
+            'unknotting_skipped': True,
+            'cause': (f'{what} {value} > {limit} ({measure}). The brute force is '
                       f'exponential; measured over 474 records, '
                       f'unknotting_number was never obtained above c=64 or braid length 201. '
                       f'Above the threshold it is not computed '
                       f'but rejected — otherwise the run hits the '
                       f'memory wall (23.08.: 20 min, 9 earlyoom kills).'),
-            'schwelle': limit, 'gemessen': value,
-            'nachholbar_mit': f'{measure}=<larger> as environment variable'}
+            'threshold': limit, 'measured': value,
+            'can_be_filled_with': f'{measure}=<larger> as environment variable'}
 
 
 # 4. UNKNOTTING NUMBER — Sage brute-force braid (Discovery #60)
@@ -969,7 +969,7 @@ def main():
     # otherwise the multiprocessing.Pool workers survive as RAM-eating orphans.
     install_signal_killer()
     parser = argparse.ArgumentParser()
-    parser.add_argument('input_json', help='pflicht_invarianten.json to extend')
+    parser.add_argument('input_json', help='mandatory_invariants.json to extend')
     parser.add_argument('--output', default=None,
                         help='Output path (default: input with _complete suffix)')
     parser.add_argument('--max-unknotting-subset', type=int, default=4)
@@ -979,9 +979,9 @@ def main():
     # OOM cap (env override, backward compatible: unset -> the --processes arg stays).
     # The generated regina pool (line ~571: fromSignedGauss/homfly/jones/pd per t_step)
     # grew to 5-9GB/worker for densified high-c knots -> 12 workers = OOM.
-    # PFLICHT_EXTRA_PROCESSES throttles ONLY this multiprocessing stage (hard-rule-6
+    # MANDATORY_EXTRA_PROCESSES throttles ONLY this multiprocessing stage (hard-rule-6
     # exception = documented OOM path). Set by r3_reresolve.py via R3_PFLICHT_EXTRA.
-    _env_pe = os.environ.get("PFLICHT_EXTRA_PROCESSES")
+    _env_pe = os.environ.get("MANDATORY_EXTRA_PROCESSES")
     if _env_pe:
         args.processes = max(1, int(_env_pe))
 
@@ -991,9 +991,9 @@ def main():
     output = args.output or args.input_json.replace('.json', '_complete.json')
 
     # Input values
-    a    = report['pflichtliste']['ALGEBRA']
-    d    = report['pflichtliste']['DIAGRAMM']
-    h    = report['pflichtliste']['HYPERBOLISCH']
+    a    = report['mandatory_list']['ALGEBRA']
+    d    = report['mandatory_list']['DIAGRAM']
+    h    = report['mandatory_list']['HYPERBOLIC']
     sg   = report['signed_gauss']
     pd   = d.get('pd_code')
     if not pd:

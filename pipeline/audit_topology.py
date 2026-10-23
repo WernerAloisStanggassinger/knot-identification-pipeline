@@ -14,7 +14,7 @@
 #
 # Independent of the pipeline (no kinematic scanner), fast, parallel (full throttle).
 # Usage (base python with pyknotid + regina): python audit_topology.py [--workers 12]
-# The release imports only its functions (unknot_zweitmeinung.py); main() is the original audit run.
+# The release imports only its functions (unknot_second_opinion.py); main() is the original audit run.
 # ============================================================================
 import argparse, glob, json, math, os, re, sys, traceback
 import site_config

@@ -8,7 +8,7 @@
 """four_genus_verdict.py — the ONE verdict on the smooth 4-genus, pipeline + catch-up sweep.
 
 WHY THIS EXISTS (2026-07-23, right after the slice finding Disc #555):
-pflicht_invarianten.py set `smooth_4_genus = abs(tau)`. That is the same overclaim class
+mandatory_invariants.py set `smooth_4_genus = abs(tau)`. That is the same overclaim class
 as with the slice field: only g_4 >= |tau| holds (Ozsvath-Szabo), NOT equality. A knot with
 tau = 0 thus got g_4 = 0 -- i.e. implicitly "slice" -- through the back door.
 
@@ -108,7 +108,7 @@ def four_genus_verdict(a, slice_verdict_value=None):
 
 
 def apply_to_algebra(a, slice_verdict_value=None, name=None, identity=None):
-    """With `name`/`identitaet`, a RECEIPTED entry from beweis_register.json wins first
+    """With `name`/`identity`, a RECEIPTED entry from proof_register.json wins first
     (key order: see slice_verdict.beweis_eintrag)."""
     from slice_verdict import proof_entry
     e = proof_entry(name, identity) if (name or identity) else None
@@ -116,8 +116,8 @@ def apply_to_algebra(a, slice_verdict_value=None, name=None, identity=None):
     if e is not None and 'smooth_4_genus' in e:
         a['smooth_4_genus'] = e['smooth_4_genus']
         a['smooth_4_genus_interval'] = [e['smooth_4_genus'], e['smooth_4_genus']]
-        a['smooth_4_genus_note'] = 'RECEIPTED (beweis_register.json): ' + ' '.join(e['beweis'])
-        a['smooth_4_genus_method'] = 'beweis_register.json, receipted on %s' % e.get('belegt_am', '?')
+        a['smooth_4_genus_note'] = 'RECEIPTED (proof_register.json): ' + ' '.join(e['proof'])
+        a['smooth_4_genus_method'] = 'proof_register.json, receipted on %s' % e.get('receipted_on', '?')
         if 'topological_4_genus' in e:
             a['topological_4_genus'] = e['topological_4_genus']
             a['topological_4_genus_note'] = a['smooth_4_genus_note']

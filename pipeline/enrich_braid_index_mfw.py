@@ -8,7 +8,7 @@
 """
 enrich_braid_index_mfw.py
 =========================
-Standalone enrichment: reads an existing pflicht_invarianten_*.json
+Standalone enrichment: reads an existing mandatory_invariants_*.json
 and adds the Morton-Franks-Williams lower bound for braid_index(K) to the
 DIAGRAMM block, computed from the homfly_polynomial already present.
 
@@ -30,12 +30,12 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from pflicht_invarianten_extra import mfw_braid_index_bound
+from mandatory_invariants_extra import mfw_braid_index_bound
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('json_path', help='pflicht_invarianten_*.json')
+    ap.add_argument('json_path', help='mandatory_invariants_*.json')
     ap.add_argument('--in-place', action='store_true',
                     help='Write the enrichment directly into the input file')
     args = ap.parse_args()
@@ -44,8 +44,8 @@ def main():
     with p.open() as f:
         report = json.load(f)
 
-    a = report.get('pflichtliste', {}).get('ALGEBRA', {})
-    d = report.get('pflichtliste', {}).get('DIAGRAMM', {})
+    a = report.get('mandatory_list', {}).get('ALGEBRA', {})
+    d = report.get('mandatory_list', {}).get('DIAGRAM', {})
     homfly = a.get('homfly_polynomial')
     n_strands = d.get('braid_n_strands') or d.get('braid_index')
 

@@ -8,7 +8,7 @@
 """
 enrich_optional_invariants.py
 =============================
-Enriches a pflicht_invarianten_*.json with optional invariants from
+Enriches a mandatory_invariants_*.json with optional invariants from
 optionale_invarianten.txt. Five waves:
 
   Wave 1 (--phase trivial): derivable from existing mandatory fields,
@@ -31,7 +31,7 @@ optionale_invarianten.txt. Five waves:
 Default: all waves; can be reduced with --skip-{sage,snappy,kauffman,bridge}.
 
 Writes into the NEW top-level block 'optional_invariants' in the JSON
-(NOT into pflichtliste, so that the mandatory/optional separation stays clear).
+(NOT into mandatory_list, so that the mandatory/optional separation stays clear).
 
 Usage:
   python enrich_optional_invariants.py <pflicht_*.json> [--in-place]
@@ -70,9 +70,9 @@ SEAL_PRELUDE = (
 # ──────────────────────────────────────────────
 
 def derive_trivial_invariants(report):
-    a = report['pflichtliste']['ALGEBRA']
-    d = report['pflichtliste']['DIAGRAMM']
-    h = report['pflichtliste']['HYPERBOLISCH']
+    a = report['mandatory_list']['ALGEBRA']
+    d = report['mandatory_list']['DIAGRAM']
+    h = report['mandatory_list']['HYPERBOLIC']
     raw = report.get('raw_subprocess_outputs', {})
     sn  = raw.get('snappy', {})
     out = {}
@@ -456,8 +456,8 @@ def derive_meridional_rank_and_bridge(report, optional):
     if not isinstance(mr_upper, int):
         return {'meridional_rank_note': 'no knot_group_generators_simplified available (wave 2 Sage skipped or failed)'}
 
-    d = report['pflichtliste'].get('DIAGRAMM', {})
-    a = report['pflichtliste'].get('ALGEBRA', {})
+    d = report['mandatory_list'].get('DIAGRAM', {})
+    a = report['mandatory_list'].get('ALGEBRA', {})
     c_min = d.get('crossing_number_min', 999) or 999
     det_K = a.get('determinant', 1) or 1
     # 🔴 CORRECTION 2026-08-10 (finding 15, sweep of the same cause):
@@ -536,7 +536,7 @@ def derive_meridional_rank_and_bridge(report, optional):
         f'Boileau-Zieschang b>=mr>={out["meridional_rank_lower_bound"]})'
     )
     if inconsistency_note:
-        out['bridge_index_inconsistency_with_pflicht_extra'] = inconsistency_note
+        out['bridge_index_inconsistency_with_mandatory_extra'] = inconsistency_note
 
     return out
 
@@ -578,11 +578,11 @@ def main():
     if not args.skip_sage:
         print('\n=== Wave 2: Sage extras ===')
         t0 = time.time()
-        bw = report['pflichtliste']['DIAGRAMM'].get('braid_word')
+        bw = report['mandatory_list']['DIAGRAM'].get('braid_word')
         if isinstance(bw, str):
             try: bw = json.loads(bw)
             except: bw = None
-        n_str = report['pflichtliste']['DIAGRAMM'].get('braid_n_strands')
+        n_str = report['mandatory_list']['DIAGRAM'].get('braid_n_strands')
         if bw and n_str:
             sage_out = sage_extras(bw, n_str)
             print(f'  {time.time()-t0:.1f}s, keys: {sorted(sage_out.keys())}')
@@ -596,7 +596,7 @@ def main():
     if not args.skip_snappy:
         print('\n=== Wave 3: snappy extras ===')
         t0 = time.time()
-        iso = report['pflichtliste']['HYPERBOLISCH'].get('canonical_retriangulation')
+        iso = report['mandatory_list']['HYPERBOLIC'].get('canonical_retriangulation')
         if iso:
             sn_out = snappy_extras(iso)
             print(f'  {time.time()-t0:.1f}s, keys: {sorted(sn_out.keys())}')
@@ -616,10 +616,10 @@ def main():
         # for older JSONs" (Disc #114b), but the implementation
         # was not — the compute was unconditional, only the write was
         # protected. For c=24+ chiral knots without a CHA hit,
-        # first pflicht_invarianten_extra called knotpy.kauffman → 600s timeout,
+        # first mandatory_invariants_extra called knotpy.kauffman → 600s timeout,
         # then this stage AGAIN → another 600s = 20+ min hang
         # (W32 run 6 kf376, 2026-05-18). Disc #218 documents the fix.
-        alg = report['pflichtliste'].get('ALGEBRA', {})
+        alg = report['mandatory_list'].get('ALGEBRA', {})
         kauff_already   = alg.get('kauffman_polynomial')
         knotpy_err_prev = str(alg.get('kauffman_polynomial_knotpy_error') or '')
         if kauff_already:
@@ -635,7 +635,7 @@ def main():
                 f'pflicht_extra knotpy: {knotpy_err_prev}')
         else:
             t0 = time.time()
-            pd_code = report['pflichtliste']['DIAGRAMM'].get('pd_code')
+            pd_code = report['mandatory_list']['DIAGRAM'].get('pd_code')
             if pd_code:
                 kf_out = kauffman_via_knotpy(pd_code)
                 print(f'  {time.time()-t0:.1f}s, keys: {sorted(kf_out.keys())}')
@@ -651,7 +651,7 @@ def main():
                           f'amphi_symm_check={kf_out.get("kauffman_polynomial_amphi_symmetry_check")}')
 
                     # Discovery #114b: also fill the mandatory slot if it is still
-                    # empty. pflicht_invarianten_extra.py has had its own knotpy
+                    # empty. mandatory_invariants_extra.py has had its own knotpy
                     # fallback since Discovery #114a, but wave 4 is an
                     # additional safeguard (idempotent for older JSONs).
                     if not alg.get('kauffman_polynomial'):
@@ -666,7 +666,7 @@ def main():
                             'enrich_optional_invariants wave 4 (Discovery #114b): '
                             'mandatory slot was empty, filled with the knotpy value.'
                         )
-                        print(f'  Discovery #114b: mandatory slot pflichtliste.ALGEBRA.kauffman_polynomial filled as well.')
+                        print(f'  Discovery #114b: mandatory slot mandatory_list.ALGEBRA.kauffman_polynomial filled as well.')
             else:
                 print('  skipped (no pd_code).')
 

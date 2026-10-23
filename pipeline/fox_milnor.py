@@ -99,7 +99,7 @@ def fox_milnor(alex_str):
             continue
         k = q.as_expr()
         mult[k] = mult.get(k, 0) + e
-    details = {'faktoren': {str(k): v for k, v in mult.items()}}
+    details = {'factors': {str(k): v for k, v in mult.items()}}
     for k, e in mult.items():
         q = sp.Poly(k, t)
         qs = _reciprocal(q).as_expr()

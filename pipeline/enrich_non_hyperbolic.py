@@ -335,21 +335,21 @@ def _robust_hyperbolic(pd_code, n_tries=40):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("pflicht_json", type=Path)
+    ap.add_argument("mandatory_json", type=Path)
     ap.add_argument("--in-place", action="store_true",
                     help="Patch directly into the input file.")
     ap.add_argument("--vol-threshold", type=float, default=1e-3,
                     help="vol < threshold → non-hyperbolic (default 1e-3).")
     args = ap.parse_args()
 
-    if not args.pflicht_json.exists():
-        sys.exit(f"ERROR: {args.pflicht_json} missing")
+    if not args.mandatory_json.exists():
+        sys.exit(f"ERROR: {args.mandatory_json} missing")
 
-    d = json.loads(args.pflicht_json.read_text())
-    pl = d.get("pflichtliste", {})
+    d = json.loads(args.mandatory_json.read_text())
+    pl = d.get("mandatory_list", {})
     alg = pl.get("ALGEBRA", {})
-    diag = pl.get("DIAGRAMM", {})
-    hyp = pl.get("HYPERBOLISCH", {})
+    diag = pl.get("DIAGRAM", {})
+    hyp = pl.get("HYPERBOLIC", {})
 
     alex_str = alg.get("alexander_polynomial")
     vol      = hyp.get("hyperbolic_volume")
@@ -358,7 +358,7 @@ def main():
     s_inv    = alg.get("s_invariant")
     genus    = alg.get("genus")
     fibered  = alg.get("fibered")
-    name     = d.get("name", args.pflicht_json.stem)
+    name     = d.get("name", args.mandatory_json.stem)
 
     print(f"[enrich_non_hyp] {name}: vol={vol}, det={det}, c={c}")
 
@@ -506,8 +506,8 @@ def main():
     # In-place patch
     d["non_hyperbolic_classification"] = result
     if args.in_place:
-        args.pflicht_json.write_text(json.dumps(d, indent=2, ensure_ascii=False, default=str))
-        print(f"[enrich_non_hyp]   in-place patch -> {args.pflicht_json}")
+        args.mandatory_json.write_text(json.dumps(d, indent=2, ensure_ascii=False, default=str))
+        print(f"[enrich_non_hyp]   in-place patch -> {args.mandatory_json}")
     else:
         print(json.dumps(result, indent=2, default=str))
 

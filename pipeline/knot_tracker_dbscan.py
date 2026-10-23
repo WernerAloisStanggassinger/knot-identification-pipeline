@@ -604,7 +604,7 @@ if __name__ == '__main__':
     parser.add_argument('--consensus-threshold', type=float, default=0.95,
                         help='Threshold (default 0.95) from which a consensus vote counts as '
                              '"stable" (reporting only).')
-    parser.add_argument('--klassisch', action='store_true',
+    parser.add_argument('--classical', action='store_true',
                         help='old route: load everything at once (Disc #703). '
                              'Kept only for the counter-case — at 137 million '
                              'crossings it needs over 20 GB and gets killed.')
@@ -612,7 +612,7 @@ if __name__ == '__main__':
                         help='Batch size for the streaming route (default 4 million).')
     args = parser.parse_args()
 
-    if args.klassisch:
+    if args.classical:
         track(input_parquet=args.input,
               output_path=args.output,
               eps=args.eps,

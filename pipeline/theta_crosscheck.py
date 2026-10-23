@@ -19,7 +19,7 @@ Background (Discovery #133, roadmap step 4 "Dror's QR-code method"):
   step 4b/web) match against a small Theta DB.
 
 Workflow (stage 8a):
-  1. Load the pflicht JSON, extract the PD code from pflichtliste.DIAGRAMM.pd_code
+  1. Load the pflicht JSON, extract the PD code from mandatory_list.DIAGRAMM.pd_code
      (or the top-level pd_list_str).
   2. Convert PD -> (Cs, phi) via pd_to_theta_input.pd_to_cs_phi.
   3. Call sage in a sage_stable subprocess, which loads Theta.sage and computes
@@ -59,7 +59,7 @@ def _parse_pd(mandatory: dict) -> list:
 
     Searches in this order:
       1. pd_list_str (top level, e.g. '[(1, 5, 2, 4), (3, 1, 4, 6), ...]')
-      2. pflichtliste.DIAGRAMM.pd_code as a string 'PD[X[1, 5, 2, 4], X[3,...], ...]'
+      2. mandatory_list.DIAGRAMM.pd_code as a string 'PD[X[1, 5, 2, 4], X[3,...], ...]'
     """
     pd_list_str = mandatory.get("pd_list_str", "")
     if pd_list_str:
@@ -68,7 +68,7 @@ def _parse_pd(mandatory: dict) -> list:
             return [[int(x) for x in tup] for tup in pd_list]
         except Exception:
             pass
-    diag = mandatory.get("pflichtliste", {}).get("DIAGRAMM", {})
+    diag = mandatory.get("mandatory_list", {}).get("DIAGRAM", {})
     pd_code = diag.get("pd_code")
     if pd_code:
         # Parse "PD[X[1, 5, 2, 4], X[3, 1, 4, 6], X[5, 3, 6, 2]]"
@@ -277,17 +277,17 @@ def run_theta_sage(cs_rows, phi, env_name: str = "sage_stable",
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("pflicht_json", type=Path)
+    ap.add_argument("mandatory_json", type=Path)
     ap.add_argument("--output", type=Path, default=None)
     ap.add_argument("--sage-env", default="sage_stable")
     ap.add_argument("--timeout", type=int, default=600,
                     help="Timeout for the Theta subprocess in seconds")
     args = ap.parse_args()
 
-    if not args.pflicht_json.exists():
-        raise SystemExit(f"Pflicht JSON missing: {args.pflicht_json}")
-    mandatory = json.loads(args.pflicht_json.read_text())
-    name = mandatory.get("name", args.pflicht_json.stem)
+    if not args.mandatory_json.exists():
+        raise SystemExit(f"Pflicht JSON missing: {args.mandatory_json}")
+    mandatory = json.loads(args.mandatory_json.read_text())
+    name = mandatory.get("name", args.mandatory_json.stem)
 
     # 1. Extract PD
     pd_list = _parse_pd(mandatory)
@@ -316,7 +316,7 @@ def main():
         result.setdefault("theta_norm_str", "<not_computable>")
 
     # 4. Alexander consistency with the pipeline pflicht (optional, informative).
-    alex_pipeline = mandatory.get("pflichtliste", {}).get("ALGEBRA", {}).get(
+    alex_pipeline = mandatory.get("mandatory_list", {}).get("ALGEBRA", {}).get(
         "alexander_polynomial", ""
     )
     alex_theta = result.get("delta1_str", "")
@@ -335,7 +335,7 @@ def main():
 
     out = {
         "name": name,
-        "source_pflicht_json": str(args.pflicht_json),
+        "source_mandatory_json": str(args.mandatory_json),
         "pd_input": pd_list,
         "theta_input": {
             "cs_rows": [list(r) for r in cs_rows],
@@ -358,7 +358,7 @@ def main():
             "string_equal_after_normalize": _alex_match(alex_pipeline, alex_theta),
         },
         "determinant_gate": {
-            "pflicht_determinant": mandatory_det,
+            "mandatory_determinant": mandatory_det,
             "theta_determinant": theta_det,
             "match": det_gate_ok,
             "note": ("HARD (Disc #533): |Delta1(-1)| == pflicht quartet det. "
@@ -368,8 +368,8 @@ def main():
         "tool_version": "Bar-Natan/van der Veen Theta.sage (external_tools/bar_natan_theta)",
     }
 
-    out_path = args.output or args.pflicht_json.with_name(
-        args.pflicht_json.stem.replace("_pflicht_invarianten_complete", "")
+    out_path = args.output or args.mandatory_json.with_name(
+        args.mandatory_json.stem.replace("_mandatory_invariants_complete", "")
         + "_theta.json"
     )
     out_path.write_text(json.dumps(out, indent=2, ensure_ascii=False))
@@ -406,10 +406,10 @@ def _alex_match(pipeline_alex: str, theta_delta1: str) -> bool:
 
 def _mandatory_determinant(mandatory: dict):
     """Quartet det from pflicht (konsistenz_quartett preferred, otherwise ALGEBRA)."""
-    dv = mandatory.get("konsistenz_quartett", {}).get("det_value")
+    dv = mandatory.get("consistency_quartet", {}).get("det_value")
     if isinstance(dv, int):
         return dv
-    d = mandatory.get("pflichtliste", {}).get("ALGEBRA", {}).get("determinant")
+    d = mandatory.get("mandatory_list", {}).get("ALGEBRA", {}).get("determinant")
     return d if isinstance(d, int) else None
 
 

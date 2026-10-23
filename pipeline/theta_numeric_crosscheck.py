@@ -47,7 +47,7 @@ def _parse_pd(mandatory: dict) -> list:
             return [[int(x) for x in tup] for tup in pd_list]
         except Exception:
             pass
-    diag = mandatory.get("pflichtliste", {}).get("DIAGRAMM", {})
+    diag = mandatory.get("mandatory_list", {}).get("DIAGRAM", {})
     pd_code = diag.get("pd_code")
     if pd_code:
         crossings = re.findall(r"X\s*\[\s*([\d\s,]+?)\s*\]", str(pd_code))
@@ -133,15 +133,15 @@ def run_numeric_theta(cs_rows, phi, t1_str="22/7", t2_str="21/13",
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("pflicht_json", help="Path to the pflicht_invarianten[_complete].json")
+    ap.add_argument("mandatory_json", help="Path to the mandatory_invariants[_complete].json")
     ap.add_argument("--output", default=None)
     ap.add_argument("--t1", default="22/7")
     ap.add_argument("--t2", default="21/13")
     ap.add_argument("--timeout", type=int, default=600)
     args = ap.parse_args()
 
-    mandatory = json.loads(Path(args.pflicht_json).read_text())
-    name = mandatory.get("name") or Path(args.pflicht_json).stem.split("_")[0]
+    mandatory = json.loads(Path(args.mandatory_json).read_text())
+    name = mandatory.get("name") or Path(args.mandatory_json).stem.split("_")[0]
     pd_list = _parse_pd(mandatory)
     cs_rows, phi = pd_to_cs_phi(pd_list)
 
@@ -153,12 +153,12 @@ def main():
 
     res = run_numeric_theta(cs_rows, phi, args.t1, args.t2, args.timeout)
 
-    out_json = args.output or args.pflicht_json.replace(".json", "_theta_numeric.json")
+    out_json = args.output or args.mandatory_json.replace(".json", "_theta_numeric.json")
     # res may carry its own 't1'/'t2' keys — avoid the clash
     res_clean = {k: v for k, v in res.items() if k not in ("t1", "t2")}
     record = dict(
         name=name,
-        source_pflicht_json=str(args.pflicht_json),
+        source_mandatory_json=str(args.mandatory_json),
         pd_crossings=len(pd_list),
         pd_input=pd_list,
         cs_rows=[list(map(int, r)) for r in cs_rows],

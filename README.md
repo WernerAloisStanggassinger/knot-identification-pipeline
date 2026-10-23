@@ -43,13 +43,22 @@ cd my_knot/                                   # a folder with exactly one .fseri
 bash /path/to/knot-identification-pipeline/pipeline/pipeline_run.sh
 ```
 `examples/trefoil.fseries` is a small example curve. On the authors' machine (RTX 3070) a typical knot takes about six minutes.
-The main result is `<knot>_pflicht_invarianten_complete.json` ("mandatory invariants") plus `<knot>_summary.md`.
+The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summary.md`.
 
 ## How this release relates to the code that produced the results
-- Every file in `pipeline/` was translated from German: comments, docstrings and message texts only. Identifiers, JSON field
-  names and data strings stayed as they were, so **many field names and some output texts are German** (for example
-  `pflicht_invarianten` = mandatory invariants, `beweis` = proof, `fehler` = error). Translating them would change the output
-  format, so it is left for a later version.
+- Every file in `pipeline/` was translated from German in two steps. 22.10.2026: comments, docstrings and messages. 23.10.2026:
+  also identifiers, module and file names, command-line options, environment variables, JSON field names, category labels and
+  the remaining texts. `tools/map_equivalence.py` proves for every file that the translated version is the program proven
+  equivalent to the originals on 22.10.2026 (git tag `proven-equivalent`, see the next points) up to one consistent renaming,
+  and writes that renaming to `tools/translation_table.json` (identifiers, keys, file renames, free texts). The gate was
+  counter-tested with 22 deliberate changes it must catch or pass; the built-in self-tests of six modules give the same
+  results before and after (45 of 45 checks).
+- **Results the authors published before this release (knot corpus, website downloads, Zenodo deposits) use the German
+  names.** `tools/translation_table.json` maps every name this code reads or writes, for example `pflichtliste` → `mandatory_list`,
+  `pflicht_invarianten_complete.json` → `mandatory_invariants_complete.json`, `beweis` → `proof`, `grund` → `cause`. In
+  `pipeline/proof_register.json` additionally `belegt_von` → `receipted_by` and `_doku` → `_doc`.
+- A few names stay German on purpose because they name things outside the code: the authors' folder names
+  (`erzeugte_knoten/`, `bekannt/`), the material `Edelstahl` in the Blender template, and historical file names.
 - All absolute paths moved into `pipeline/site_config.py`. With `KNOT_PIPELINE_PROFILE=authors` every location is the authors' own.
 - `tools/strict_equivalence.py` and `tools/path_equivalence.py` prove, file by file, that each released module is the same program
   as the one used in the authors' runs (abstract syntax trees compared after the allowed changes; both gates counter-tested with

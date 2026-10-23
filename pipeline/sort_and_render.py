@@ -71,7 +71,7 @@ def is_knotinfo_folder(name: str) -> bool:
 
 def find_mandatory_complete(d: Path) -> Path | None:
     """Find <stem>_pflicht_invarianten*_complete.json in folder."""
-    candidates = sorted(d.glob('*_pflicht_invarianten*_complete.json'))
+    candidates = sorted(d.glob('*_mandatory_invariants*_complete.json'))
     return candidates[0] if candidates else None
 
 
@@ -97,9 +97,9 @@ def is_failure(d: Path, mand: Path | None, pdata: dict | None) -> tuple[bool, st
     """
     if mand is None or pdata is None:
         return True, 'type_a (no _complete.json)'
-    pl = pdata.get('pflichtliste', {})
+    pl = pdata.get('mandatory_list', {})
     alg = pl.get('ALGEBRA', {}) or {}
-    hyp = pl.get('HYPERBOLISCH', {}) or {}
+    hyp = pl.get('HYPERBOLIC', {}) or {}
     vals = [
         alg.get('signature'),
         hyp.get('symmetry_group'),
@@ -129,10 +129,10 @@ def get_knotinfo_match(cdata: dict | None) -> str | None:
 
 def fingerprint_from_mandatory(pdata: dict) -> tuple[int|None, int|None, str|None, str|None]:
     """Compute (c, det, sym, chir) for cluster-fingerprint."""
-    pl = pdata.get('pflichtliste', {})
-    diag = pl.get('DIAGRAMM', {}) or {}
+    pl = pdata.get('mandatory_list', {})
+    diag = pl.get('DIAGRAM', {}) or {}
     alg = pl.get('ALGEBRA', {}) or {}
-    hyp = pl.get('HYPERBOLISCH', {}) or {}
+    hyp = pl.get('HYPERBOLIC', {}) or {}
     c = diag.get('crossing_number_min')
     det = alg.get('determinant')
     sym_full = hyp.get('symmetry_group') or ''
@@ -186,9 +186,9 @@ def load_theta_numeric(folder: Path, stem: str) -> str | None:
 
 def theta_match(folder_a: Path, folder_b: Path) -> bool:
     """True if both folders have theta values AND they are identical."""
-    stem_a = re.sub(r'_pflicht_invarianten.*_complete\.json$', '',
+    stem_a = re.sub('_mandatory_invariants.*_complete\\.json$', '',
                     find_mandatory_complete(folder_a).name) if find_mandatory_complete(folder_a) else folder_a.name
-    stem_b = re.sub(r'_pflicht_invarianten.*_complete\.json$', '',
+    stem_b = re.sub('_mandatory_invariants.*_complete\\.json$', '',
                     find_mandatory_complete(folder_b).name) if find_mandatory_complete(folder_b) else folder_b.name
     ta = load_theta_numeric(folder_a, stem_a)
     tb = load_theta_numeric(folder_b, stem_b)
@@ -331,7 +331,7 @@ def determine_target(folder: Path, dry_run: bool = False) -> tuple[str, Path, st
         return 'failure', target, reason
 
     # KnotInfo check
-    stem_match = re.match(r'(.+?)_pflicht_invarianten.*_complete\.json$', mand.name)
+    stem_match = re.match('(.+?)_mandatory_invariants.*_complete\\.json$', mand.name)
     stem = stem_match.group(1) if stem_match else folder.name
     cdata = load_crosscheck_data(folder, stem)
     ki_id = get_knotinfo_match(cdata)

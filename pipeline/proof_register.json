@@ -1,7 +1,7 @@
 {
- "_doku": [
+ "_doc": [
   "Receipt-bearing overrides. ONLY for cases where a PROOF exists that the pipeline",
-  "cannot carry out algorithmically. Every entry MUST carry 'beweis' (proof) -- an entry without",
+  "cannot carry out algorithmically. Every entry MUST carry 'proof' -- an entry without",
   "proof text is ignored by slice_verdict/four_genus_verdict. This is the only place",
   "where a verdict may override the computed bounds; it is deliberately small,",
   "hand-maintained and readable, so that it does not become a back door for claims.",
@@ -17,7 +17,7 @@
   "smooth_4_genus": 0,
   "topological_4_genus": 0,
   "is_amphicheiral": true,
-  "beweis": [
+  "proof": [
    "Identity (Disc #142/#557, anchor 1): knots-of-love = 3_1 # 3_1 # 3_1 # m3_1 # m3_1 # m3_1 (three right- and three left-handed trefoils = square knot three times; handedness corrected 2026-07-26, before that this said six times 3_1 -- det=3^6 and Alexander (t^2-t+1)^6 are chirality-blind, the proof stands three lines further down),",
    "Alexander (t^2-t+1)^6 bit-exact, det 729 = 3^6, genus 6, not hyperbolic (vol ~ 1.5e-5).",
    "HANDEDNESS (2026-07-23, Disc #557): Jones is multiplicative under connected sum AND",
@@ -34,16 +34,16 @@
    "Cross-check: all necessary slice conditions were satisfied anyway (sigma=tau=s=Arf=0,",
    "det=729=27^2) -- the proof explains WHY instead of presuming it."
   ],
-  "belegt_am": "2026-07-23",
-  "belegt_von": "Werner Alois Stanggassinger + Claude Code",
-  "quelle_oeffentlich": "Own result: the knot is K # m(K) with K = 3₁#3₁#3₁ (handedness fixed by Jones/HOMFLY factorisation against our own trefoil). K # m(K) is always a ribbon knot ⇒ slice ⇒ g₄ = 0."
+  "receipted_on": "2026-07-23",
+  "receipted_by": "Werner Alois Stanggassinger + Claude Code",
+  "source_public": "Own result: the knot is K # m(K) with K = 3₁#3₁#3₁ (handedness fixed by Jones/HOMFLY factorisation against our own trefoil). K # m(K) is always a ribbon knot ⇒ slice ⇒ g₄ = 0."
  },
  "12a_1019": {
   "slice": true,
   "ribbon": true,
   "smooth_4_genus": 0,
   "topological_4_genus": 0,
-  "beweis": [
+  "proof": [
    "IDENTITY COMPUTED BLIND: 12a_1019 comes from our own .fseries chain (crosscheck_knotinfo), independently of the source cited here. What was looked up is a PROPERTY of an already identified knot -- hard rule 1 not violated.",
    "RIBBON RECEIPT (literature, fetched 2026-08-19): Christoph Lamm, 'The search for non-symmetric ribbon knots', arXiv:1710.06909v2 (5 January 2019), Table 1: 'a list of all 137 prime ribbon knots with crossing numbers 11 or 12'. Receipt PDF: konversationen/slice_stand_20260818/. 12a1019 is in this list.",
    "CONSTRUCTION (Lamm, appendix page 20, det=361 block): 12a1019 is the SYMMETRIC UNION with partial knot K_+- = 7_6 and axis parameters (1, -1).",
@@ -53,17 +53,17 @@
    "The necessary conditions were all satisfied anyway (tau = s = sigma = Arf = 0, det = 361 = 19^2) -- the receipt explains WHY instead of leaving it open.",
    "LIMIT, explicitly: this is a LITERATURE RECEIPT for a property of a blindly identified knot, NOT a disc we built ourselves. As long as we have not constructed and checked the band presentation by our own hand, Lamm is the source."
   ],
-  "belegt_am": "2026-08-19",
-  "belegt_von": "Werner Alois Stanggassinger + Claude Code",
-  "quelle_oeffentlich": "C. Lamm, The search for non-symmetric ribbon knots, arXiv:1710.06909v2 (2019), Table 1 and appendix p. 20: symmetric union with partial knot 7₆ and axis parameters (1, −1). Ribbon ⇒ slice ⇒ g₄ = 0. Cross-check: det(7₆)² = 19² = 361, matching our independently computed determinant.",
-  "quelle_url": "https://arxiv.org/abs/1710.06909"
+  "receipted_on": "2026-08-19",
+  "receipted_by": "Werner Alois Stanggassinger + Claude Code",
+  "source_public": "C. Lamm, The search for non-symmetric ribbon knots, arXiv:1710.06909v2 (2019), Table 1 and appendix p. 20: symmetric union with partial knot 7₆ and axis parameters (1, −1). Ribbon ⇒ slice ⇒ g₄ = 0. Cross-check: det(7₆)² = 19² = 361, matching our independently computed determinant.",
+  "public_source_url": "https://arxiv.org/abs/1710.06909"
  },
  "12n_706": {
   "slice": true,
   "ribbon": true,
   "smooth_4_genus": 0,
   "topological_4_genus": 0,
-  "beweis": [
+  "proof": [
    "IDENTITY COMPUTED BLIND: 12n_706 comes from our own .fseries chain (crosscheck_knotinfo), independently of the source cited here. What was looked up is a PROPERTY of an already identified knot -- hard rule 1 not violated.",
    "RIBBON RECEIPT (literature, fetched 2026-08-19): Christoph Lamm, 'The search for non-symmetric ribbon knots', arXiv:1710.06909v2 (5 January 2019), Table 1: 'a list of all 137 prime ribbon knots with crossing numbers 11 or 12'. Receipt PDF: konversationen/slice_stand_20260818/. 12n706 is in this list.",
    "CONSTRUCTION (Lamm, appendix page 18, det=49 block): 12n706 is the SYMMETRIC UNION with partial knot K_+- = 7_1 and axis parameters (1, -1).",
@@ -73,17 +73,17 @@
    "The necessary conditions were all satisfied anyway (tau = s = sigma = Arf = 0, det = 49 = 7^2) -- the receipt explains WHY instead of leaving it open.",
    "LIMIT, explicitly: this is a LITERATURE RECEIPT for a property of a blindly identified knot, NOT a disc we built ourselves. As long as we have not constructed and checked the band presentation by our own hand, Lamm is the source."
   ],
-  "belegt_am": "2026-08-19",
-  "belegt_von": "Werner Alois Stanggassinger + Claude Code",
-  "quelle_oeffentlich": "C. Lamm, The search for non-symmetric ribbon knots, arXiv:1710.06909v2 (2019), Table 1 and appendix p. 18: symmetric union with partial knot 7₁ and axis parameters (1, −1). Ribbon ⇒ slice ⇒ g₄ = 0. Cross-check: det(7₁)² = 7² = 49, matching our independently computed determinant.",
-  "quelle_url": "https://arxiv.org/abs/1710.06909"
+  "receipted_on": "2026-08-19",
+  "receipted_by": "Werner Alois Stanggassinger + Claude Code",
+  "source_public": "C. Lamm, The search for non-symmetric ribbon knots, arXiv:1710.06909v2 (2019), Table 1 and appendix p. 18: symmetric union with partial knot 7₁ and axis parameters (1, −1). Ribbon ⇒ slice ⇒ g₄ = 0. Cross-check: det(7₁)² = 7² = 49, matching our independently computed determinant.",
+  "public_source_url": "https://arxiv.org/abs/1710.06909"
  },
  "mirror": {
   "slice": true,
   "ribbon": true,
   "smooth_4_genus": 0,
   "topological_4_genus": 0,
-  "beweis": [
+  "proof": [
    "IDENTITY COMPUTED BLIND: the record 'mirror' was determined from our own .fseries as 5_2 # m5_2 (crosscheck_knotinfo, distinct_knot_id), independently of everything here.",
    "STRUCTURAL ARGUMENT (no literature receipt needed): for INVERTIBLE K, K # m(K) is always a ribbon knot -- one folds the knotted band back onto itself at a plane, the fold IS the ribbon disc. For invertible K, m(K) is the concordance inverse of K, so K # m(K) represents the zero element.",
    "INVERTIBILITY OF 5_2 COMPUTED (2026-08-19, snappy, gnottheorie_env): symmetry_group() = Z/2 + Z/2, is_invertible_knot() = True, is_full_group() = True (so COMPLETELY determined, not a partial result), is_amphicheiral() = False (5_2 is chiral, so m5_2 really is a different summand).",
@@ -92,8 +92,8 @@
    "CONSEQUENCE: ribbon => slice => g_4 = 0, smooth AND topological. All necessary conditions were satisfied anyway (tau=s=sigma=Arf=0, det=49=7^2) -- the argument explains WHY.",
    "LIMIT: this is a STRUCTURAL argument from the construction, not a band presentation we built and checked explicitly. It is therefore better receipted than the Lamm cases (no outside receipt needed), but it does not replace the constructive branch."
   ],
-  "quelle_oeffentlich": "Own result: the knot is K # m(K) with K = 5₂. We computed that 5₂ is invertible (SnapPy symmetry group Z/2+Z/2, full group), so m(5₂) is its concordance inverse and K # m(K) is a ribbon knot ⇒ slice ⇒ g₄ = 0. Handedness is fixed by the signature, which is chirality-sensitive: σ(5₂) = −2 and σ(m5₂) = +2 sum to 0, matching the record, whereas two same-handed summands would give −4.",
-  "belegt_am": "2026-08-19",
-  "belegt_von": "Werner Alois Stanggassinger + Claude Code"
+  "source_public": "Own result: the knot is K # m(K) with K = 5₂. We computed that 5₂ is invertible (SnapPy symmetry group Z/2+Z/2, full group), so m(5₂) is its concordance inverse and K # m(K) is a ribbon knot ⇒ slice ⇒ g₄ = 0. Handedness is fixed by the signature, which is chirality-sensitive: σ(5₂) = −2 and σ(m5₂) = +2 sum to 0, matching the record, whereas two same-handed summands would give −4.",
+  "receipted_on": "2026-08-19",
+  "receipted_by": "Werner Alois Stanggassinger + Claude Code"
  }
 }

@@ -113,10 +113,10 @@ def main():
             'aggressive_partial':   True,
             'fallback_reason':      reason,
             'regina_status':        rstat or None,
-            'note':                 'aggressive_simplify lieferte kein brauchbares '
-                                    'Diagramm (Hoch-c/Timeout) — kinematic-Diagramm '
-                                    'als Fallback. crossing_number_min = Obergrenze '
-                                    '(nicht-minimal, Disc #231).',
+            'note':                 'aggressive_simplify gave no usable '
+                                    'diagram (high c/timeout) — kinematic diagram '
+                                    'as fallback. crossing_number_min = upper bound '
+                                    '(not minimal, Disc #231).',
         }
         out_path = args.output or (args.kinematic_json if args.in_place
                                     else args.kinematic_json.replace('.json', '_merged.json'))
@@ -150,9 +150,9 @@ def main():
             'handoff_source':          ho_src,
             'handoff_det_checked':     handoff.get('det') if use_ho else None,
             'regina_best_size':        agg_best.get('size_simp_regina'),
-            'note':                    'Pflichtliste-Werte werden auf das '
-                                       'reduzierte Diagramm aus '
-                                       'aggressive_simplify gerechnet.',
+            'note':                    'mandatory-list values are computed on the '
+                                       'reduced diagram from '
+                                       'aggressive_simplify.',
         }
     else:
         print(f'[MERGE] no merge needed:')
@@ -163,8 +163,8 @@ def main():
             'merged_from':           None,
             'kinematic_size':        kin_size,
             'aggressive_best_size':  agg_size,
-            'note':                  'kinematic_result war bereits minimal '
-                                     'oder besser als aggressive_simplify.',
+            'note':                  'kinematic_result was already minimal '
+                                     'or better than aggressive_simplify.',
         }
 
     out_path = args.output or (args.kinematic_json if args.in_place

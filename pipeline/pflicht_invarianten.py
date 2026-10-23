@@ -97,7 +97,7 @@ def run_sage(code, timeout=600):
 # REGINA (base): classical algebra + diagram codes
 # ──────────────────────────────────────────────
 
-_REGINA_HELFER = '\n        import os as _os, time as _time, tempfile as _tf\n        _T_START = _time.time()\n        def _restbudget():\n            """How much may ONE expensive call still cost without the OUTER\n            limit firing and taking all the cheap results with it? 85 % of the outer\n            budget minus what has already been spent. Never below 10 s."""\n            return max(10, int(_AUSSEN * 0.85 - (_time.time() - _T_START)))\n        def _mit_frist(_fn, _tag, _sek=None):\n            """ONE expensive call in a throwaway child with its own clock.\n            Footgun 13: isolation at process level, not at exception level.\n            Footgun 18/24: waitpid ALWAYS with WNOHANG, never blocking.\n            Footgun 20: NEVER signal.alarm — by default SIGALRM terminates the\n                        watcher, not the watched.\n            File instead of pipe: an 84-crossing polynomial overflows the 64 KB\n            pipe buffer, the child blocks on write and the parent\n            waits for a child that is waiting for it."""\n            if _sek is None:\n                _sek = _restbudget()\n            _fd, _pf = _tf.mkstemp(prefix=\'reg_\' + _tag + \'_\')\n            _os.close(_fd)\n            _t0 = _time.time()\n            _pid = _os.fork()\n            if _pid == 0:\n                try:\n                    _v = str(_fn())\n                    with open(_pf, \'w\') as _f:\n                        _f.write(_v)\n                    _os._exit(0)\n                except BaseException as _e:\n                    try:\n                        with open(_pf, \'w\') as _f:\n                            _f.write(\'\\x00ERR \' + repr(_e)[:300])\n                    except BaseException:\n                        pass\n                    _os._exit(1)\n            while True:\n                _p, _st = _os.waitpid(_pid, _os.WNOHANG)\n                if _p:\n                    try:\n                        _s = open(_pf).read()\n                    except BaseException:\n                        _s = \'\\x00ERR Ergebnisdatei nicht lesbar\'\n                    try:\n                        _os.unlink(_pf)\n                    except OSError:\n                        pass\n                    if _s.startswith(\'\\x00ERR\'):\n                        return None, _s[5:]\n                    return _s, None\n                if _time.time() - _t0 > _sek:\n                    _os.kill(_pid, 9)\n                    _os.waitpid(_pid, 0)\n                    try:\n                        _os.unlink(_pf)\n                    except OSError:\n                        pass\n                    return None, \'timeout (%ds Einzelriegel, aeusseres Budget %ds)\' % (_sek, _AUSSEN)\n                _time.sleep(0.25)\n'
+_REGINA_HELFER = '\n        import os as _os, time as _time, tempfile as _tf\n        _T_START = _time.time()\n        def _restbudget():\n            """How much may ONE expensive call still cost without the OUTER\n            limit firing and taking all the cheap results with it? 85 % of the outer\n            budget minus what has already been spent. Never below 10 s."""\n            return max(10, int(_AUSSEN * 0.85 - (_time.time() - _T_START)))\n        def _mit_frist(_fn, _tag, _sek=None):\n            """ONE expensive call in a throwaway child with its own clock.\n            Footgun 13: isolation at process level, not at exception level.\n            Footgun 18/24: waitpid ALWAYS with WNOHANG, never blocking.\n            Footgun 20: NEVER signal.alarm — by default SIGALRM terminates the\n                        watcher, not the watched.\n            File instead of pipe: an 84-crossing polynomial overflows the 64 KB\n            pipe buffer, the child blocks on write and the parent\n            waits for a child that is waiting for it."""\n            if _sek is None:\n                _sek = _restbudget()\n            _fd, _pf = _tf.mkstemp(prefix=\'reg_\' + _tag + \'_\')\n            _os.close(_fd)\n            _t0 = _time.time()\n            _pid = _os.fork()\n            if _pid == 0:\n                try:\n                    _v = str(_fn())\n                    with open(_pf, \'w\') as _f:\n                        _f.write(_v)\n                    _os._exit(0)\n                except BaseException as _e:\n                    try:\n                        with open(_pf, \'w\') as _f:\n                            _f.write(\'\\x00ERR \' + repr(_e)[:300])\n                    except BaseException:\n                        pass\n                    _os._exit(1)\n            while True:\n                _p, _st = _os.waitpid(_pid, _os.WNOHANG)\n                if _p:\n                    try:\n                        _s = open(_pf).read()\n                    except BaseException:\n                        _s = \'\\x00ERR result file not readable\'\n                    try:\n                        _os.unlink(_pf)\n                    except OSError:\n                        pass\n                    if _s.startswith(\'\\x00ERR\'):\n                        return None, _s[5:]\n                    return _s, None\n                if _time.time() - _t0 > _sek:\n                    _os.kill(_pid, 9)\n                    _os.waitpid(_pid, 0)\n                    try:\n                        _os.unlink(_pf)\n                    except OSError:\n                        pass\n                    return None, \'timeout (%ds single latch, outer budget %ds)\' % (_sek, _AUSSEN)\n                _time.sleep(0.25)\n'
 
 
 def regina_full(signed_gauss, point_eval=False):
@@ -168,7 +168,7 @@ def regina_full(signed_gauss, point_eval=False):
             out['parsed'] = False
             out['error']  = str(e)
         for _k in [_k for _k, _v in out.items() if _v is None]:
-            del out[_k]          # fehlender Schluessel wie frueher, nicht None
+            del out[_k]          # missing key as before, not None
         print(json.dumps(out))
     """)
     # Disc #192: 180s too tight because of subprocess init overhead (conda run +
@@ -348,16 +348,16 @@ def snappy_full(pd_code, point_eval=False):
     code = SEAL_PRELUDE + textwrap.dedent(f"""
         # --- Laengenspektrum: EIN Schema ---
         def _lspec_eintrag(g):
-            # EIN Schema fuers Laengenspektrum (Befund 2026-08-24). Frueher schrieben
-            # die Fallback-Pfade Strings, der Hauptpfad Floats — wer 'length_real' liest,
-            # sah bei den Strings NICHTS. 53 Records waren so still unsichtbar.
-            # SnapPy.Number: .real()/.imag() sind METHODEN (in snappy_env gemessen).
+            # ONE schema for the length spectrum (finding 2026-08-24). The fallback paths used
+            # to write strings, the main path floats — whoever read 'length_real'
+            # saw NOTHING for the strings. 53 records were silently invisible that way.
+            # SnapPy.Number: .real()/.imag() are METHODS (measured in snappy_env).
             try:
                 return dict(length_real=float(g.length.real()),
                             length_imag=float(g.length.imag()),
                             multiplicity=int(g.multiplicity))
             except Exception as _e:
-                # Nie still verlieren: alte Form behalten UND den Grund danebenschreiben.
+                # Never lose silently: keep the old form AND write the reason next to it.
                 return dict(length=str(g.length), mult=int(g.multiplicity),
                             schema_err=str(_e))
         import json, snappy, spherogram
@@ -409,7 +409,7 @@ def snappy_full(pd_code, point_eval=False):
         except Exception as e:
             out['exterior_err'] = str(e)
         try:
-            if {point_eval!r}: raise RuntimeError('point_eval: HFK (exponentiell) uebersprungen')
+            if {point_eval!r}: raise RuntimeError('point_eval: HFK (exponential) skipped')
             hfk = L.knot_floer_homology()
             out['knot_floer'] = {{
                 'seifert_genus': int(hfk['seifert_genus']),
@@ -422,16 +422,16 @@ def snappy_full(pd_code, point_eval=False):
                 'modulus':       int(hfk['modulus']),
             }}
         except Exception as e: out['hfk_err'] = str(e)
-        # Seifert-Matrix für Det/Signature manuell
-        # det EXAKT in ganzen Zahlen (Disc #582, 2026-07-27): np.linalg.det rechnet float64
-        # und meldete oberhalb von ~1e15 Scheinkonflikte gegen das gespeicherte det —
-        # 6 Faelle im Korpus, relativer Fehler bis 4e-13, alle bei det >= 3e13. V+V^T ist
-        # ganzzahlig, also gehoert der dritte det-Zeuge bruchfrei gerechnet (Bareiss).
-        # Die Signatur bleibt bei den Eigenwerten: dort zaehlen nur Vorzeichen.
+        # Seifert matrix for det/signature by hand
+        # det EXACT in integers (Disc #582, 2026-07-27): np.linalg.det computes in float64
+        # and reported spurious conflicts with the stored det above ~1e15 —
+        # 6 cases in the corpus, relative error up to 4e-13, all at det >= 3e13. V+V^T is
+        # integral, so the third det witness belongs computed without fractions (Bareiss).
+        # The signature stays with the eigenvalues: only signs count there.
         try:
             V = L.seifert_matrix()
             import numpy as np
-            # spherogram seifert_matrix gibt SnapPy-Matrix oder list-of-lists
+            # spherogram seifert_matrix returns a SnapPy matrix or a list of lists
             try:
                 rows = [[int(x) for x in row] for row in np.array(V).tolist()]
             except Exception:
@@ -459,11 +459,11 @@ def snappy_full(pd_code, point_eval=False):
             out['det_via_seifert_method'] = 'bareiss_exakt_ganzzahlig'
             evs = np.linalg.eigvalsh(np.array(S_int, dtype=float))
             out['signature'] = int((evs > 1e-10).sum() - (evs < -1e-10).sum())
-            # KONVENTION, gemessen an 675 Records (Disc #582): diese Signatur ist durchgehend
-            # das NEGATIV von Sage Link.signature() auf demselben PD. Sie ist ein Zeuge fuer
-            # |sigma|, NICHT fuer das Vorzeichen — wer sie ungedreht neben die Spalte legt,
-            # sieht lauter Schein-Widersprueche.
-            out['signature_konvention'] = 'spherogram V+V^T = -1 * sage Link.signature() (675/675 gemessen)'
+            # CONVENTION, measured on 675 records (Disc #582): this signature is throughout
+            # the NEGATIVE of Sage Link.signature() on the same PD. It is a witness for
+            # |sigma|, NOT for the sign — whoever puts it unflipped next to the column
+            # sees nothing but spurious contradictions.
+            out['signature_konvention'] = 'spherogram V+V^T = -1 * sage Link.signature() (675/675 measured)'
         except Exception as e:
             out['seifert_err'] = str(e)
         print(json.dumps(out))
@@ -483,8 +483,8 @@ def sage_invariants(pd_code, point_eval=False):
         out = {{}}
         try:
             pd_list = eval(pd_str)
-            # Sage Link ist 1-basiert, spherogram 0-basiert (Discovery #13)
-            # Falls min(arc_id) == 0, alle +1 shiften
+            # Sage Link is 1-based, spherogram 0-based (Discovery #13)
+            # if min(arc_id) == 0, shift all by +1
             all_ids = [aid for cr in pd_list for aid in cr]
             shift = 0
             if min(all_ids) == 0:
@@ -498,11 +498,11 @@ def sage_invariants(pd_code, point_eval=False):
             out['writhe']      = int(L.writhe())
             _pe = {point_eval!r}
             try:
-                if _pe: raise RuntimeError('point_eval: HOMFLY (libhomfly skaliert nicht) uebersprungen')
+                if _pe: raise RuntimeError('point_eval: HOMFLY (libhomfly does not scale) skipped')
                 out['homfly_sage'] = str(L.homfly_polynomial())
             except Exception as e: out['homfly_err'] = str(e)
             try:
-                if _pe: raise RuntimeError('point_eval: Jones uebersprungen')
+                if _pe: raise RuntimeError('point_eval: Jones skipped')
                 out['jones_sage']  = str(L.jones_polynomial())
             except Exception as e: out['jones_err'] = str(e)
             try: out['alexander_sage'] = str(L.alexander_polynomial())
@@ -513,7 +513,7 @@ def sage_invariants(pd_code, point_eval=False):
                 out['braid_word']      = str(list(B.Tietze()))
                 out['braid_length']    = len(list(B.Tietze()))
             except Exception as e: out['braid_err'] = str(e)
-            # Knot-Klasse über Braid für Arf
+            # Knot class via the braid for Arf
             try:
                 K = Knot(B)
                 out['arf_invariant'] = int(K.arf_invariant())
@@ -661,23 +661,23 @@ def homfly_rueckfallebene(report, point_eval):
             w = None
     n_max = int(os.environ.get('HOMFLY_FALLBACK_NMAX', 10))
     if not w or not n:
-        a['homfly_luecke'] = {'grund': 'kein Zopfwort im Record — die Hecke-Spur '
-                                       'braucht eines', 'weg': 'hecke_f_p'}
+        a['homfly_luecke'] = {'grund': 'no braid word in the record — the Hecke trace '
+                                       'needs one', 'weg': 'hecke_f_p'}
         return
     if int(n) > n_max:
         a['homfly_luecke'] = {
-            'grund': f'Strangzahl n={int(n)} > {n_max}: die Hecke-Spur kostet ~n!, '
-                     f'ab n=11 sind es Stunden (Darstellungsdimension 2310 bzw. '
-                     f'7700 bei n=12)',
+            'grund': f'strand number n={int(n)} > {n_max}: the Hecke trace costs ~n!, '
+                     f'from n=11 on it takes hours (representation dimension 2310, '
+                     f'7700 at n=12)',
             'weg': 'hecke_f_p', 'n': int(n),
-            'hinweis': 'nachholbar mit HOMFLY_FALLBACK_NMAX=12 oder '
+            'hinweis': 'can be filled later with HOMFLY_FALLBACK_NMAX=12 or '
                        'tools/homfly_interpolation.py --ziele --exakt'}
         return
 
     zg = d.get('crossing_number_min')
     if not zg:
-        a['homfly_luecke'] = {'grund': 'keine Kreuzungszahl — ohne sie steht die '
-                                       'z-Achse der Interpolationsbox nicht fest',
+        a['homfly_luecke'] = {'grund': 'no crossing number — without it the '
+                                       'z axis of the interpolation box is not fixed',
                               'weg': 'hecke_f_p'}
         return
 
@@ -702,7 +702,7 @@ def homfly_rueckfallebene(report, point_eval):
     try:
         out = json.loads(res.stdout.strip().splitlines()[-1])
     except Exception:
-        a['homfly_luecke'] = {'grund': 'Rueckfallebene lieferte kein JSON',
+        a['homfly_luecke'] = {'grund': 'fallback level returned no JSON',
                               'weg': 'hecke_f_p',
                               'stderr': (res.stderr or '')[-400:]}
         print("  no JSON returned — gap labelled")
@@ -716,14 +716,14 @@ def homfly_rueckfallebene(report, point_eval):
                else a.get('determinant_alexander'))
     gruende = []
     if not out.get('stabil'):
-        gruende.append('CRT nicht stabil geworden (mehr Primzahlen noetig)')
+        gruende.append('CRT did not become stable (more primes needed)')
     if out.get('frisch_treffer') != out.get('frisch_gesamt'):
-        gruende.append(f"frische Punkte {out.get('frisch_treffer')}/"
+        gruende.append(f"fresh points {out.get('frisch_treffer')}/"
                        f"{out.get('frisch_gesamt')} in F_p")
     if det_rec is not None and out.get('det') != int(det_rec):
-        gruende.append(f"det {out.get('det')} != Record {int(det_rec)}")
+        gruende.append(f"det {out.get('det')} != record {int(det_rec)}")
     if out.get('alexander_punkte') is False:
-        gruende.append(f"Alexander-Punkte: {out.get('alexander_punkte_text')}")
+        gruende.append(f"Alexander points: {out.get('alexander_punkte_text')}")
     if gruende:
         a['homfly_luecke'] = {'grund': '; '.join(gruende), 'weg': 'hecke_f_p',
                               'sek': round(time.time() - t0, 1)}
@@ -736,18 +736,18 @@ def homfly_rueckfallebene(report, point_eval):
     a.pop('homfly_luecke', None)
     report['homfly_herkunft'] = {
         'datum': time.strftime('%Y-%m-%d'),
-        'weg': ('Hecke-Spur ueber F_p auf einem Gitter + CRT, dann '
-                '2-D-Interpolation (claude_setup_v2/tools/homfly_modular.py)'),
-        'warum_nicht_regina': ('point_eval-Modus: reginas exponentielle Zeilen '
-                               '(homfly/jones/bracket) wurden nicht mitgeschickt'
+        'weg': ('Hecke trace over F_p on a grid + CRT, then '
+                '2-D interpolation (claude_setup_v2/tools/homfly_modular.py)'),
+        'warum_nicht_regina': ('point_eval mode: regina\'s exponential lines '
+                               '(homfly/jones/bracket) were not sent along'
                                if point_eval else
-                               'regina lieferte kein homfly (Zeit oder Speicher)'),
-        'konvention': 'regina AZ, Variablen gedruckt als x=a, y=z',
+                               'regina returned no homfly (time or memory)'),
+        'konvention': 'regina AZ, variables printed as x=a, y=z',
         'primzahlen': out.get('primzahlen'), 'terme': out.get('terme'),
-        'zeuge_1': 'CRT stabil (eine Primzahl mehr aendert nichts)',
-        'zeuge_2': f"frische Punkte in F_p: {out.get('frisch_treffer')}/"
-                   f"{out.get('frisch_gesamt')} exakt gleich",
-        'zeuge_3': f"det |P(1,2i)| = {out.get('det')} = Record {det_rec}",
+        'zeuge_1': 'CRT stable (one more prime changes nothing)',
+        'zeuge_2': f"fresh points in F_p: {out.get('frisch_treffer')}/"
+                   f"{out.get('frisch_gesamt')} exactly equal",
+        'zeuge_3': f"det |P(1,2i)| = {out.get('det')} = record {det_rec}",
         'zeuge_4': out.get('alexander_punkte_text'),
         'sekunden': round(time.time() - t0, 1),
     }
@@ -959,9 +959,9 @@ def main():
                 report['pflichtliste']['DIAGRAMM']['pd_code'] = ersatz_pd
                 report['pd_code_herkunft'] = {
                     'quelle': quelle,
-                    'grund': 'regina_failed — PD aus Stage 4 (aggressive_simplify)',
-                    'warnung': ('Diagrammgroesse ist eine Obergrenze fuer die '
-                                'Kreuzungszahl, kein Minimum.')}
+                    'grund': 'regina_failed — PD from stage 4 (aggressive_simplify)',
+                    'warnung': ('diagram size is an upper bound for the '
+                                'crossing number, not a minimum.')}
             t_pk = time.time()
             d_pk = punkt_alexander_det(ersatz_pd)
             if d_pk is not None:
@@ -1027,7 +1027,7 @@ def main():
             # slice knot -- 213 records, 29 provably wrong). Signature, Arf and determinant
             # are not yet known at this point; the verdict is made at the end in one
             # block with slice_verdict.apply_to_algebra().
-            a['ribbon']          = 'unbestimmt (algorithmisch nicht entscheidbar in Pipeline)'
+            a['ribbon']          = 'undetermined (not algorithmically decidable in the pipeline)'
         if 'signature' in snp:
             # Store in the corpus convention (= Sage Link.signature) so that the field is directly
             # readable next to `signature`. The raw spherogram value is its negative
@@ -1073,7 +1073,7 @@ def main():
         homfly_rueckfallebene(report, point_eval)
     except Exception as _e:
         report['pflichtliste']['ALGEBRA']['homfly_luecke'] = {
-            'grund': 'Rueckfallebene selbst gescheitert: ' + repr(_e)[:200],
+            'grund': 'fallback level itself failed: ' + repr(_e)[:200],
             'weg': 'hecke_f_p'}
         print(f"  Fallback failed: {_e!r} — gap labelled, "
               f"run continues")
@@ -1179,7 +1179,7 @@ def main():
         'hfk_rank_consistent': hfk_rank_ok,
         'hfk_rank_equals_det': hfk_rank_equals_det,
         'hfk_delta_thin':     None,   # can only be filled by a delta measurement
-        'hfk_thin_note':      'rank==det ist NICHT delta-Duennheit: es erzwingt nur gleiche Maslov-Paritaet je Alexander-Grad, delta und delta-2 sind damit vereinbar (gemessen 2026-09-18 an kf304_gtw_1.75pi: rank 243 = det, deltas {-1:32, +1:211}). Echte Duennheit misst claude_setup_v2/tools/pruef_hfk_thin.py; hfk_delta_thin bleibt None, solange sie fuer diesen Knoten nicht gerechnet wurde. Disc #797.',
+        'hfk_thin_note':      'rank==det is NOT delta-thinness: it only forces equal Maslov parity per Alexander grading, delta and delta-2 are compatible with it (measured 2026-09-18 on kf304_gtw_1.75pi: rank 243 = det, deltas {-1:32, +1:211}). Real thinness is measured by claude_setup_v2/tools/pruef_hfk_thin.py; hfk_delta_thin stays None as long as it has not been computed for this knot. Disc #797.',
         'alternating':        is_alt,
     }
     report['konsistenz_consistent'] = overall_consistent
@@ -1244,11 +1244,11 @@ def main():
                 report['pflichtliste']['DIAGRAMM']['crossing_number_min'] = _alt
                 report['_C_BOUND_KEPT_FROM_PREVIOUS'] = {
                     'kept': _alt, 'this_run_found': _neu,
-                    'reason': ('c ist Obergrenze (Disc #231) — die frueher belegte kleinere '
-                               'Schranke bleibt gueltig; Stage-4-Sampling ist stochastisch, '
-                               'ein schlechterer Lauf darf sie nicht anheben (Disc #562).'),
-                    'diagramm_felder': ('pd_code/dt/writhe/knot_sig gehoeren zum Diagramm DIESES '
-                                        'Laufs — nur die Schranke ist die alte.'),
+                    'reason': ('c is an upper bound (Disc #231) — the smaller bound receipted '
+                               'earlier stays valid; stage-4 sampling is stochastic, '
+                               'a worse run must not raise it (Disc #562).'),
+                    'diagramm_felder': ('pd_code/dt/writhe/knot_sig belong to the diagram of THIS '
+                                        'run — only the bound is the old one.'),
                     'when': '2026-07-25',
                 }
                 print(f"\n[PFLICHT] 🛡  c guard: this run found {_neu}, record carried {_alt} "

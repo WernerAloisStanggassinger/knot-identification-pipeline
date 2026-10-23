@@ -311,21 +311,21 @@ def length_spectrum_via_canonize(pd_code, n_geos=10, timeout=300, isosig=None):
 
         # --- Laengenspektrum: EIN Schema ---
         def _lspec_eintrag(g):
-            # EIN Schema fuers Laengenspektrum (Befund 2026-08-24). Frueher schrieben
-            # die Fallback-Pfade Strings, der Hauptpfad Floats — wer 'length_real' liest,
-            # sah bei den Strings NICHTS. 53 Records waren so still unsichtbar.
-            # SnapPy.Number: .real()/.imag() sind METHODEN (in snappy_env gemessen).
+            # ONE schema for the length spectrum (finding 2026-08-24). The fallback paths used
+            # to write strings, the main path floats — whoever read 'length_real'
+            # saw NOTHING for the strings. 53 records were silently invisible that way.
+            # SnapPy.Number: .real()/.imag() are METHODS (measured in snappy_env).
             try:
                 return dict(length_real=float(g.length.real()),
                             length_imag=float(g.length.imag()),
                             multiplicity=int(g.multiplicity))
             except Exception as _e:
-                # Nie still verlieren: alte Form behalten UND den Grund danebenschreiben.
+                # Never lose silently: keep the old form AND write the reason next to it.
                 return dict(length=str(g.length), mult=int(g.multiplicity),
                             schema_err=str(_e))
         def cluster_geodesics(geos, tol=1e-9):
-            '''Gruppiere Geodaeten nach komplexer Naehe; multiplicity = Cluster-Groesse.
-            Konjugierte Paare (+/-Im) werden als VERSCHIEDENE Geodaeten behandelt.'''
+            '''Group geodesics by complex proximity; multiplicity = cluster size.
+            Conjugate pairs (+/-Im) are treated as DIFFERENT geodesics.'''
             clusters = []
             for g in geos:
                 L = complex(g.length)
@@ -361,7 +361,7 @@ def length_spectrum_via_canonize(pd_code, n_geos=10, timeout=300, isosig=None):
             out['duration_s']      = time.time() - t0
         except Exception as e_alt:
             out['err_alt'] = str(e_alt)
-            # Pfad 2: klassisches length_spectrum mit Dirichlet
+            # path 2: classical length_spectrum with Dirichlet
             try:
                 ls = M.length_spectrum(0.5)
                 out['method'] = 'direct_dirichlet'
@@ -372,7 +372,7 @@ def length_spectrum_via_canonize(pd_code, n_geos=10, timeout=300, isosig=None):
                 out['duration_s'] = time.time() - t0
             except Exception as e_dir:
                 out['err_direct'] = str(e_dir)
-                # Pfad 3: nach randomize() (kurze Schleife)
+                # path 3: after randomize() (short loop)
                 for k in range(3):
                     try:
                         Mr = M.copy()
@@ -512,21 +512,21 @@ def bridge_number_bounds(genus, crossing_number, det=None, alternating=False):
             'upper_bound': 1,
             'interval':    [1, 1],
             'is_2_bridge_excluded': True,  # the unknot is 1-bridge, not 2-bridge
-            'lower_bound_source': 'unknot (Seifert-Genus 0 ⟺ Unknoten)',
-            'upper_bound_source': 'unknot (Seifert-Genus 0 ⟺ Unknoten)',
+            'lower_bound_source': 'unknot (Seifert genus 0 ⟺ unknot)',
+            'upper_bound_source': 'unknot (Seifert genus 0 ⟺ unknot)',
         }
 
     det1 = det is not None and abs(int(det)) == 1
     if det1:
         lower = 3
-        lower_src = ('det = ±1 schliesst 2 Bruecken aus ⇒ b(K) >= 3 '
-                     '(nichttrivialer 2-Bruecken-Knoten K(p,q) hat det = p >= 3). '
-                     '⚠️ det = ±1 heisst NICHT Unknoten — Gegenbeispiele im eigenen '
-                     'Korpus: conway_cw, conway_kt, mi_T3_5, irrational = T(3,7).')
+        lower_src = ('det = ±1 excludes 2 bridges ⇒ b(K) >= 3 '
+                     '(a nontrivial 2-bridge knot K(p,q) has det = p >= 3). '
+                     '⚠️ det = ±1 does NOT mean unknot — counterexamples in our own '
+                     'corpus: conway_cw, conway_kt, mi_T3_5, irrational = T(3,7).')
     else:
         lower = 2
         lower_src = ('nontrivial knot (Genus > 0) ⇒ b(K) >= 2 '
-                     '(Discovery #109: alte "Schubert b>=g+1"-Regel entfernt)')
+                     '(Discovery #109: old "Schubert b>=g+1" rule removed)')
     upper = c if c is not None else None
     out = {
         'lower_bound': lower,
@@ -546,8 +546,8 @@ def bridge_number_bounds(genus, crossing_number, det=None, alternating=False):
         alt_upper = (c + 1) // 2 + ((c + 1) % 2)  # ceil((c+1)/2)
         out['alt_upper_bound_heuristic']        = alt_upper
         out['alt_upper_bound_heuristic_source'] = (
-            f'Murasugi/Sakuma-Heuristik fuer alternating: b(K) <= ceil((c+1)/2) = {alt_upper}; '
-            f'NICHT in dieser Pipeline bewiesen, nur als Plausibilitaets-Hinweis')
+            f'Murasugi/Sakuma heuristic for alternating: b(K) <= ceil((c+1)/2) = {alt_upper}; '
+            f'NOT proven in this pipeline, only a plausibility hint')
     return out
 
 
@@ -616,14 +616,14 @@ def _unknot_zu_gross(mass, wert, grenze, was):
     like a finding and is none (Disc #674/#680)."""
     return {'unknotting_number': None,
             'unknotting_uebersprungen': True,
-            'grund': (f'{was} {wert} > {grenze} ({mass}). Die Brute-Force ist '
-                      f'exponentiell; gemessen ueber 474 Records kam '
-                      f'unknotting_number nie ueber c=64 bzw. Zopflaenge 201 '
-                      f'zustande. Oberhalb der Schwelle wird nicht gerechnet, '
-                      f'sondern abgelehnt — sonst rennt der Lauf gegen die '
-                      f'Speicherwand (23.08.: 20 min, 9 earlyoom-Abschuesse).'),
+            'grund': (f'{was} {wert} > {grenze} ({mass}). The brute force is '
+                      f'exponential; measured over 474 records, '
+                      f'unknotting_number was never obtained above c=64 or braid length 201. '
+                      f'Above the threshold it is not computed '
+                      f'but rejected — otherwise the run hits the '
+                      f'memory wall (23.08.: 20 min, 9 earlyoom kills).'),
             'schwelle': grenze, 'gemessen': wert,
-            'nachholbar_mit': f'{mass}=<groesser> als Umgebungsvariable'}
+            'nachholbar_mit': f'{mass}=<larger> as environment variable'}
 
 
 # 4. UNKNOTTING NUMBER — Sage brute-force braid (Discovery #60)
@@ -640,7 +640,7 @@ def unknotting_number_brute_force(braid_word, n_strands, max_subset=4,
     in ascending order → early abort."""
     if braid_word is not None and len(braid_word) > UNKNOT_L_MAX:
         return _unknot_zu_gross('UNKNOT_L_MAX', len(braid_word), UNKNOT_L_MAX,
-                                'Zopflaenge')
+                                'braid length')
     code = SEAL_PRELUDE + MEM_PRELUDE + textwrap.dedent(f"""
         import json, sys
         from sage.all import BraidGroup, Knot
@@ -664,9 +664,9 @@ def unknotting_number_brute_force(braid_word, n_strands, max_subset=4,
                 # Test 1: Det == 1
                 if abs(int(K.determinant())) != 1:
                     return False
-                # Test 2: Jones-Polynom = 1
+                # Test 2: Jones polynomial = 1
                 jp = K.jones_polynomial()
-                # Trivial Jones-Polynom (Unknot) ist 1
+                # trivial Jones polynomial (unknot) is 1
                 if str(jp).strip() in ('1', 't^0'):
                     return True
                 return False
@@ -674,7 +674,7 @@ def unknotting_number_brute_force(braid_word, n_strands, max_subset=4,
                 return False
 
         L = len(braid_word)
-        print(json.dumps({{'msg': f'Brute-force over braid length {{L}}, subsets k=1..{{max_subset}} (k=0 wird im Caller anhand det/Jones aus pflicht-JSON entschieden)'}}), flush=True)
+        print(json.dumps({{'msg': f'Brute-force over braid length {{L}}, subsets k=1..{{max_subset}} (k=0 is decided by the caller from det/Jones in the pflicht JSON)'}}), flush=True)
 
         u_found = None
         for k in range(1, max_subset + 1):
@@ -694,7 +694,7 @@ def unknotting_number_brute_force(braid_word, n_strands, max_subset=4,
                 'braid_length': L,
                 'n_strands': n_strands}}
         if u_found is None:
-            out['note'] = f'u > {{max_subset}} oder nicht gefunden — max_subset erhöhen'
+            out['note'] = f'u > {{max_subset}} or not found — raise max_subset'
         print(json.dumps(out), flush=True)
     """)
     cmd = ['conda', 'run', '-n', 'sage_stable', '--no-capture-output',
@@ -745,7 +745,7 @@ def unknotting_via_signed_gauss_flip(signed_gauss, max_subset=4, processes=12):
     n_crossings = len(indices)
     if n_crossings > UNKNOT_C_MAX:
         return _unknot_zu_gross('UNKNOT_C_MAX', n_crossings, UNKNOT_C_MAX,
-                                'Diagrammgroesse')
+                                'diagram size')
     code = SEAL_PRELUDE + MEM_PRELUDE + textwrap.dedent(f"""
         import json, re, sys
         from itertools import combinations
@@ -768,23 +768,23 @@ def unknotting_via_signed_gauss_flip(signed_gauss, max_subset=4, processes=12):
             return ''.join(out)
 
         def trivial_test(subset):
-            '''Returns 0 = NOT-trivial (det != 1), 1 = simplify→0 (sicher Unknot),
-                       2 = det==1 ∧ Jones==1 aber Regina-simplify > 0 (Unknot-Kandidat).
+            '''Returns 0 = NOT-trivial (det != 1), 1 = simplify→0 (certainly unknot),
+                       2 = det==1 ∧ Jones==1 but Regina simplify > 0 (unknot candidate).
             '''
             try:
                 sg = crossing_change_sg(signed_gauss, set(subset))
                 L = regina.Link.fromSignedGauss(sg)
                 if not L.isClassical():
                     return 0
-                # Det-Check vor simplify (Det-Berechnung schneller)
+                # det check before simplify (det computation is faster)
                 jones = str(L.jones(regina.Algorithm.Treewidth))
-                # Regina-Jones bei x=i = ±det(K), ohne Sage-Roundtrip:
-                # det(K) = |jones(-1)| im normalen Konvention, aber Regina nutzt x.
-                # Stattdessen: simplify und groessere Tests dort
+                # Regina Jones at x=i = ±det(K), without a Sage round trip:
+                # det(K) = |jones(-1)| in the usual convention, but Regina uses x.
+                # Instead: simplify and the larger tests there
                 L.simplify()
                 if L.size() == 0:
                     return 1
-                # Diagramm hat noch Crossings; Test ueber Jones==1
+                # diagram still has crossings; test via Jones==1
                 jp = str(L.jones(regina.Algorithm.Treewidth)).strip()
                 if jp in ('1', 't^0'):
                     return 2
@@ -824,7 +824,7 @@ def unknotting_via_signed_gauss_flip(signed_gauss, max_subset=4, processes=12):
                'n_crossings_diagram': n0,
                'witness_subset': u_witness}}
         if u_found is None:
-            out['note'] = f'kein Subset bis k={{max_subset}} fuehrt zum Unknot via Regina-simplify'
+            out['note'] = f'no subset up to k={{max_subset}} leads to the unknot via Regina simplify'
         print(json.dumps(out), flush=True)
     """)
     cmd = ['conda', 'run', '-n', 'base', '--no-capture-output',
@@ -836,7 +836,7 @@ def unknotting_via_signed_gauss_flip(signed_gauss, max_subset=4, processes=12):
         res = _run_with_pgkill(cmd, timeout=1800)
     except subprocess.TimeoutExpired:
         return {'error': 'timeout', 'timeout_seconds': 1800,
-                'note': 'unknotting-Suche nach 1800s abgebrochen; Ergebnis = timeout, kein Befund'}
+                'note': 'unknotting search aborted after 1800s; result = timeout, no finding'}
     if res.returncode != 0:
         return {'error': f'rc={res.returncode}', 'stderr': res.stderr[-1500:]}
     out = {'progress': []}
@@ -863,7 +863,7 @@ def unknotting_via_signed_gauss_flip(signed_gauss, max_subset=4, processes=12):
 def kauffman_via_cha(braid_word, n_strands):
     """Attempt via the CHA Markov trace (Discovery #55). Marin data only for n ≤ 4."""
     if n_strands > 4:
-        return {'error': f'n_strands={n_strands} > 4 — Marin-Daten reichen nur bis n=4 '
+        return {'error': f'n_strands={n_strands} > 4 — Marin data only go up to n=4 '
                           f'(Discovery #55, KeyError {n_strands})',
                 'unavailable_in_pipeline': True}
     code = SEAL_PRELUDE + textwrap.dedent(f"""
@@ -935,7 +935,7 @@ def kauffman_via_knotpy(pd_code_str):
                     'kauffman_polynomial_n_crossings_input': len(crossings),
                     'kauffman_polynomial_method': 'knotpy.kauffman state-sum (Discovery #106 / #114a Fallback)',
                     'kauffman_polynomial_amphi_symmetry_check': amphi_check,
-                    'kauffman_polynomial_convention_note': 'knotpy state-sum; bei chiralen Knoten ggf. Mirror gegenueber KnotInfo (Discovery #106)',
+                    'kauffman_polynomial_convention_note': 'knotpy state-sum; for chiral knots possibly the mirror relative to KnotInfo (Discovery #106)',
                 }}))
         except Exception as e:
             import traceback
@@ -1021,12 +1021,12 @@ def main():
             d['braid_index_interval']       = [mfw['lower_bound'], n_strands]
             d['braid_index_mfw_v_spread']   = mfw['spread']
             d['braid_index_mfw_note']       = (
-                f"MFW-Theorem: b(K) >= {mfw['lower_bound']} aus HOMFLY-v-Spread "
+                f"MFW theorem: b(K) >= {mfw['lower_bound']} from the HOMFLY v-spread "
                 f"{mfw['spread']} (v-exp ∈ [{mfw['min_v_exp']}, {mfw['max_v_exp']}]); "
-                f"obere Grenze = aktuelle Sage-Braid-Straenge = {n_strands} "
-                f"(NICHT garantiert minimal — Markov-Reduktion NP-schwer, "
-                f"Discovery #56). Wenn lower_bound == upper_bound, ist b(K) "
-                f"exakt bestimmt.")
+                f"upper bound = current Sage braid strands = {n_strands} "
+                f"(NOT guaranteed minimal — Markov reduction is NP-hard, "
+                f"Discovery #56). If lower_bound == upper_bound, b(K) "
+                f"is determined exactly.")
             print(f"  v-exp-Spread = {mfw['spread']}  (variable '{mfw['variable_used']}')")
             print(f"  Interval: {mfw['lower_bound']} <= b(K) <= {n_strands}")
             if mfw['lower_bound'] == n_strands:
@@ -1070,7 +1070,7 @@ def main():
     print(f"\n[EXTRA] (2) s_invariant …")
     if h.get('is_amphicheiral'):
         a['s_invariant'] = 0
-        a['s_invariant_note'] = 'Trivial 0 wegen Amphicheiralität (Discovery #75)'
+        a['s_invariant_note'] = 'trivially 0 because of amphichirality (Discovery #75)'
         a['s_invariant_method'] = 'amphicheiral_symmetry'
         print(f"  s_invariant = 0 (amphicheiral, Discovery #75)")
     else:
@@ -1089,7 +1089,7 @@ def main():
         else:
             a['s_invariant'] = None
             a['s_invariant_note'] = (
-                f"KnotJob -sgr fehlgeschlagen: {sres.get('parse_error', 'unknown')}"
+                f"KnotJob -sgr failed: {sres.get('parse_error', 'unknown')}"
             )
             a['s_invariant_method'] = 'knotjob_sgr_failed'
             print(f"  → {time.time()-t0:.1f}s")
@@ -1136,7 +1136,7 @@ def main():
     except subprocess.TimeoutExpired:
         lsp = {'error': 'timeout', 'timeout_seconds': 600,
                'method': 'timeout', 'duration_s': 600,
-               'note': 'length_spectrum nach 600s abgebrochen; Ergebnis = timeout'}
+               'note': 'length_spectrum aborted after 600s; result = timeout'}
     h['length_spectrum_short']     = lsp.get('length_spectrum_short')
     h['length_spectrum_method']    = lsp.get('method')
     h['length_spectrum_duration_s'] = lsp.get('duration_s')
@@ -1215,8 +1215,8 @@ def main():
         if u_upper is None:
             a['unknotting_number'] = None
             a['unknotting_number_note'] = (
-                f'u > {args.max_unknotting_subset} auf diesem Diagramm — '
-                f'max_subset erhoehen oder anderes Min-Diagramm pruefen')
+                f'u > {args.max_unknotting_subset} on this diagram — '
+                f'raise max_subset or check another minimal diagram')
             a['unknotting_number_strict_lower'] = u_lower
             a['unknotting_number_strict_upper'] = None
         else:
@@ -1247,26 +1247,26 @@ def main():
                 a['unknotting_number_indicated']    = True
                 a['unknotting_number_assignment_basis'] = (
                     f'Discovery #114c: Stage-1-Witness {unk.get("witness_subset")} '
-                    f'(Regina simplify→0, topologisch belastbar — keine False '
-                    f'Positives) bei k={u_upper}; k={ks_required} alle exhaustiv '
-                    f'ohne Treffer (Stage-1 + Stage-2). diagram_u(K) = {u_upper} '
-                    f'beweisbar auf c-minimal-Diagramm. globales u(K) koennte '
-                    f'auf anderem Diagramm < {u_upper} sein, daher strict_lower '
-                    f'= {u_lower} bleibt formal als nicht-streng-ausgeschlossen.')
+                    f'(Regina simplify→0, topologically reliable — no false '
+                    f'positives) at k={u_upper}; k={ks_required} all exhaustive '
+                    f'without hit (stage 1 + stage 2). diagram_u(K) = {u_upper} '
+                    f'provable on the c-minimal diagram. global u(K) could '
+                    f'be < {u_upper} on another diagram, hence strict_lower '
+                    f'= {u_lower} stays formal, as not strictly excluded.')
             else:
                 # Lower != upper, but not tested exhaustively
                 a['unknotting_number']              = None
                 a['unknotting_number_strict_lower'] = u_lower
                 a['unknotting_number_strict_upper'] = u_upper
                 a['unknotting_number_assignment_basis'] = (
-                    f'k={ks_required} nicht vollstaendig getestet '
-                    f'(durchsuchte k={ks_searched}, mit Treffer={sorted(ks_with_hits)}); '
-                    f'kein Discovery-#114c-Auto-Assign.')
+                    f'k={ks_required} not completely tested '
+                    f'(searched k={ks_searched}, with hits={sorted(ks_with_hits)}); '
+                    f'no Discovery #114c auto-assign.')
 
             a['unknotting_number_note'] = (
                 f'{u_lower} <= u(K) <= {u_upper}; Witness-Subset '
-                f'{unk.get("witness_subset")} liefert Unknot via Crossing-Flip; '
-                f'k={list(range(u_lower, u_upper))} ohne Treffer.')
+                f'{unk.get("witness_subset")} gives the unknot via crossing flip; '
+                f'k={list(range(u_lower, u_upper))} without hit.')
         print(f"  → {time.time()-t0:.1f}s")
         for prog in unk.get('progress', []):
             if 'k' in prog:

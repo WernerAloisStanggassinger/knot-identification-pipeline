@@ -49,7 +49,7 @@ import sys, os, json, ast, time, argparse, cmath
 import site_config
 import multiprocessing as mp
 
-CORES = None   # global, set from --kerne; otherwise EICH_KERNE (see below)
+CORES = None   # global, set from --cores; otherwise EICH_KERNE (see below)
 # ---------------------------------------------------------------------------
 # CALIBRATED DEFAULT FOR THE WORKER COUNT — measured 2026-08-25, not guessed.
 #
@@ -75,7 +75,7 @@ CORES = None   # global, set from --kerne; otherwise EICH_KERNE (see below)
 # EICH_KERNE workers (4 x 6 = 24). The parallelism belongs one level
 # higher, not inside the single knot.
 #
-# Override: --kerne <n> always wins; without the argument
+# Override: --cores <n> always wins; without the argument
 # HOMFLY_CORES from the environment applies; only then this value. On another
 # box recalibrate (kern_eichung2.py), do not estimate.
 # ---------------------------------------------------------------------------
@@ -472,12 +472,12 @@ def self_test():
         print(f'  LATCH c={c_rot} (17 decades above): '
               f'{"rejects ✅" if good else "🔴 LETS THROUGH"}')
 
-    # (3) THE LOAD-BEARING COUNTER-CASE: in --exakt there is no cancellation.
+    # (3) THE LOAD-BEARING COUNTER-CASE: in --exact there is no cancellation.
     #     If the latch fires there, it chokes exactly the path that can do it.
     g = mantissa_latch(151, 1e-3, exact=True)
     good = g is None
     rg &= good
-    print(f'  LATCH c=151 but --exakt        : '
+    print(f'  LATCH c=151 but --exact        : '
           f'{"lets through ✅ (no floating point, no wall)" if good else "🔴 CHOKES THE EXACT PATH"}')
 
     # (4) the wall must MOVE with the bound, not be nailed down
@@ -653,7 +653,7 @@ def target_entries(wall_file, n_max=12, target_list=None):
 #
 # It is NOT a stop before the run but a computational result: in floating point
 # the result there IS not representable. The path that can do it is named in the
-# label: --exakt (F_p + CRT, homfly_modular) has no cancellation, and
+# label: --exact (F_p + CRT, homfly_modular) has no cancellation, and
 # for it the latch is switched off.
 # The reason text returned by mantissen_riegel() is data (stored in 'gruende') and stays German.
 # ============================================================================
@@ -670,7 +670,7 @@ def residue_prediction(zdeg):
 
 def mantissa_latch(zdeg, residue_max, exact=False):
     """Returns a REASON if floating point no longer carries this crossing
-    number — otherwise None. In --exakt there is no cancellation, hence
+    number — otherwise None. In --exact there is no cancellation, hence
     no latch either (the counter-case without which this latch would choke
     exactly the path that works)."""
     if exact or not zdeg:
@@ -684,7 +684,7 @@ def mantissa_latch(zdeg, residue_max, exact=False):
     return (f'mantissa latch: c={zdeg} > {c_wand:.0f}; expected residue '
             f'~1e{math.log10(expected_residue):+.0f}, that is {decades:.0f} decades above '
             f'{residue_max:.0e} (measured over {MANTISSA_N} runs). '
-            f'Floating point cannot represent this — way out: --exakt')
+            f'Floating point cannot represent this — way out: --exact')
 
 
 def process_target(t, residue_max=1e-3, fresh_max=1e-8, exact=False,
@@ -702,7 +702,7 @@ def process_target(t, residue_max=1e-3, fresh_max=1e-8, exact=False,
     from homfly_crosscheck import record_det, record_alexander, det_from_alexander
     t0 = time.time()
     # The target list is frozen at START. If a second path runs alongside
-    # (regina, --exakt), it fills records in the meantime — and this
+    # (regina, --exact), it fills records in the meantime — and this
     # run computes them a second time. Happened exactly so on 23.08.: the four
     # green results of the floating-point run were repetitions of
     # records that the exact path had already written at 12:00.
@@ -739,7 +739,7 @@ def process_target(t, residue_max=1e-3, fresh_max=1e-8, exact=False,
     if exact:
         import homfly_modular as _hm
         from homfly_modular import interpolate_exact, check_fresh_mod
-        # pass --kerne through into the EXACT path. Without this line the
+        # pass --cores through into the EXACT path. Without this line the
         # expensive path stayed serial while the floating-point path ran in parallel — exactly the
         # half that matters (25.08.).
         _hm.CORES = CORES

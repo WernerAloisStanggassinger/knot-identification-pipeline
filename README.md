@@ -51,7 +51,7 @@ The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summ
   the remaining texts. `tools/map_equivalence.py` proves for every file that the translated version is the program proven
   equivalent to the originals on 22.10.2026 (git tag `proven-equivalent`, see the next points) up to one consistent renaming,
   and writes that renaming to `tools/translation_table.json` (identifiers, keys, file renames, free texts). The gate was
-  counter-tested with 22 deliberate changes it must catch or pass; the built-in self-tests of six modules give the same
+  counter-tested with 25 deliberate changes it must catch or pass; the built-in self-tests of six modules give the same
   results before and after (45 of 45 checks).
 - **Results the authors published before this release (knot corpus, website downloads, Zenodo deposits) use the German
   names.** `tools/translation_table.json` maps every name this code reads or writes, for example `pflichtliste` → `mandatory_list`,

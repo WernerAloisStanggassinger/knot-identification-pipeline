@@ -13,7 +13,7 @@ cells) and needs only numpy.
 
 It is NOT the reference — the reference is `clearance_segment.py`, whose four
 counter-cases hit analytically known distances. This version is calibrated
-AGAINST that one (`--eichen`), not against itself (Disc #745: a test that only
+AGAINST that one (`--calibrate`), not against itself (Disc #745: a test that only
 measures reproducibility never catches a construction error).
 
 Why segments instead of points (Disc #746/#747): the distance between sample

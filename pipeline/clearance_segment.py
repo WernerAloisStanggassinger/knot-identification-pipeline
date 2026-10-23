@@ -25,7 +25,7 @@ METHOD: segment midpoints into a cKDTree, fetch candidate pairs within the radiu
 (radius = generous bound from a coarse point pass), discard neighbours along the
 curve, compute the exact segment-segment distance for the survivors.
 
-`--selbsttest` runs four counter-cases, among them the sharp one: two offset circles with
+`--self-test` runs four counter-cases, among them the sharp one: two offset circles with
 an ANALYTICALLY known distance — there the segment measurement must hit the true value and
 the point measurement must overestimate it. If the segment measurement misses, it is wrong.
 """
@@ -177,7 +177,7 @@ def main():
     if a.self_test:
         sys.exit(self_test())
     if not a.fseries:
-        ap.error('fseries missing (or --selbsttest)')
+        ap.error('fseries missing (or --self-test)')
 
     import importlib.util, time
     sp = importlib.util.spec_from_file_location('b', '@PIPELINE_DIR@/build_curve_json.py'.replace('@PIPELINE_DIR@', site_config.PIPELINE_DIR))

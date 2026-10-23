@@ -180,7 +180,7 @@ def _box(word, n, z_grad_max):
     return (a_lo - 1) // 2, (a_hi + 1) // 2, (z_grad_max + 2) // 2, e
 
 
-CORES = None    # global; set from --kerne, otherwise EICH_KERNE (see below)
+CORES = None    # global; set from --cores, otherwise EICH_KERNE (see below)
 # ---------------------------------------------------------------------------
 # CALIBRATED DEFAULT FOR THE WORKER COUNT — measured 2026-08-25, not guessed.
 #
@@ -206,7 +206,7 @@ CORES = None    # global; set from --kerne, otherwise EICH_KERNE (see below)
 # EICH_KERNE workers (4 x 6 = 24). Parallelism belongs one level
 # higher, not inside the single knot.
 #
-# Override: --kerne <n> always wins; without the argument
+# Override: --cores <n> always wins; without the argument
 # HOMFLY_CORES from the environment applies; only then this value. On another
 # box, re-calibrate (kern_eichung2.py), do not estimate.
 # ---------------------------------------------------------------------------

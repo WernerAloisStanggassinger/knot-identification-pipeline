@@ -75,7 +75,7 @@ if __name__ == '__main__':
     if a.self_test:
         sys.exit(self_test())
     if not a.fseries:
-        ap.error('fseries paths or --selbsttest')
+        ap.error('fseries paths or --self-test')
     with ProcessPoolExecutor(a.workers) as ex:
         res = list(ex.map(one_curve, a.fseries))
     u = [r for r in res if r.get('unknot')]

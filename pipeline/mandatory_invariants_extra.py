@@ -310,7 +310,7 @@ def length_spectrum_via_canonize(pd_code, n_geos=10, timeout=300, isosig=None):
         out = {{'volume': float(M.volume()), 'isosig_used': bool(iso)}}
 
         # --- length spectrum: ONE schema ---
-        def _lspec_eintrag(g):
+        def _lspec_entry(g):
             # ONE schema for the length spectrum (finding 2026-08-24). The fallback paths used
             # to write strings, the main path floats — whoever read 'length_real'
             # saw NOTHING for the strings. 53 records were silently invisible that way.
@@ -366,7 +366,7 @@ def length_spectrum_via_canonize(pd_code, n_geos=10, timeout=300, isosig=None):
                 ls = M.length_spectrum(0.5)
                 out['method'] = 'direct_dirichlet'
                 out['length_spectrum_short'] = [
-                    _lspec_eintrag(g)
+                    _lspec_entry(g)
                     for g in ls[:N_GEOS]
                 ]
                 out['duration_s'] = time.time() - t0
@@ -381,7 +381,7 @@ def length_spectrum_via_canonize(pd_code, n_geos=10, timeout=300, isosig=None):
                         ls = Mr.length_spectrum(0.5)
                         out['method'] = f'randomize_x{{k+1}}'
                         out['length_spectrum_short'] = [
-                            _lspec_eintrag(g)
+                            _lspec_entry(g)
                             for g in ls[:N_GEOS]
                         ]
                         out['duration_s'] = time.time() - t0

@@ -70,6 +70,9 @@ def defined_names(tree, acc):
         elif isinstance(n, ast.Constant) and isinstance(n.value, str):
             code = parse_code(n.value)
             if code is not None: defined_names(code, acc)
+        elif isinstance(n, ast.JoinedStr):
+            code = parse_code(template(n))
+            if code is not None: defined_names(code, acc)
     return acc
 
 def strip_comments_loose(s):
@@ -140,6 +143,17 @@ def name_strings(tree, acc):
 
 class Walk:
     def __init__(self, fname): self.f = fname; self.idents = []; self.strings = []; self.errors = []
+    def fragment(self, x, y, path, line):
+        """Code that does not parse on its own: same token sequence, except words that are identifier renamings
+        (recorded, then checked like every other identifier: uniform, one-to-one, fresh, repository-defined)."""
+        tx, ty = re.findall(r'\w+|\S', x), re.findall(r'\w+|\S', y)
+        if len(tx) != len(ty):
+            self.errors.append(f'{self.f}: {path}: code fragment changed beyond comments and renamings'); return
+        for u, v in zip(tx, ty):
+            if u == v: continue
+            if re.fullmatch(r'[A-Za-z_]\w*', u) and re.fullmatch(r'[A-Za-z_]\w*', v): self.idents.append((u, v, 'fragment', line))
+            else: self.errors.append(f'{self.f}: {path}: code fragment changed beyond comments and renamings ({u!r} -> {v!r})'); return
+
     def cmp(self, a, b, path='root'):
         if type(a) is not type(b):
             self.errors.append(f'{self.f}: {path}: node {type(a).__name__} vs {type(b).__name__}'); return
@@ -156,8 +170,7 @@ class Walk:
                     ca, cb = parse_code(a.value), parse_code(b.value)
                     if ca is not None and cb is not None: self.cmp(ca, cb, path + '<code>')
                     elif looks_like_code(a.value) or looks_like_code(b.value):
-                        if strip_comments_loose(a.value) != strip_comments_loose(b.value):
-                            self.errors.append(f'{self.f}: {path}: multi-line string changed beyond comments')
+                        self.fragment(strip_comments_loose(a.value), strip_comments_loose(b.value), path, getattr(a, 'lineno', 0))
                     else: self.strings.append((a.value, b.value, getattr(a, 'lineno', 0)))
             elif type(a.value) is not type(b.value) or a.value != b.value:
                 self.errors.append(f'{self.f}: {path}: constant {a.value!r} vs {b.value!r}')
@@ -170,8 +183,7 @@ class Walk:
                 ca, cb = parse_code(ta), parse_code(tb)
                 if ca is not None and cb is not None: self.cmp(ca, cb, path + '<fcode>')
                 elif looks_like_code(ta) or looks_like_code(tb):
-                    if strip_comments_loose(ta) != strip_comments_loose(tb):
-                        self.errors.append(f'{self.f}: {path}: multi-line f-string template changed beyond comments')
+                    self.fragment(strip_comments_loose(ta), strip_comments_loose(tb), path, getattr(a, 'lineno', 0))
                 else: self.strings.append((ta, tb, getattr(a, 'lineno', 0)))
             return
         idf = IDENT_FIELDS.get(type(a))

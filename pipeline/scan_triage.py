@@ -120,7 +120,7 @@ if __name__ == '__main__':
               f"it only means: lowering the threshold is allowed, the pipeline decides.")
         sys.exit(1)
     if not a.root:
-        ap.error('wurzel, --gate or --selbsttest is required')
+        ap.error('wurzel, --gate or --self-test is required')
 
     pqs = []
     for d in sorted(glob.glob(os.path.join(a.root, '*/'))):

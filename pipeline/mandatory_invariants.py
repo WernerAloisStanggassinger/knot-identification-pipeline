@@ -97,7 +97,7 @@ def run_sage(code, timeout=600):
 # REGINA (base): classical algebra + diagram codes
 # ──────────────────────────────────────────────
 
-_REGINA_HELPER = '\n        import os as _os, time as _time, tempfile as _tf\n        _T_START = _time.time()\n        def _restbudget():\n            """How much may ONE expensive call still cost without the OUTER\n            limit firing and taking all the cheap results with it? 85 % of the outer\n            budget minus what has already been spent. Never below 10 s."""\n            return max(10, int(_AUSSEN * 0.85 - (_time.time() - _T_START)))\n        def _mit_frist(_fn, _tag, _sek=None):\n            """ONE expensive call in a throwaway child with its own clock.\n            Footgun 13: isolation at process level, not at exception level.\n            Footgun 18/24: waitpid ALWAYS with WNOHANG, never blocking.\n            Footgun 20: NEVER signal.alarm — by default SIGALRM terminates the\n                        watcher, not the watched.\n            File instead of pipe: an 84-crossing polynomial overflows the 64 KB\n            pipe buffer, the child blocks on write and the parent\n            waits for a child that is waiting for it."""\n            if _sek is None:\n                _sek = _restbudget()\n            _fd, _pf = _tf.mkstemp(prefix=\'reg_\' + _tag + \'_\')\n            _os.close(_fd)\n            _t0 = _time.time()\n            _pid = _os.fork()\n            if _pid == 0:\n                try:\n                    _v = str(_fn())\n                    with open(_pf, \'w\') as _f:\n                        _f.write(_v)\n                    _os._exit(0)\n                except BaseException as _e:\n                    try:\n                        with open(_pf, \'w\') as _f:\n                            _f.write(\'\\x00ERR \' + repr(_e)[:300])\n                    except BaseException:\n                        pass\n                    _os._exit(1)\n            while True:\n                _p, _st = _os.waitpid(_pid, _os.WNOHANG)\n                if _p:\n                    try:\n                        _s = open(_pf).read()\n                    except BaseException:\n                        _s = \'\\x00ERR result file not readable\'\n                    try:\n                        _os.unlink(_pf)\n                    except OSError:\n                        pass\n                    if _s.startswith(\'\\x00ERR\'):\n                        return None, _s[5:]\n                    return _s, None\n                if _time.time() - _t0 > _sek:\n                    _os.kill(_pid, 9)\n                    _os.waitpid(_pid, 0)\n                    try:\n                        _os.unlink(_pf)\n                    except OSError:\n                        pass\n                    return None, \'timeout (%ds single latch, outer budget %ds)\' % (_sek, _AUSSEN)\n                _time.sleep(0.25)\n'
+_REGINA_HELPER = '\n        import os as _os, time as _time, tempfile as _tf\n        _T_START = _time.time()\n        def _remaining_budget():\n            """How much may ONE expensive call still cost without the OUTER\n            limit firing and taking all the cheap results with it? 85 % of the outer\n            budget minus what has already been spent. Never below 10 s."""\n            return max(10, int(_OUTER * 0.85 - (_time.time() - _T_START)))\n        def _with_deadline(_fn, _tag, _sek=None):\n            """ONE expensive call in a throwaway child with its own clock.\n            Footgun 13: isolation at process level, not at exception level.\n            Footgun 18/24: waitpid ALWAYS with WNOHANG, never blocking.\n            Footgun 20: NEVER signal.alarm — by default SIGALRM terminates the\n                        watcher, not the watched.\n            File instead of pipe: an 84-crossing polynomial overflows the 64 KB\n            pipe buffer, the child blocks on write and the parent\n            waits for a child that is waiting for it."""\n            if _sek is None:\n                _sek = _remaining_budget()\n            _fd, _pf = _tf.mkstemp(prefix=\'reg_\' + _tag + \'_\')\n            _os.close(_fd)\n            _t0 = _time.time()\n            _pid = _os.fork()\n            if _pid == 0:\n                try:\n                    _v = str(_fn())\n                    with open(_pf, \'w\') as _f:\n                        _f.write(_v)\n                    _os._exit(0)\n                except BaseException as _e:\n                    try:\n                        with open(_pf, \'w\') as _f:\n                            _f.write(\'\\x00ERR \' + repr(_e)[:300])\n                    except BaseException:\n                        pass\n                    _os._exit(1)\n            while True:\n                _p, _st = _os.waitpid(_pid, _os.WNOHANG)\n                if _p:\n                    try:\n                        _s = open(_pf).read()\n                    except BaseException:\n                        _s = \'\\x00ERR result file not readable\'\n                    try:\n                        _os.unlink(_pf)\n                    except OSError:\n                        pass\n                    if _s.startswith(\'\\x00ERR\'):\n                        return None, _s[5:]\n                    return _s, None\n                if _time.time() - _t0 > _sek:\n                    _os.kill(_pid, 9)\n                    _os.waitpid(_pid, 0)\n                    try:\n                        _os.unlink(_pf)\n                    except OSError:\n                        pass\n                    return None, \'timeout (%ds single latch, outer budget %ds)\' % (_sek, _OUTER)\n                _time.sleep(0.25)\n'
 
 
 def regina_full(signed_gauss, point_eval=False):
@@ -116,20 +116,20 @@ def regina_full(signed_gauss, point_eval=False):
     # budget before jones/bracket even got their turn.
     _exp_lines = [] if point_eval else [
         "L.improveTreewidth()",
-        "_v, _e = _mit_frist(lambda: L.jones(regina.Algorithm.Treewidth), 'jones')",
+        "_v, _e = _with_deadline(lambda: L.jones(regina.Algorithm.Treewidth), 'jones')",
         "out['jones'] = _v",
         "if _e: out['jones_err'] = _e",
-        "_v, _e = _mit_frist(lambda: L.bracket(regina.Algorithm.Treewidth), 'bracket')",
+        "_v, _e = _with_deadline(lambda: L.bracket(regina.Algorithm.Treewidth), 'bracket')",
         "out['kauffman'] = _v",
         "if _e: out['kauffman_err'] = _e",
-        "_v, _e = _mit_frist(lambda: L.homfly(regina.Algorithm.Treewidth), 'homfly')",
+        "_v, _e = _with_deadline(lambda: L.homfly(regina.Algorithm.Treewidth), 'homfly')",
         "out['homfly'] = _v",
         "if _e: out['homfly_err'] = _e",
     ]
     _expensive = "\n".join("            " + _l for _l in _exp_lines)
     _outer = (int(os.environ.get('REGINA_TIMEOUT_POINTEVAL', 300)) if point_eval
                else int(os.environ.get('REGINA_TIMEOUT', 1200)))
-    code = SEAL_PRELUDE + textwrap.dedent(f"        _AUSSEN = {_outer}\n") \
+    code = SEAL_PRELUDE + textwrap.dedent(f"        _OUTER = {_outer}\n") \
          + textwrap.dedent(_REGINA_HELPER) + textwrap.dedent(f"""
         import json, regina
         sg = {signed_gauss!r}
@@ -154,7 +154,7 @@ def regina_full(signed_gauss, point_eval=False):
                 out['pd_code'] = pd_str
             except Exception as e:
                 out['pd_err'] = str(e)
-            _v, _e = _mit_frist(lambda: L.alexander(), 'alexander')
+            _v, _e = _with_deadline(lambda: L.alexander(), 'alexander')
             if _v is not None: out['alexander'] = _v
             if _e: out['alexander_err'] = _e
 {_expensive}
@@ -347,7 +347,7 @@ def snappy_full(pd_code, point_eval=False):
     geometry (vol/sym/cusp) + Seifert det/signature (numerical) stay."""
     code = SEAL_PRELUDE + textwrap.dedent(f"""
         # --- length spectrum: ONE schema ---
-        def _lspec_eintrag(g):
+        def _lspec_entry(g):
             # ONE schema for the length spectrum (finding 2026-08-24). The fallback paths used
             # to write strings, the main path floats — whoever read 'length_real'
             # saw NOTHING for the strings. 53 records were silently invisible that way.
@@ -402,7 +402,7 @@ def snappy_full(pd_code, point_eval=False):
             try:
                 ls = M.length_spectrum(0.5)
                 out['length_spectrum_short'] = [
-                    _lspec_eintrag(g)
+                    _lspec_entry(g)
                     for g in ls[:10]
                 ]
             except Exception as e: out['lspec_err'] = str(e)
@@ -456,7 +456,7 @@ def snappy_full(pd_code, point_eval=False):
 
             out['seifert_matrix_size'] = n_s
             out['det_via_seifert'] = abs(_det_bareiss(S_int))
-            out['det_via_seifert_method'] = 'bareiss_exakt_ganzzahlig'
+            out['det_via_seifert_method'] = 'bareiss_exact_integer'
             evs = np.linalg.eigvalsh(np.array(S_int, dtype=float))
             out['signature'] = int((evs > 1e-10).sum() - (evs < -1e-10).sum())
             # CONVENTION, measured on 675 records (Disc #582): this signature is throughout
@@ -671,7 +671,7 @@ def homfly_fallback_level(report, point_eval):
                      f'7700 at n=12)',
             'route': 'hecke_f_p', 'n': int(n),
             'hint': 'can be filled later with HOMFLY_FALLBACK_NMAX=12 or '
-                       'tools/homfly_interpolation.py --ziele --exakt'}
+                       'tools/homfly_interpolation.py --targets --exact'}
         return
 
     zg = d.get('crossing_number_min')

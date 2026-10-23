@@ -54,21 +54,21 @@ from pd_to_theta_input import pd_to_cs_phi, cs_phi_to_sage_literal  # noqa: E402
 THETA_DIR = site_config.THETA_DIR
 
 
-def _parse_pd(pflicht: dict) -> list:
+def _parse_pd(mandatory: dict) -> list:
     """Extract the PD list as a list of 4-tuples (int) from a pflicht JSON.
 
     Searches in this order:
       1. pd_list_str (top level, e.g. '[(1, 5, 2, 4), (3, 1, 4, 6), ...]')
       2. pflichtliste.DIAGRAMM.pd_code as a string 'PD[X[1, 5, 2, 4], X[3,...], ...]'
     """
-    pd_list_str = pflicht.get("pd_list_str", "")
+    pd_list_str = mandatory.get("pd_list_str", "")
     if pd_list_str:
         try:
             pd_list = ast.literal_eval(pd_list_str)
             return [[int(x) for x in tup] for tup in pd_list]
         except Exception:
             pass
-    diag = pflicht.get("pflichtliste", {}).get("DIAGRAMM", {})
+    diag = mandatory.get("pflichtliste", {}).get("DIAGRAMM", {})
     pd_code = diag.get("pd_code")
     if pd_code:
         # Parse "PD[X[1, 5, 2, 4], X[3, 1, 4, 6], X[5, 3, 6, 2]]"
@@ -286,11 +286,11 @@ def main():
 
     if not args.pflicht_json.exists():
         raise SystemExit(f"Pflicht JSON missing: {args.pflicht_json}")
-    pflicht = json.loads(args.pflicht_json.read_text())
-    name = pflicht.get("name", args.pflicht_json.stem)
+    mandatory = json.loads(args.pflicht_json.read_text())
+    name = mandatory.get("name", args.pflicht_json.stem)
 
     # 1. Extract PD
-    pd_list = _parse_pd(pflicht)
+    pd_list = _parse_pd(mandatory)
     n_cross = len(pd_list)
     print(f"[theta_crosscheck] {name}: c={n_cross} PD-crossings")
 
@@ -316,7 +316,7 @@ def main():
         result.setdefault("theta_norm_str", "<not_computable>")
 
     # 4. Alexander consistency with the pipeline pflicht (optional, informative).
-    alex_pipeline = pflicht.get("pflichtliste", {}).get("ALGEBRA", {}).get(
+    alex_pipeline = mandatory.get("pflichtliste", {}).get("ALGEBRA", {}).get(
         "alexander_polynomial", ""
     )
     alex_theta = result.get("delta1_str", "")
@@ -326,11 +326,11 @@ def main():
     #     mirror conventions -> always False -> defused as "indicative only". As a result
     #     stale/wrong-knot theta slipped through (trainstation det1215!=3969, double-6
     #     det49!=483428169). det is mirror/convention invariant = a usable hard bound.
-    pflicht_det = _pflicht_determinant(pflicht)
+    mandatory_det = _mandatory_determinant(mandatory)
     theta_det = _theta_determinant(result.get("delta1_str", ""))
     det_gate_ok = (
-        isinstance(pflicht_det, int) and isinstance(theta_det, int)
-        and pflicht_det == theta_det
+        isinstance(mandatory_det, int) and isinstance(theta_det, int)
+        and mandatory_det == theta_det
     )
 
     out = {
@@ -358,7 +358,7 @@ def main():
             "string_equal_after_normalize": _alex_match(alex_pipeline, alex_theta),
         },
         "determinant_gate": {
-            "pflicht_determinant": pflicht_det,
+            "pflicht_determinant": mandatory_det,
             "theta_determinant": theta_det,
             "match": det_gate_ok,
             "note": ("HARD (Disc #533): |Delta1(-1)| == pflicht quartet det. "
@@ -378,9 +378,9 @@ def main():
         print(f"[theta_crosscheck]   Delta1 = {result['delta1_str']}")
         # det-gate verdict: the computed theta MUST hit the pflicht det, otherwise
         # it ran on the wrong knot (Disc #533) -> loud + exit != 0.
-        if theta_det is not None and pflicht_det is not None and not det_gate_ok:
+        if theta_det is not None and mandatory_det is not None and not det_gate_ok:
             print(f"[theta_crosscheck] 🔴 DET-GATE FAIL {name}: theta_det={theta_det} "
-                  f"!= pflicht_det={pflicht_det} -> stale/wrong-knot theta, do NOT trust!")
+                  f"!= pflicht_det={mandatory_det} -> stale/wrong-knot theta, do NOT trust!")
             sys.exit(4)  # exit 4 = det-gate breach (distinguishable from exit 3 = compute fail)
     else:
         sys.exit(3)  # exit 3 for sweep tracking, JSON has been written
@@ -404,12 +404,12 @@ def _alex_match(pipeline_alex: str, theta_delta1: str) -> bool:
         return False
 
 
-def _pflicht_determinant(pflicht: dict):
+def _mandatory_determinant(mandatory: dict):
     """Quartet det from pflicht (konsistenz_quartett preferred, otherwise ALGEBRA)."""
-    dv = pflicht.get("konsistenz_quartett", {}).get("det_value")
+    dv = mandatory.get("konsistenz_quartett", {}).get("det_value")
     if isinstance(dv, int):
         return dv
-    d = pflicht.get("pflichtliste", {}).get("ALGEBRA", {}).get("determinant")
+    d = mandatory.get("pflichtliste", {}).get("ALGEBRA", {}).get("determinant")
     return d if isinstance(d, int) else None
 
 

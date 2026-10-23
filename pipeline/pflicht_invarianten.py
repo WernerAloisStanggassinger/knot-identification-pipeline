@@ -97,7 +97,7 @@ def run_sage(code, timeout=600):
 # REGINA (base): classical algebra + diagram codes
 # ──────────────────────────────────────────────
 
-_REGINA_HELFER = '\n        import os as _os, time as _time, tempfile as _tf\n        _T_START = _time.time()\n        def _restbudget():\n            """How much may ONE expensive call still cost without the OUTER\n            limit firing and taking all the cheap results with it? 85 % of the outer\n            budget minus what has already been spent. Never below 10 s."""\n            return max(10, int(_AUSSEN * 0.85 - (_time.time() - _T_START)))\n        def _mit_frist(_fn, _tag, _sek=None):\n            """ONE expensive call in a throwaway child with its own clock.\n            Footgun 13: isolation at process level, not at exception level.\n            Footgun 18/24: waitpid ALWAYS with WNOHANG, never blocking.\n            Footgun 20: NEVER signal.alarm — by default SIGALRM terminates the\n                        watcher, not the watched.\n            File instead of pipe: an 84-crossing polynomial overflows the 64 KB\n            pipe buffer, the child blocks on write and the parent\n            waits for a child that is waiting for it."""\n            if _sek is None:\n                _sek = _restbudget()\n            _fd, _pf = _tf.mkstemp(prefix=\'reg_\' + _tag + \'_\')\n            _os.close(_fd)\n            _t0 = _time.time()\n            _pid = _os.fork()\n            if _pid == 0:\n                try:\n                    _v = str(_fn())\n                    with open(_pf, \'w\') as _f:\n                        _f.write(_v)\n                    _os._exit(0)\n                except BaseException as _e:\n                    try:\n                        with open(_pf, \'w\') as _f:\n                            _f.write(\'\\x00ERR \' + repr(_e)[:300])\n                    except BaseException:\n                        pass\n                    _os._exit(1)\n            while True:\n                _p, _st = _os.waitpid(_pid, _os.WNOHANG)\n                if _p:\n                    try:\n                        _s = open(_pf).read()\n                    except BaseException:\n                        _s = \'\\x00ERR result file not readable\'\n                    try:\n                        _os.unlink(_pf)\n                    except OSError:\n                        pass\n                    if _s.startswith(\'\\x00ERR\'):\n                        return None, _s[5:]\n                    return _s, None\n                if _time.time() - _t0 > _sek:\n                    _os.kill(_pid, 9)\n                    _os.waitpid(_pid, 0)\n                    try:\n                        _os.unlink(_pf)\n                    except OSError:\n                        pass\n                    return None, \'timeout (%ds single latch, outer budget %ds)\' % (_sek, _AUSSEN)\n                _time.sleep(0.25)\n'
+_REGINA_HELPER = '\n        import os as _os, time as _time, tempfile as _tf\n        _T_START = _time.time()\n        def _restbudget():\n            """How much may ONE expensive call still cost without the OUTER\n            limit firing and taking all the cheap results with it? 85 % of the outer\n            budget minus what has already been spent. Never below 10 s."""\n            return max(10, int(_AUSSEN * 0.85 - (_time.time() - _T_START)))\n        def _mit_frist(_fn, _tag, _sek=None):\n            """ONE expensive call in a throwaway child with its own clock.\n            Footgun 13: isolation at process level, not at exception level.\n            Footgun 18/24: waitpid ALWAYS with WNOHANG, never blocking.\n            Footgun 20: NEVER signal.alarm — by default SIGALRM terminates the\n                        watcher, not the watched.\n            File instead of pipe: an 84-crossing polynomial overflows the 64 KB\n            pipe buffer, the child blocks on write and the parent\n            waits for a child that is waiting for it."""\n            if _sek is None:\n                _sek = _restbudget()\n            _fd, _pf = _tf.mkstemp(prefix=\'reg_\' + _tag + \'_\')\n            _os.close(_fd)\n            _t0 = _time.time()\n            _pid = _os.fork()\n            if _pid == 0:\n                try:\n                    _v = str(_fn())\n                    with open(_pf, \'w\') as _f:\n                        _f.write(_v)\n                    _os._exit(0)\n                except BaseException as _e:\n                    try:\n                        with open(_pf, \'w\') as _f:\n                            _f.write(\'\\x00ERR \' + repr(_e)[:300])\n                    except BaseException:\n                        pass\n                    _os._exit(1)\n            while True:\n                _p, _st = _os.waitpid(_pid, _os.WNOHANG)\n                if _p:\n                    try:\n                        _s = open(_pf).read()\n                    except BaseException:\n                        _s = \'\\x00ERR result file not readable\'\n                    try:\n                        _os.unlink(_pf)\n                    except OSError:\n                        pass\n                    if _s.startswith(\'\\x00ERR\'):\n                        return None, _s[5:]\n                    return _s, None\n                if _time.time() - _t0 > _sek:\n                    _os.kill(_pid, 9)\n                    _os.waitpid(_pid, 0)\n                    try:\n                        _os.unlink(_pf)\n                    except OSError:\n                        pass\n                    return None, \'timeout (%ds single latch, outer budget %ds)\' % (_sek, _AUSSEN)\n                _time.sleep(0.25)\n'
 
 
 def regina_full(signed_gauss, point_eval=False):
@@ -127,10 +127,10 @@ def regina_full(signed_gauss, point_eval=False):
         "if _e: out['homfly_err'] = _e",
     ]
     _expensive = "\n".join("            " + _l for _l in _exp_lines)
-    _aussen = (int(os.environ.get('REGINA_TIMEOUT_POINTEVAL', 300)) if point_eval
+    _outer = (int(os.environ.get('REGINA_TIMEOUT_POINTEVAL', 300)) if point_eval
                else int(os.environ.get('REGINA_TIMEOUT', 1200)))
-    code = SEAL_PRELUDE + textwrap.dedent(f"        _AUSSEN = {_aussen}\n") \
-         + textwrap.dedent(_REGINA_HELFER) + textwrap.dedent(f"""
+    code = SEAL_PRELUDE + textwrap.dedent(f"        _AUSSEN = {_outer}\n") \
+         + textwrap.dedent(_REGINA_HELPER) + textwrap.dedent(f"""
         import json, regina
         sg = {signed_gauss!r}
         out = {{}}
@@ -260,7 +260,7 @@ def alex_det(alex_str):
     return abs(int(v)) if v.denominator == 1 else abs(float(v))
 
 
-def punkt_alexander_det(pd_str, variante=6):
+def point_alexander_det(pd_str, variante=6):
     """FALLBACK when regina cannot manage the algebra (approved by Werner 2026-08-22).
 
     WHY: regina's Alexander doubles every ~16 crossings — measured on our own
@@ -280,21 +280,21 @@ def punkt_alexander_det(pd_str, variante=6):
     """
     try:
         import sys as _sys
-        _sieb = site_config.KAWAUCHI_SIEVE_DIR
-        if _sieb not in _sys.path:
-            _sys.path.insert(0, _sieb)
-        from alex_punkt import parse_pd, alexander_poly, normiere
+        _sieve = site_config.KAWAUCHI_SIEVE_DIR
+        if _sieve not in _sys.path:
+            _sys.path.insert(0, _sieve)
+        from alex_punkt import parse_pd, alexander_poly, normalise
         pd = parse_pd(pd_str)
         if not pd:
             return None
-        co = normiere(alexander_poly(pd, variante))
+        co = normalise(alexander_poly(pd, variante))
         return abs(sum(c * ((-1) ** i) for i, c in enumerate(co)))
     except Exception as e:
         print(f"  Point Alexander not possible: {type(e).__name__}: {e}")
         return None
 
 
-def pd_aus_stage4(output_pfad):
+def pd_from_stage4(output_path):
     """Fetch a PD from the stage-4 artifact when regina delivers none.
 
     On regina_failed, pd_code becomes None -> without this, Snappy fails too,
@@ -302,21 +302,21 @@ def pd_aus_stage4(output_pfad):
     The smallest one is preferred (spherogram regularly beats regina, Disc #562).
     """
     import glob as _glob
-    ordner = os.path.dirname(os.path.abspath(output_pfad)) or '.'
-    treffer = sorted(_glob.glob(os.path.join(ordner, '*_aggressive_simplify.json')))
-    if not treffer:
+    folder = os.path.dirname(os.path.abspath(output_path)) or '.'
+    hits = sorted(_glob.glob(os.path.join(folder, '*_aggressive_simplify.json')))
+    if not hits:
         return None, None
     try:
-        d = json.load(open(treffer[0], encoding='utf-8'))
+        d = json.load(open(hits[0], encoding='utf-8'))
         best = d.get('best', {}) or {}
-        kand = [(best.get('sphe_pd_best_n'), best.get('sphe_pd_best'), 'spherogram'),
+        cand_k = [(best.get('sphe_pd_best_n'), best.get('sphe_pd_best'), 'spherogram'),
                 (best.get('size_simp_regina'), best.get('pd'), 'regina')]
-        kand = [(n, s, q) for n, s, q in kand
+        cand_k = [(n, s, q) for n, s, q in cand_k
                 if isinstance(s, str) and s.startswith('PD[') and isinstance(n, int)]
-        if not kand:
+        if not cand_k:
             return None, None
-        kand.sort()
-        return kand[0][1], f"{treffer[0]} ({kand[0][2]}, c={kand[0][0]})"
+        cand_k.sort()
+        return cand_k[0][1], f"{hits[0]} ({cand_k[0][2]}, c={cand_k[0][0]})"
     except Exception as e:
         print(f"  Stage-4 PD not readable: {type(e).__name__}: {e}")
         return None, None
@@ -622,7 +622,7 @@ def knotjob_s(pd_code, name='knot'):
 HOMFLY_FALLBACK_TOOLS = site_config.TOOLS_DIR
 
 
-def homfly_rueckfallebene(report, point_eval):
+def homfly_fallback_level(report, point_eval):
     """Fills homfly_polynomial when regina did NOT deliver it — and
     labels the gap when that fails too.
 
@@ -681,7 +681,7 @@ def homfly_rueckfallebene(report, point_eval):
                               'weg': 'hecke_f_p'}
         return
 
-    riegel = int(os.environ.get('HOMFLY_FALLBACK_TIMEOUT', 1800))
+    latch = int(os.environ.get('HOMFLY_FALLBACK_TIMEOUT', 1800))
     cmd = [site_config.PYTHON_MAIN,
            os.path.join(HOMFLY_FALLBACK_TOOLS, 'homfly_modular.py'),
            '--wort', json.dumps([int(g) for g in w]),
@@ -693,11 +693,11 @@ def homfly_rueckfallebene(report, point_eval):
           f"n={int(n)}, c={int(zg)}) …")
     t0 = time.time()
     try:
-        res = subprocess.run(cmd, capture_output=True, text=True, timeout=riegel)
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=latch)
     except subprocess.TimeoutExpired:
-        a['homfly_luecke'] = {'grund': f'Riegel {riegel}s erreicht',
+        a['homfly_luecke'] = {'grund': f'Riegel {latch}s erreicht',
                               'weg': 'hecke_f_p'}
-        print(f"  Time limit {riegel}s reached — gap labelled, run continues")
+        print(f"  Time limit {latch}s reached — gap labelled, run continues")
         return
     try:
         out = json.loads(res.stdout.strip().splitlines()[-1])
@@ -714,20 +714,20 @@ def homfly_rueckfallebene(report, point_eval):
 
     det_rec = (a.get('determinant') if a.get('determinant') is not None
                else a.get('determinant_alexander'))
-    gruende = []
+    reasons = []
     if not out.get('stabil'):
-        gruende.append('CRT did not become stable (more primes needed)')
+        reasons.append('CRT did not become stable (more primes needed)')
     if out.get('frisch_treffer') != out.get('frisch_gesamt'):
-        gruende.append(f"fresh points {out.get('frisch_treffer')}/"
+        reasons.append(f"fresh points {out.get('frisch_treffer')}/"
                        f"{out.get('frisch_gesamt')} in F_p")
     if det_rec is not None and out.get('det') != int(det_rec):
-        gruende.append(f"det {out.get('det')} != record {int(det_rec)}")
+        reasons.append(f"det {out.get('det')} != record {int(det_rec)}")
     if out.get('alexander_punkte') is False:
-        gruende.append(f"Alexander points: {out.get('alexander_punkte_text')}")
-    if gruende:
-        a['homfly_luecke'] = {'grund': '; '.join(gruende), 'weg': 'hecke_f_p',
+        reasons.append(f"Alexander points: {out.get('alexander_punkte_text')}")
+    if reasons:
+        a['homfly_luecke'] = {'grund': '; '.join(reasons), 'weg': 'hecke_f_p',
                               'sek': round(time.time() - t0, 1)}
-        print(f"  Witnesses disagree ⟹ NOTHING written: {'; '.join(gruende)[:160]}")
+        print(f"  Witnesses disagree ⟹ NOTHING written: {'; '.join(reasons)[:160]}")
         return
 
     a['homfly_polynomial'] = out['homfly']
@@ -823,8 +823,8 @@ def jones_at_i(jones_str):
     s = jones_str.replace(' ', '').replace('x^-', 'x^N')  # marker for negative exponents
     s2 = '+' + s if s[0] not in '+-' else s
     raw_terms = re.split(r'(?=[+-])', s2)[1:]
-    re_teil = 0
-    im_teil = 0
+    re_part = 0
+    im_part = 0
     for t in raw_terms:
         sign = 1
         if t[0] == '-': sign = -1; t = t[1:]
@@ -839,14 +839,14 @@ def jones_at_i(jones_str):
         # i^k cyclic: 1, i, -1, -i  — two integers instead of one float
         r = xe_n % 4
         if r == 0:
-            re_teil += sign * c
+            re_part += sign * c
         elif r == 1:
-            im_teil += sign * c
+            im_part += sign * c
         elif r == 2:
-            re_teil -= sign * c
+            re_part -= sign * c
         else:
-            im_teil -= sign * c
-    return math.isqrt(re_teil * re_teil + im_teil * im_teil)
+            im_part -= sign * c
+    return math.isqrt(re_part * re_part + im_part * im_part)
 
 
 # ──────────────────────────────────────────────
@@ -942,11 +942,11 @@ def main():
     # computes the determinant from it in seconds. Without this, stage 5 aborted with
     # "no det witness" (3 runs on 22.08.), although everything needed was there.
     if report.get('regina_failed'):
-        ersatz_pd, quelle = pd_aus_stage4(args.output)
+        ersatz_pd, source_name = pd_from_stage4(args.output)
         if ersatz_pd:
             if not pd_code:
                 pd_code = ersatz_pd
-                print(f"  ↻ PD taken over from stage 4: {quelle}")
+                print(f"  ↻ PD taken over from stage 4: {source_name}")
                 # 2026-08-23: the replacement PD must also go INTO THE REPORT, not only into
                 # the local variable. The fallback of 22.08. rescued stage 5
                 # (det witness), but stage 6 reads pflichtliste.DIAGRAMM.pd_code —
@@ -958,16 +958,16 @@ def main():
                 # minimum (Disc #231: honest bound "<=N", never report it as c).
                 report['pflichtliste']['DIAGRAMM']['pd_code'] = ersatz_pd
                 report['pd_code_herkunft'] = {
-                    'quelle': quelle,
+                    'quelle': source_name,
                     'grund': 'regina_failed — PD from stage 4 (aggressive_simplify)',
                     'warnung': ('diagram size is an upper bound for the '
                                 'crossing number, not a minimum.')}
             t_pk = time.time()
-            d_pk = punkt_alexander_det(ersatz_pd)
+            d_pk = point_alexander_det(ersatz_pd)
             if d_pk is not None:
                 report['pflichtliste']['ALGEBRA']['determinant_punkt'] = d_pk
                 report['punkt_alexander'] = {
-                    'det': d_pk, 'quelle': quelle, 'variante': 6,
+                    'det': d_pk, 'quelle': source_name, 'variante': 6,
                     'sekunden': round(time.time() - t_pk, 2),
                     'note': ('geeicht alex_eichung.py Variante 6; '
                              '557/557 Korpus-Determinanten getroffen, 0 Abweichungen')}
@@ -1070,7 +1070,7 @@ def main():
     # gap carries its reason. Placed here because only the Sage step sets the
     # braid word that the Hecke trace needs.
     try:
-        homfly_rueckfallebene(report, point_eval)
+        homfly_fallback_level(report, point_eval)
     except Exception as _e:
         report['pflichtliste']['ALGEBRA']['homfly_luecke'] = {
             'grund': 'fallback level itself failed: ' + repr(_e)[:200],
@@ -1221,11 +1221,11 @@ def main():
     # bound stays true, so a re-run must not overwrite it.
     # Only LOWERING is allowed; raising is refused and logged.
     try:
-        _neu = report['pflichtliste']['DIAGRAMM'].get('crossing_number_min')
+        _new = report['pflichtliste']['DIAGRAMM'].get('crossing_number_min')
         # Read both sources: the stage-5 report of the PREVIOUS run and the record
         # (complete.json) — bound sweeps lower c only in complete.json, so the guard
         # must look there too, otherwise a re-run silently raises it again.
-        _kandidaten = []
+        _candidates = []
         for _p in (args.output,
                    args.output.replace('_pflicht_invarianten.json',
                                        '_pflicht_invarianten_complete.json')):
@@ -1235,15 +1235,15 @@ def main():
                         _v = ((json.load(_f).get('pflichtliste') or {}).get('DIAGRAMM') or {}) \
                             .get('crossing_number_min')
                     if isinstance(_v, int):
-                        _kandidaten.append(_v)
+                        _candidates.append(_v)
                 except Exception:
                     pass
-        if isinstance(_neu, int) and _kandidaten:
-            _alt = min(_kandidaten)
-            if _alt < _neu:
+        if isinstance(_new, int) and _candidates:
+            _alt = min(_candidates)
+            if _alt < _new:
                 report['pflichtliste']['DIAGRAMM']['crossing_number_min'] = _alt
                 report['_C_BOUND_KEPT_FROM_PREVIOUS'] = {
-                    'kept': _alt, 'this_run_found': _neu,
+                    'kept': _alt, 'this_run_found': _new,
                     'reason': ('c is an upper bound (Disc #231) — the smaller bound receipted '
                                'earlier stays valid; stage-4 sampling is stochastic, '
                                'a worse run must not raise it (Disc #562).'),
@@ -1251,7 +1251,7 @@ def main():
                                         'run — only the bound is the old one.'),
                     'when': '2026-07-25',
                 }
-                print(f"\n[PFLICHT] 🛡  c guard: this run found {_neu}, record carried {_alt} "
+                print(f"\n[PFLICHT] 🛡  c guard: this run found {_new}, record carried {_alt} "
                       f"→ keeping {_alt} (never raise, Disc #562).")
     except Exception as _e:
         print(f"[PFLICHT] ⚠ c guard skipped: {type(_e).__name__}: {_e}")
@@ -1264,8 +1264,8 @@ def main():
     print(f"\n{'='*60}")
     print(f"PFLICHTLISTE — {args.name}")
     print(f"{'='*60}")
-    for kategorie, items in report['pflichtliste'].items():
-        print(f"\n=== {kategorie} ===")
+    for category, items in report['pflichtliste'].items():
+        print(f"\n=== {category} ===")
         for k, v in items.items():
             if v is None:
                 continue

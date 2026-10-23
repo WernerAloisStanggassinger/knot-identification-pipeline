@@ -27,7 +27,7 @@ sys.path.insert(0, site_config.TOPO_GATE_DIR)
 from audit_topology import parse_fseries, detect_period_pi, eval_curve, reduced_crossings
 
 
-def eine(path):
+def one_curve(path):
     try:
         offset, A, B = parse_fseries(path)
         period = math.pi if detect_period_pi(A, B) else 2 * math.pi
@@ -45,22 +45,22 @@ def selbsttest():
     that it must REJECT (Footgun 16). Otherwise green is worthless.
     Note: the probe names passed to pruef() are data for the gate and stay German."""
     ok = tot = 0
-    def pruef(name, ist, soll):
+    def check(name, actual, expected):
         nonlocal ok, tot
-        tot += 1; gut = (ist == soll); ok += gut
-        print(f"  {'✅' if gut else '🔴'} {name}: reduced={ist} (expected {soll})")
+        tot += 1; good = (actual == expected); ok += good
+        print(f"  {'✅' if good else '🔴'} {name}: reduced={actual} (expected {expected})")
     t = np.linspace(0, 2*np.pi, 3000, endpoint=False)
     # circle — must give 0
-    kreis = np.stack([np.cos(t), np.sin(t), np.zeros_like(t)], 1)
-    pruef('circle ⟹ unknot', reduced_crossings(kreis), 0)
+    circle = np.stack([np.cos(t), np.sin(t), np.zeros_like(t)], 1)
+    check('circle ⟹ unknot', reduced_crossings(circle), 0)
     # COUNTER-CASE trefoil T(2,3) — must give 3, otherwise the tool says "unknot" to everything
-    kle = np.stack([np.sin(t)+2*np.sin(2*t), np.cos(t)-2*np.cos(2*t), -np.sin(3*t)], 1)
-    pruef('trefoil ⟹ NOT unknot (counter-case)', reduced_crossings(kle), 3)
+    trefoil = np.stack([np.sin(t)+2*np.sin(2*t), np.cos(t)-2*np.cos(2*t), -np.sin(3*t)], 1)
+    check('trefoil ⟹ NOT unknot (counter-case)', reduced_crossings(trefoil), 3)
     # COUNTER-CASE figure-eight — 4
-    ach = np.stack([(2+np.cos(2*t))*np.cos(3*t), (2+np.cos(2*t))*np.sin(3*t), np.sin(4*t)], 1)
-    pruef('figure-eight ⟹ 4 (second counter-case)', reduced_crossings(ach), 4)
+    fig8 = np.stack([(2+np.cos(2*t))*np.cos(3*t), (2+np.cos(2*t))*np.sin(3*t), np.sin(4*t)], 1)
+    check('figure-eight ⟹ 4 (second counter-case)', reduced_crossings(fig8), 4)
     # canary: a shifted circle stays an unknot
-    pruef('canary: shifted circle', reduced_crossings(kreis + np.array([5., -3., 2.])), 0)
+    check('canary: shifted circle', reduced_crossings(circle + np.array([5., -3., 2.])), 0)
     print(f"\n  {ok}/{tot} probes")
     return 0 if ok == tot else 1
 
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     if not a.fseries:
         ap.error('fseries paths or --selbsttest')
     with ProcessPoolExecutor(a.workers) as ex:
-        res = list(ex.map(eine, a.fseries))
+        res = list(ex.map(one_curve, a.fseries))
     u = [r for r in res if r.get('unknot')]
     k = [r for r in res if r.get('unknot') is False]
     f = [r for r in res if 'fehler' in r]

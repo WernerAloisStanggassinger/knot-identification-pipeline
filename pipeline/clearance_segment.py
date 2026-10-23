@@ -63,7 +63,7 @@ def clearance(points, ring_skip, radius=None):
     a = points
     b = np.roll(points, -1, axis=0)
     mitten = 0.5 * (a + b)
-    laengen = np.linalg.norm(b - a, axis=1)
+    lengths = np.linalg.norm(b - a, axis=1)
     if radius is None:
         # coarse bound from the point distance, generously padded
         tree0 = cKDTree(points)
@@ -71,12 +71,12 @@ def clearance(points, ring_skip, radius=None):
         idx = np.arange(n)
         rd = np.minimum(np.abs(idx[:, None] - j), n - np.abs(idx[:, None] - j))
         d = np.where(rd >= ring_skip, d, np.inf)
-        radius = float(d.min()) * 1.5 + 2 * float(laengen.max())
+        radius = float(d.min()) * 1.5 + 2 * float(lengths.max())
     tree = cKDTree(mitten)
-    paare = tree.query_pairs(radius, output_type='ndarray')
-    if len(paare) == 0:
+    pairs = tree.query_pairs(radius, output_type='ndarray')
+    if len(pairs) == 0:
         return float('inf'), 0
-    i, j = paare[:, 0], paare[:, 1]
+    i, j = pairs[:, 0], pairs[:, 1]
     rd = np.minimum(np.abs(i - j), n - np.abs(i - j))
     m = rd >= ring_skip
     i, j = i[m], j[m]
@@ -86,7 +86,7 @@ def clearance(points, ring_skip, radius=None):
     return float(d.min()), len(i)
 
 
-def _punkt_mca(points, ring_skip):
+def _point_mca(points, ring_skip):
     n = len(points)
     tree = cKDTree(points)
     k = min(64, n)
@@ -125,21 +125,21 @@ def selbsttest():
     k2 = np.c_[np.cos(t2), np.sin(t2), np.full(16, 0.01)]
     d_seg = _seg_seg_dist(k1, np.roll(k1, -1, 0), k2, np.roll(k2, -1, 0)).min()
     d_pkt = np.linalg.norm(k1[:, None, :] - k2[None, :, :], axis=2).min()
-    besser = d_seg < d_pkt and abs(d_seg - 0.01) < 1e-3
-    print(f'   {"✅" if besser else "🔴"} segment {d_seg:.6f} · point {d_pkt:.6f} · true 0.010000')
-    fehler += (not besser)
+    better = d_seg < d_pkt and abs(d_seg - 0.01) < 1e-3
+    print(f'   {"✅" if better else "🔴"} segment {d_seg:.6f} · point {d_pkt:.6f} · true 0.010000')
+    fehler += (not better)
 
     print('\n3) LOWER BOUND — segment must never be LARGER than point')
     rng = np.random.default_rng(7)
-    schlimm = 0
+    worst_k = 0
     for _ in range(20):
         p = rng.normal(size=(200, 3))
         ds = _seg_seg_dist(p, np.roll(p, -1, 0), p[::-1], np.roll(p[::-1], -1, 0)).min()
         dp = np.linalg.norm(p[:, None, :] - p[::-1][None, :, :], axis=2).min()
         if ds > dp + 1e-12:
-            schlimm += 1
-    print(f'   {"✅" if schlimm == 0 else f"🔴 {schlimm}/20 violated"} 20 random polygons')
-    fehler += bool(schlimm)
+            worst_k += 1
+    print(f'   {"✅" if worst_k == 0 else f"🔴 {worst_k}/20 violated"} 20 random polygons')
+    fehler += bool(worst_k)
 
     print('\n4) CIRCLE AGAINST THE ANALYTIC NUMBER')
     #   🔴 The first draft expected ~2 here ("the circle approaches itself only across the
@@ -150,18 +150,18 @@ def selbsttest():
     #      against the checker.
     n, rs = 512, 40
     t = np.linspace(0, 2 * np.pi, n, endpoint=False)
-    kreis = np.c_[np.cos(t), np.sin(t), np.zeros_like(t)]
-    sehne = 2 * np.sin(np.pi * rs / n)
-    d_pkt = _punkt_mca(kreis, rs)
-    d_seg, npaare = clearance(kreis, ring_skip=rs)
-    ok_p = abs(d_pkt - sehne) < 1e-9
+    circle = np.c_[np.cos(t), np.sin(t), np.zeros_like(t)]
+    chord = 2 * np.sin(np.pi * rs / n)
+    d_pkt = _point_mca(circle, rs)
+    d_seg, npairs = clearance(circle, ring_skip=rs)
+    ok_p = abs(d_pkt - chord) < 1e-9
     #   The segment distance lies below the chord (chords lie inside the circle)
     #   and must not fall arbitrarily far below it: the bound is the chord itself
     #   times cos(pi/n) — the distance of the segment midpoints.
-    unten = sehne * np.cos(np.pi / n) ** 2
-    ok_s = unten * 0.97 <= d_seg <= sehne
-    print(f'   {"✅" if ok_p else "🔴"} point   {d_pkt:.9f} against analytic {sehne:.9f}')
-    print(f'   {"✅" if ok_s else "🔴"} segment {d_seg:.9f} — below the chord, above {unten:.9f} ({npaare} pairs)')
+    lower = chord * np.cos(np.pi / n) ** 2
+    ok_s = lower * 0.97 <= d_seg <= chord
+    print(f'   {"✅" if ok_p else "🔴"} point   {d_pkt:.9f} against analytic {chord:.9f}')
+    print(f'   {"✅" if ok_s else "🔴"} segment {d_seg:.9f} — below the chord, above {lower:.9f} ({npairs} pairs)')
     fehler += (not ok_p) + (not ok_s)
 
     print(f'\n{"✅ ALL COUNTER-CASES PASSED" if fehler == 0 else f"🔴 {fehler} ERRORS"}')
@@ -191,8 +191,8 @@ def main():
         L = ds * n
         rs = max(3, int(np.ceil(max(0.05 * L, 2.0 * bmax * 0.015) / max(ds, 1e-9))))
         t = time.time()
-        dp = _punkt_mca(pts, rs)
-        dseg, npaare = clearance(pts, rs)
+        dp = _point_mca(pts, rs)
+        dseg, npairs = clearance(pts, rs)
         print(f'{n:>7} {dp:>13.9f} {dseg:>13.9f} {dp/dseg:>12.3f} {time.time()-t:>7.2f}')
 
 

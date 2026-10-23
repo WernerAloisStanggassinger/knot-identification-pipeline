@@ -32,7 +32,7 @@ code set topological_4_genus = smooth_4_genus, i.e. equality -- that also become
 from fractions import Fraction
 
 
-def _zahl(x):
+def _number(x):
     try:
         return Fraction(x)
     except (TypeError, ValueError):
@@ -42,76 +42,76 @@ def _zahl(x):
 def four_genus_verdict(a, slice_verdict_value=None):
     """a = ALGEBRA dict. Returns a dict with bounds + value (or None)."""
     hfk = a.get('knot_floer_homology') or {}
-    tau = _zahl(a.get('tau_invariant', hfk.get('tau')))
-    s = _zahl(a.get('rasmussen_s', a.get('s_invariant')))
-    sig = _zahl(a.get('signature'))
+    tau = _number(a.get('tau_invariant', hfk.get('tau')))
+    s = _number(a.get('rasmussen_s', a.get('s_invariant')))
+    sig = _number(a.get('signature'))
     g3 = a.get('genus', hfk.get('seifert_genus'))
 
-    unten = Fraction(0)
-    quellen = []
-    if tau is not None and abs(tau) > unten:
-        unten = abs(tau); quellen = ['|tau|=%s (Ozsvath-Szabo)' % abs(tau)]
+    lower = Fraction(0)
+    sources = []
+    if tau is not None and abs(tau) > lower:
+        lower = abs(tau); sources = ['|tau|=%s (Ozsvath-Szabo)' % abs(tau)]
     elif tau is not None:
-        quellen.append('|tau|=%s' % abs(tau))
-    for wert, name in ((s, '|s|/2 (Rasmussen)'), (sig, '|signature|/2 (Murasugi)')):
-        if wert is None:
+        sources.append('|tau|=%s' % abs(tau))
+    for value, name in ((s, '|s|/2 (Rasmussen)'), (sig, '|signature|/2 (Murasugi)')):
+        if value is None:
             continue
-        b = abs(wert) / 2
-        if b > unten:
-            unten = b; quellen = ['%s = %s' % (name, b)]
-    if slice_verdict_value is False and unten < 1:
-        unten = Fraction(1); quellen = ['slice widerlegt => g_4 >= 1']
+        b = abs(value) / 2
+        if b > lower:
+            lower = b; sources = ['%s = %s' % (name, b)]
+    if slice_verdict_value is False and lower < 1:
+        lower = Fraction(1); sources = ['slice widerlegt => g_4 >= 1']
 
     # g_4 is an integer -> round up
-    unten_ganz = -((-unten.numerator) // unten.denominator)
+    lower_int = -((-lower.numerator) // lower.denominator)
 
     # g_3 only works as an UPPER bound if it is a number. Some records hold
     # only a bound there themselves ("≥ 18") -- nothing follows from that for g_4 from above.
     try:
-        oben = int(g3) if g3 is not None else None
+        upper = int(g3) if g3 is not None else None
     except (TypeError, ValueError):
-        oben = None
+        upper = None
 
     out = {
-        'smooth_4_genus_lower_bound': int(unten_ganz),
-        'smooth_4_genus_lower_source': '; '.join(quellen) if quellen else 'no bound computable',
-        'smooth_4_genus_upper_bound': oben,
-        'smooth_4_genus_upper_source': ('g_3 = %s (Seifert surface pushed into the 4-ball)' % oben)
-                                       if oben is not None else 'g_3 unknown',
+        'smooth_4_genus_lower_bound': int(lower_int),
+        'smooth_4_genus_lower_source': '; '.join(sources) if sources else 'no bound computable',
+        'smooth_4_genus_upper_bound': upper,
+        'smooth_4_genus_upper_source': ('g_3 = %s (Seifert surface pushed into the 4-ball)' % upper)
+                                       if upper is not None else 'g_3 unknown',
     }
-    if oben is not None and int(unten_ganz) == oben:
-        out['smooth_4_genus'] = oben
-        out['smooth_4_genus_note'] = 'exact: lower and upper bound coincide (%s)' % oben
-        out['smooth_4_genus_interval'] = [oben, oben]
+    if upper is not None and int(lower_int) == upper:
+        out['smooth_4_genus'] = upper
+        out['smooth_4_genus_note'] = 'exact: lower and upper bound coincide (%s)' % upper
+        out['smooth_4_genus_interval'] = [upper, upper]
     else:
         out['smooth_4_genus'] = None
-        out['smooth_4_genus_interval'] = [int(unten_ganz), oben]
+        out['smooth_4_genus_interval'] = [int(lower_int), upper]
         out['smooth_4_genus_note'] = (
             'undetermined: %s <= g_4 <= %s. The pipeline only knows bounds; |tau| used to stand here, '
-            'but that is only the LOWER bound (2026-07-23).' % (int(unten_ganz), oben))
+            'but that is only the LOWER bound (2026-07-23).' % (int(lower_int), upper))
     out['smooth_4_genus_method'] = 'four_genus_verdict.py (2026-07-23): bounds, a value only when they coincide'
 
     # topological: |signature|/2 <= g_4^top <= g_4^smooth ; tau and s do NOT bound it
-    t_unten = int(-((-(abs(sig) / 2).numerator) // (abs(sig) / 2).denominator)) if sig is not None else 0
-    t_oben = out['smooth_4_genus'] if out['smooth_4_genus'] is not None else oben
-    out['topological_4_genus_lower_bound'] = t_unten
-    out['topological_4_genus_upper_bound'] = t_oben
-    if t_oben is not None and t_unten == t_oben:
-        out['topological_4_genus'] = t_oben
+    t_lower = int(-((-(abs(sig) / 2).numerator) // (abs(sig) / 2).denominator)) if sig is not None else 0
+    t_upper = out['smooth_4_genus'] if out['smooth_4_genus'] is not None else upper
+    out['topological_4_genus_lower_bound'] = t_lower
+    out['topological_4_genus_upper_bound'] = t_upper
+    if t_upper is not None and t_lower == t_upper:
+        out['topological_4_genus'] = t_upper
         out['topological_4_genus_note'] = 'exact: |signature|/2 == upper bound'
     else:
         out['topological_4_genus'] = None
         out['topological_4_genus_note'] = (
             'undetermined: %s <= g_4^top <= %s (g_4^top <= g_4^smooth; tau and s do NOT bound '
-            'the topological genus)' % (t_unten, t_oben))
+            'the topological genus)' % (t_lower, t_upper))
     return out
 
 
-def apply_to_algebra(a, slice_verdict_value=None, name=None, identitaet=None):
+def apply_to_algebra(a, slice_verdict_value=None, name=None, identity=None):
     """With `name`/`identitaet`, a RECEIPTED entry from beweis_register.json wins first
     (key order: see slice_verdict.beweis_eintrag)."""
-    from slice_verdict import beweis_eintrag
-    e = beweis_eintrag(name, identitaet) if (name or identitaet) else None
+    from slice_verdict import proof_entry
+    e = proof_entry(name, identity) if (name or identity) else None
     a.update(four_genus_verdict(a, slice_verdict_value))
     if e is not None and 'smooth_4_genus' in e:
         a['smooth_4_genus'] = e['smooth_4_genus']

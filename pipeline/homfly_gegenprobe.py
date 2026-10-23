@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from homfly_eichung import parse_homfly, eval_homfly
 
 
-def det_aus_homfly(homfly_str):
+def det_from_homfly(homfly_str):
     """det = |P(a=1, z=2i)| — EXACT in integers, never in floating point.
 
     Floating point is not a convenience here but an error: at y-degree 20
@@ -53,7 +53,7 @@ def det_aus_homfly(homfly_str):
     return float(w) if w * w == q else (q ** 0.5)
 
 
-def _alex_terme(s):
+def _alex_terms(s):
     """regina writes 'x', Sage 't' — both as {exponent: coefficient}.
     Footgun 15: whoever reads only one notation measures himself.
     In regina, coefficient and variable are separated by a SPACE
@@ -79,18 +79,18 @@ def _alex_terme(s):
             m = re.match(rf'^(\d+)?{var}(?:\^(-?\d+))?$', st)
             if not m:
                 return None
-            koef = int(m.group(1)) if m.group(1) else 1
+            coef_k = int(m.group(1)) if m.group(1) else 1
             e = int(m.group(2)) if m.group(2) else 1
         else:
             if not st.isdigit():
                 return None
-            koef, e = int(st), 0
-        out[e] = out.get(e, 0) + vz * koef
+            coef_k, e = int(st), 0
+        out[e] = out.get(e, 0) + vz * coef_k
     return out
 
 
-def det_aus_alexander(alex_str):
-    t = _alex_terme(alex_str)
+def det_from_alexander(alex_str):
+    t = _alex_terms(alex_str)
     if not t:
         return None
     return abs(sum(c * ((-1) ** e) for e, c in t.items()))
@@ -104,7 +104,7 @@ def record_det(d):
     Order = reliability, first hit wins."""
     pf = d.get('pflichtliste', {})
     raw = d.get('raw_subprocess_outputs', {})
-    kand = [
+    cand_k = [
         pf.get('ALGEBRA', {}).get('determinant'),
         pf.get('KLASSISCH', {}).get('determinant'),
         pf.get('ALGEBRA', {}).get('determinant_alexander'),
@@ -113,7 +113,7 @@ def record_det(d):
         raw.get('sage', {}).get('determinant'),
         raw.get('seifert_zeuge', {}).get('determinant_seifert'),
     ]
-    for v in kand:
+    for v in cand_k:
         if v is not None:
             return int(v)
     return None
@@ -127,18 +127,18 @@ def record_alexander(d):
     return d.get('raw_subprocess_outputs', {}).get('regina', {}).get('alexander')
 
 
-def pruefe_einen(recdatei, homfly_str, toleranz=1e-6):
-    d = json.load(open(recdatei))
+def check_single(rec_file, homfly_str, tolerance=1e-6):
+    d = json.load(open(rec_file))
     det_rec = record_det(d)
-    dh = det_aus_homfly(homfly_str)
+    dh = det_from_homfly(homfly_str)
     alex = record_alexander(d)
-    da = det_aus_alexander(alex) if alex else None
+    da = det_from_alexander(alex) if alex else None
     if dh is None:
         return {'ok': False, 'grund': 'homfly_unparsbar'}
     if det_rec is None:
         return {'ok': False, 'grund': 'kein_det_im_record', 'det_homfly': dh}
     ab = abs(dh - det_rec) / max(det_rec, 1)
-    ok = ab < toleranz
+    ok = ab < tolerance
     r = {'ok': ok, 'det_record': det_rec, 'det_homfly': dh, 'rel': ab,
          'zeugen': 2}
     if da is not None:
@@ -154,24 +154,24 @@ def selbsttest():
     is decoration. Four probes, two of them MUST be rejected."""
     ok = True
     # 1) trefoil: P = 2a^-2 - a^-4 + a^-2 z^2, det must be 3
-    d1 = det_aus_homfly('x^-2 y^2 + 2 x^-2 - x^-4')
+    d1 = det_from_homfly('x^-2 y^2 + 2 x^-2 - x^-4')
     print(f'  probe 1 trefoil     det={d1:.6f}  expected 3   ',
           '✅' if abs(d1 - 3) < 1e-9 else '🔴')
     ok &= abs(d1 - 3) < 1e-9
     # 2) figure-eight 4_1: P = -a^-2 + 3 - a^2 - z^2  (det 5)
-    d2 = det_aus_homfly('- x^-2 + 3 - x^2 - y^2')
+    d2 = det_from_homfly('- x^-2 + 3 - x^2 - y^2')
     print(f'  probe 2 figure-8    det={d2:.6f}  expected 5   ',
           '✅' if abs(d2 - 5) < 1e-9 else '🔴')
     ok &= abs(d2 - 5) < 1e-9
     # 3) COUNTER-CASE: a falsified trefoil must NOT give 3
-    d3 = det_aus_homfly('x^-2 y^2 + 3 x^-2 - x^-4')
+    d3 = det_from_homfly('x^-2 y^2 + 3 x^-2 - x^-4')
     print(f'  probe 3 COUNTER-CASE det={d3:.6f}  must NOT be 3 ',
           '✅' if abs(d3 - 3) > 1e-9 else '🔴')
     ok &= abs(d3 - 3) > 1e-9
     # 4) Alexander witness, both notations, plus counter-case
-    a1 = det_aus_alexander('x^2 - x + 1')          # trefoil -> 3
-    a2 = det_aus_alexander('t^2 - 3 t + 1')        # 4_1       -> 5
-    a3 = det_aus_alexander('x^2 - x + 2')          # counter-case -> 4, not 3
+    a1 = det_from_alexander('x^2 - x + 1')          # trefoil -> 3
+    a2 = det_from_alexander('t^2 - 3 t + 1')        # 4_1       -> 5
+    a3 = det_from_alexander('x^2 - x + 2')          # counter-case -> 4, not 3
     print(f'  probe 4 Alexander   x:{a1} t:{a2} counter-case:{a3} ',
           '✅' if (a1 == 3 and a2 == 5 and a3 == 4) else '🔴')
     ok &= (a1 == 3 and a2 == 5 and a3 == 4)
@@ -188,25 +188,25 @@ if __name__ == '__main__':
     if a.selbsttest:
         sys.exit(selbsttest())
     erg = json.load(open(a.wand))
-    gut = schlecht = 0
-    raus = []
+    good = bad = 0
+    out_list = []
     for e in erg:
         if e.get('status') != 'OK' or not e.get('homfly'):
             continue
-        r = pruefe_einen(e['record'], e['homfly'])
+        r = check_single(e['record'], e['homfly'])
         r.update({'name': e['name'], 'n': e.get('n'), 'c': e.get('c'),
                   'record': e['record'], 'homfly': e['homfly']})
-        raus.append(r)
+        out_list.append(r)
         if r['ok']:
-            gut += 1
+            good += 1
         else:
-            schlecht += 1
+            bad += 1
             print(f"  🔴 {e['name'][:40]:<40} {r.get('grund','det-mismatch')} "
                   f"rec={r.get('det_record')} homfly={r.get('det_homfly')}")
-    print(f"\n{gut} passed, {schlecht} failed "
-          f"(of {len(raus)} checked).")
-    drei = sum(1 for r in raus if r.get('zeugen') == 3)
-    print(f"of these with THREE witnesses (det + Alexander + HOMFLY): {drei}")
+    print(f"\n{good} passed, {bad} failed "
+          f"(of {len(out_list)} checked).")
+    three = sum(1 for r in out_list if r.get('zeugen') == 3)
+    print(f"of these with THREE witnesses (det + Alexander + HOMFLY): {three}")
     if a.out:
-        json.dump(raus, open(a.out, 'w'), indent=1)
-    sys.exit(0 if schlecht == 0 else 1)
+        json.dump(out_list, open(a.out, 'w'), indent=1)
+    sys.exit(0 if bad == 0 else 1)

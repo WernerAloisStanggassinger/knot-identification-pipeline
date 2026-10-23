@@ -32,11 +32,11 @@ import json
 import os
 from math import isqrt
 
-_REGISTER_PFAD = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'beweis_register.json')
+_REGISTER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'beweis_register.json')
 _REGISTER = None
 
 
-def beweis_eintrag(name, identitaet=None):
+def proof_entry(name, identity=None):
     """Receipt-backed override from beweis_register.json — ONLY with a non-empty 'beweis' (proof).
     An entry without proof text is ignored; the register must not become a back door.
 
@@ -51,13 +51,13 @@ def beweis_eintrag(name, identitaet=None):
     global _REGISTER
     if _REGISTER is None:
         try:
-            _REGISTER = json.load(open(_REGISTER_PFAD))
+            _REGISTER = json.load(open(_REGISTER_PATH))
         except Exception:
             _REGISTER = {}
-    kandidaten = [name, identitaet]
+    candidates = [name, identity]
     if name and '__' in name:
-        kandidaten.append(name.split('__')[0])
-    for k in kandidaten:
+        candidates.append(name.split('__')[0])
+    for k in candidates:
         if not k:
             continue
         e = _REGISTER.get(k)
@@ -66,7 +66,7 @@ def beweis_eintrag(name, identitaet=None):
     return None
 
 
-def _quadratzahl(n):
+def _is_square(n):
     try:
         n = int(n)
     except (TypeError, ValueError):
@@ -91,14 +91,14 @@ def slice_verdict(a):
     # (Arf = 0 <=> det ≡ ±1 mod 8) -- that is a theorem, not an estimate, and the determinant
     # comes from three independent paths. Where the stored Arf contradicts it (known for
     # st121_k4, Goeritz parity bug Disc #291), the theorem wins and the contradiction is recorded.
-    arf_konflikt = None
+    arf_conflict = None
     if det is not None:
         try:
-            arf_aus_det = 0 if int(det) % 8 in (1, 7) else 1
-            if arf is not None and arf != arf_aus_det:
-                arf_konflikt = 'stored Arf=%s contradicts det=%s mod 8 (=> Arf=%s); ' \
-                               'the theorem holds, the field does not' % (arf, det, arf_aus_det)
-            arf = arf_aus_det
+            arf_from_det = 0 if int(det) % 8 in (1, 7) else 1
+            if arf is not None and arf != arf_from_det:
+                arf_conflict = 'stored Arf=%s contradicts det=%s mod 8 (=> Arf=%s); ' \
+                               'the theorem holds, the field does not' % (arf, det, arf_from_det)
+            arf = arf_from_det
         except (TypeError, ValueError):
             pass
 
@@ -111,7 +111,7 @@ def slice_verdict(a):
         obstr.append('signature=%s != 0 (Murasugi)' % sig)
     if arf not in (0, None):
         obstr.append('Arf=%s != 0 (Robertello%s)' % (arf, ', from det mod 8' if det is not None else ''))
-    if det is not None and _quadratzahl(det) is False:
+    if det is not None and _is_square(det) is False:
         obstr.append('det=%s not a square (Fox-Milnor, point evaluation at t=-1)' % det)
     # FULL Fox-Milnor: Delta = f(t)*f(1/t) as a factorisation condition. Strictly stronger than
     # the determinant test, which only looks at Delta(-1) (2026-07-23, Disc #558).
@@ -119,32 +119,32 @@ def slice_verdict(a):
     if alex:
         try:
             from fox_milnor import fox_milnor as _fm
-            besteht, grund, _d = _fm(alex)
-            if besteht is False:
-                obstr.append('Fox-Milnor verletzt: %s' % grund)
+            passes, reason, _d = _fm(alex)
+            if passes is False:
+                obstr.append('Fox-Milnor verletzt: %s' % reason)
         except Exception:
             pass
 
-    warn = (' | ⚠ ' + arf_konflikt) if arf_konflikt else ''
+    warn = (' | ⚠ ' + arf_conflict) if arf_conflict else ''
     if obstr:
         return False, 'proven NOT slice: ' + '; '.join(obstr) + warn, obstr
     if genus == 0:
         return True, 'unknot (genus 0) — trivially slice' + warn, []
-    fehlt = [n for n, v in (('tau', tau), ('s', s), ('signature', sig),
+    missing = [n for n, v in (('tau', tau), ('s', s), ('signature', sig),
                             ('Arf', arf), ('determinant', det)) if v is None]
     note = ('undetermined: all checked necessary conditions hold '
             '(tau=s=signature=Arf=0, det a square), that is NOT sufficient — '
             'the pipeline cannot prove slice')
-    if fehlt:
-        note += ' | not checked (field missing): ' + ', '.join(fehlt)
+    if missing:
+        note += ' | not checked (field missing): ' + ', '.join(missing)
     return None, note + warn, []
 
 
-def apply_to_algebra(a, name=None, identitaet=None):
+def apply_to_algebra(a, name=None, identity=None):
     """Sets slice + slice_note + slice_obstructions in place. Returns the verdict.
     With `name` the proof register is asked first: if it holds a RECEIPTED entry, that entry wins,
     and the proof text is copied into the field (so that nobody has to re-derive it later)."""
-    e = beweis_eintrag(name, identitaet) if (name or identitaet) else None
+    e = proof_entry(name, identity) if (name or identity) else None
     if e is not None and 'slice' in e:
         a['slice'] = e['slice']
         a['slice_note'] = 'RECEIPTED (beweis_register.json): ' + ' '.join(e['beweis'])

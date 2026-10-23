@@ -269,13 +269,13 @@ def track(input_parquet, output_path, eps, min_cell_count, fold_pi,
     print(f"[DBSCAN-TRACKER]   {n_kept:,} of {N:,} points in a cluster "
           f"({100*n_kept/N:.1f}%)")
 
-    return _aggregiere_und_schreibe(df_kept, output_path, eps, N,
+    return _aggregate_and_write(df_kept, output_path, eps, N,
                                     consensus_threshold, merge_pi_antipodal,
                                     fold_pi, t_total)
 
 
 
-def _aggregiere_und_schreibe(df_kept, output_path, eps, N,
+def _aggregate_and_write(df_kept, output_path, eps, N,
                              consensus_threshold, merge_pi_antipodal,
                              fold_pi, t_total):
     """Shared aggregation and write part for track() and
@@ -314,12 +314,12 @@ def _aggregiere_und_schreibe(df_kept, output_path, eps, N,
         'tj_centroid':      gb['tj_folded'].mean(),
     })
 
-    return _schreibe_aus_aggregat(reps, stats, output_path, eps, N,
+    return _write_from_aggregate(reps, stats, output_path, eps, N,
                                  consensus_threshold, merge_pi_antipodal,
                                  fold_pi, t_total)
 
 
-def _schreibe_aus_aggregat(reps, stats, output_path, eps, N,
+def _write_from_aggregate(reps, stats, output_path, eps, N,
                            consensus_threshold, merge_pi_antipodal,
                            fold_pi, t_total):
     """Shared write part (factored out 2026-08-24, Disc #703)."""
@@ -396,7 +396,7 @@ def _schreibe_aus_aggregat(reps, stats, output_path, eps, N,
 # on the batch size and on the number of KEPT points, no longer on N.
 # ──────────────────────────────────────────────────────────────────────
 
-def _zellen(ti, tj, cell_size, n_grid):
+def _cells(ti, tj, cell_size, n_grid):
     """Exactly the formula of the CUDA kernel cell_assign: floor(t/cell_size),
     then clamp. float32 so that the rounding is the same."""
     cx = np.floor(ti.astype(np.float32) / np.float32(cell_size)).astype(np.int32)
@@ -434,7 +434,7 @@ def track_streaming(input_parquet, output_path, eps, min_cell_count, fold_pi,
         tj = b.column('t_norm_j').to_numpy(zero_copy_only=False).astype(np.float32)
         if fold_pi:
             ti, tj = fold_pi_antisym(ti, tj)
-        cx, cy = _zellen(ti, tj, cell_size, n_grid)
+        cx, cy = _cells(ti, tj, cell_size, n_grid)
         counts += np.bincount(cx.astype(np.int64) * n_grid + cy,
                               minlength=n_grid * n_grid)
     n_frames_total = max_step + 1
@@ -462,7 +462,7 @@ def track_streaming(input_parquet, output_path, eps, min_cell_count, fold_pi,
     t0 = time.time()
     K = int(n_components)
     n_worte = (n_frames_total + 63) // 64
-    akku = {
+    accum = {
         'n': np.zeros(K, dtype=np.int64),
         'over': np.zeros(K, dtype=np.int64),
         'sign': np.zeros(K, dtype=np.int64),
@@ -471,9 +471,9 @@ def track_streaming(input_parquet, output_path, eps, min_cell_count, fold_pi,
         'maxabs': np.full(K, -1.0, dtype=np.float64),
         'frames': np.zeros((K, n_worte), dtype=np.uint64),
     }
-    rep_felder = ['t_step', 'seg_i', 'seg_j', 't_norm_i', 't_norm_j',
+    rep_fields = ['t_step', 'seg_i', 'seg_j', 't_norm_i', 't_norm_j',
                   'z_i', 'z_j', 'cross2d', 'ti_folded', 'tj_folded']
-    rep = {f: [None] * K for f in rep_felder}
+    rep = {f: [None] * K for f in rep_fields}
     n_kept = 0
 
     for b in pf.iter_batches(batch_size=batch_rows):
@@ -484,7 +484,7 @@ def track_streaming(input_parquet, output_path, eps, min_cell_count, fold_pi,
             ti_f, tj_f = fold_pi_antisym(ti, tj)
         else:
             ti_f, tj_f = ti, tj
-        cx, cy = _zellen(ti_f, tj_f, cell_size, n_grid)
+        cx, cy = _cells(ti_f, tj_f, cell_size, n_grid)
         cl = cell_labels[cx, cy]
         keep = cl >= 0
         if not keep.any():
@@ -498,32 +498,32 @@ def track_streaming(input_parquet, output_path, eps, min_cell_count, fold_pi,
         tif = ti_f[keep]
         tjf = tj_f[keep]
 
-        np.add.at(akku['n'], c, 1)
-        np.add.at(akku['over'], c, (zi > zj).astype(np.int64))
-        np.add.at(akku['sign'], c, (c2 > 0).astype(np.int64))
-        np.add.at(akku['sum_ti'], c, tif.astype(np.float64))
-        np.add.at(akku['sum_tj'], c, tjf.astype(np.float64))
+        np.add.at(accum['n'], c, 1)
+        np.add.at(accum['over'], c, (zi > zj).astype(np.int64))
+        np.add.at(accum['sign'], c, (c2 > 0).astype(np.int64))
+        np.add.at(accum['sum_ti'], c, tif.astype(np.float64))
+        np.add.at(accum['sum_tj'], c, tjf.astype(np.float64))
 
         # Frames: first deduplicate per batch, then set bits — otherwise 42 million
         # scattered accesses instead of a few tens of thousands.
-        schl = np.unique(c * np.int64(n_frames_total) + ts.astype(np.int64))
-        kc = (schl // n_frames_total).astype(np.int64)
-        kt = (schl % n_frames_total).astype(np.int64)
-        np.bitwise_or.at(akku['frames'], (kc, kt >> 6),
+        key_s = np.unique(c * np.int64(n_frames_total) + ts.astype(np.int64))
+        kc = (key_s // n_frames_total).astype(np.int64)
+        kt = (key_s % n_frames_total).astype(np.int64)
+        np.bitwise_or.at(accum['frames'], (kc, kt >> 6),
                          (np.uint64(1) << (kt & 63).astype(np.uint64)))
 
         # Representative: running maximum, STRICTLY greater (pandas idxmax takes the
         # first maximum — with >= one would get the last).
         aabs = np.abs(c2)
-        ordnung = np.argsort(c, kind='stable')
-        cs, as_ = c[ordnung], aabs[ordnung]
-        grenzen = np.flatnonzero(np.r_[True, cs[1:] != cs[:-1]])
-        for g0, g1 in zip(grenzen, np.r_[grenzen[1:], cs.size]):
+        order = np.argsort(c, kind='stable')
+        cs, as_ = c[order], aabs[order]
+        limits = np.flatnonzero(np.r_[True, cs[1:] != cs[:-1]])
+        for g0, g1 in zip(limits, np.r_[limits[1:], cs.size]):
             k = int(cs[g0])
-            lok = int(np.argmax(as_[g0:g1]))          # first maximum in the batch
-            if as_[g0 + lok] > akku['maxabs'][k]:
-                akku['maxabs'][k] = as_[g0 + lok]
-                i = int(ordnung[g0 + lok])
+            loc_i = int(np.argmax(as_[g0:g1]))          # first maximum in the batch
+            if as_[g0 + loc_i] > accum['maxabs'][k]:
+                accum['maxabs'][k] = as_[g0 + loc_i]
+                i = int(order[g0 + loc_i])
                 rep['t_step'][k] = ts[i]
                 rep['seg_i'][k] = d['seg_i'].to_numpy()[keep][i]
                 rep['seg_j'][k] = d['seg_j'].to_numpy()[keep][i]
@@ -542,23 +542,23 @@ def track_streaming(input_parquet, output_path, eps, min_cell_count, fold_pi,
         print("[DBSCAN-TRACKER] No point in an active cell.", file=sys.stderr)
         sys.exit(1)
 
-    da = akku['n'] > 0
+    da = accum['n'] > 0
     idx = np.flatnonzero(da)
     bits = np.zeros(K, dtype=np.int64)
     for k in idx:
-        w = akku['frames'][k]
+        w = accum['frames'][k]
         bits[k] = int(sum(int(x).bit_count() for x in w))
-    reps = pd.DataFrame({f: [rep[f][k] for k in idx] for f in rep_felder})
+    reps = pd.DataFrame({f: [rep[f][k] for k in idx] for f in rep_fields})
     reps = reps.rename(columns={'t_step': 'rep_t_step', 'seg_i': 'rep_seg_i',
                                 'seg_j': 'rep_seg_j', 't_norm_i': 'ti_repr',
                                 't_norm_j': 'tj_repr', 'z_i': 'rep_z_i',
                                 'z_j': 'rep_z_j', 'cross2d': 'rep_cross2d'})
     reps.index = pd.Index(idx, name='cluster')
     stats = pd.DataFrame({
-        'n_obs':            akku['n'][idx],
+        'n_obs':            accum['n'][idx],
         'n_unique_t_steps': bits[idx],
-        'vote_over':        akku['over'][idx] / akku['n'][idx],
-        'vote_sign':        akku['sign'][idx] / akku['n'][idx],
+        'vote_over':        accum['over'][idx] / accum['n'][idx],
+        'vote_sign':        accum['sign'][idx] / accum['n'][idx],
         # float32 BECAUSE pandas' mean() on a float32 column returns float32.
         # ⚠️ DELIBERATELY NOT BIT-IDENTICAL to the classic route (Disc #703): these
         # two columns differ by up to ONE float32 ULP (measured 5.96e-08),
@@ -568,11 +568,11 @@ def track_streaming(input_parquet, output_path, eps, min_cell_count, fold_pi,
         # tj_repr, and those are exactly equal. The centroids are reporting quantities.
         # Computing in float64 is more accurate, but then the output is no longer
         # character-identical with the old route — and the counter-case rightly rejects it.
-        'ti_centroid':      (akku['sum_ti'][idx] / akku['n'][idx]).astype(np.float32),
-        'tj_centroid':      (akku['sum_tj'][idx] / akku['n'][idx]).astype(np.float32),
+        'ti_centroid':      (accum['sum_ti'][idx] / accum['n'][idx]).astype(np.float32),
+        'tj_centroid':      (accum['sum_tj'][idx] / accum['n'][idx]).astype(np.float32),
     }, index=reps.index)
 
-    return _schreibe_aus_aggregat(reps, stats, output_path, eps, N,
+    return _write_from_aggregate(reps, stats, output_path, eps, N,
                                   consensus_threshold, merge_pi_antipodal,
                                   fold_pi, t_total)
 

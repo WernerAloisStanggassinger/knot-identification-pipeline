@@ -34,9 +34,9 @@ def parse_homfly(s):
         return None
     # split terms at binary +/- (not at an exponent minus)
     s = re.sub(r'\s*([+-])\s+', r' \1 ', s)
-    stuecke = re.split(r'\s(?=[+-]\s)', s)
+    pieces = re.split(r'\s(?=[+-]\s)', s)
     out = {}
-    for st in stuecke:
+    for st in pieces:
         st = st.strip()
         if not st:
             continue
@@ -45,12 +45,12 @@ def parse_homfly(s):
         m = re.match(r'^(\d+)?\s*(?:x(?:\^(-?\d+))?)?\s*(?:y(?:\^(-?\d+))?)?$', st)
         if not m:
             return None
-        koef = int(m.group(1)) if m.group(1) else 1
+        coef_k = int(m.group(1)) if m.group(1) else 1
         hat_x = 'x' in st
         hat_y = 'y' in st
         i = int(m.group(2)) if m.group(2) else (1 if hat_x else 0)
         j = int(m.group(3)) if m.group(3) else (1 if hat_y else 0)
-        out[(i, j)] = out.get((i, j), 0) + vz * koef
+        out[(i, j)] = out.get((i, j), 0) + vz * coef_k
     return out
 
 
@@ -59,7 +59,7 @@ def eval_homfly(poly, x, y):
 
 
 # ── conventions under which (a,q) is mapped to (x,y) ──────────────────────
-VARIANTEN = {
+VARIANTS = {
     0: ('x=a,    y=q-1/q',   lambda a, q: (a,     q - 1 / q)),
     1: ('x=1/a,  y=q-1/q',   lambda a, q: (1 / a, q - 1 / q)),
     2: ('x=a,    y=1/q-q',   lambda a, q: (a,     1 / q - q)),
@@ -69,27 +69,27 @@ VARIANTEN = {
 }
 
 
-def unsere(w, n, a, q, procs):
+def ours(w, n, a, q, procs):
     from hecke_homfly_fast import homfly_hecke
     return homfly_hecke(list(w), n, complex(a), complex(q), procs)
 
 
-def lauf(faelle, a, q, procs, nur=None):
+def run_name(faelle, a, q, procs, only=None):
     erg = {}
-    for vid, (name, sub) in VARIANTEN.items():
-        if nur is not None and vid != nur:
+    for vid, (name, sub) in VARIANTS.items():
+        if only is not None and vid != only:
             continue
         x, y = sub(complex(a), complex(q))
-        zeilen = []
+        rows = []
         for f in faelle:
             p = parse_homfly(f['homfly'])
             if p is None:
-                zeilen.append((f, None, None, None)); continue
+                rows.append((f, None, None, None)); continue
             r_reg = eval_homfly(p, x, y)
-            r_own = unsere(f['w'], f['n'], a, q, procs)
+            r_own = ours(f['w'], f['n'], a, q, procs)
             quot = (r_reg / r_own) if abs(r_own) > 1e-14 else None
-            zeilen.append((f, r_reg, r_own, quot))
-        erg[vid] = (name, zeilen)
+            rows.append((f, r_reg, r_own, quot))
+        erg[vid] = (name, rows)
     return erg
 
 
@@ -102,36 +102,36 @@ def norm_K(a, q):
     return (q - 1 / q) / (a - 1 / a)
 
 
-def pruefe(faelle, punkte, procs, toleranz=1e-9):
+def check_one(faelle, points, procs, tolerance=1e-9):
     """Calibration at SEVERAL points. A constant fitted at one point
     proves no functional form — only agreement at further
     points does that (feedback-agreement-is-no-proof-below-resolution)."""
-    gesamt_ok = True
-    for vid, (vname, sub) in sorted(VARIANTEN.items()):
-        treffer = fehl = 0
-        schlimmster = 0.0
-        for (a, q) in punkte:
+    all_ok = True
+    for vid, (vname, sub) in sorted(VARIANTS.items()):
+        hits = misses = 0
+        worst = 0.0
+        for (a, q) in points:
             x, y = sub(complex(a), complex(q))
             K = norm_K(complex(a), complex(q))
             for f in faelle:
                 p = parse_homfly(f['homfly'])
                 if p is None:
-                    fehl += 1; continue
+                    misses += 1; continue
                 r_reg = eval_homfly(p, x, y)
-                r_own = unsere(f['w'], f['n'], a, q, procs) * K
-                nen = max(abs(r_reg), abs(r_own), 1e-12)
-                rel = abs(r_reg - r_own) / nen
-                schlimmster = max(schlimmster, rel)
-                if rel < toleranz: treffer += 1
-                else: fehl += 1
-        ok = (fehl == 0)
-        gesamt_ok &= (ok if vid == 0 else True)
-        marke = '✅' if ok else '🔴'
-        print(f"  {marke} variant {vid} ({vname:<20}): {treffer} hits, {fehl} misses, "
-              f"largest rel. deviation {schlimmster:.2e}")
+                r_own = ours(f['w'], f['n'], a, q, procs) * K
+                denom_n = max(abs(r_reg), abs(r_own), 1e-12)
+                rel = abs(r_reg - r_own) / denom_n
+                worst = max(worst, rel)
+                if rel < tolerance: hits += 1
+                else: misses += 1
+        ok = (misses == 0)
+        all_ok &= (ok if vid == 0 else True)
+        mark = '✅' if ok else '🔴'
+        print(f"  {mark} variant {vid} ({vname:<20}): {hits} hits, {misses} misses, "
+              f"largest rel. deviation {worst:.2e}")
         if vid == 0 and not ok:
             print("     🔴 the calibrated variant does NOT hit — calibration invalid.")
-    return 0 if gesamt_ok else 1
+    return 0 if all_ok else 1
 
 
 if __name__ == '__main__':
@@ -146,14 +146,14 @@ if __name__ == '__main__':
     a = ap.parse_args()
     faelle = json.load(open(a.faelle))
     if a.pruefen:
-        punkte = [(1.3, 1.2), (0.7, 1.45), (2.1, 0.83), (1.11, 1.07)]
-        print(f"Calibration at {len(punkte)} points x {len(faelle)} cases "
-              f"= {len(punkte)*len(faelle)} probes per variant")
-        sys.exit(pruefe(faelle, punkte, a.procs))
-    for vid, (name, zeilen) in lauf(faelle, a.a, a.q, a.procs, a.variante).items():
+        points = [(1.3, 1.2), (0.7, 1.45), (2.1, 0.83), (1.11, 1.07)]
+        print(f"Calibration at {len(points)} points x {len(faelle)} cases "
+              f"= {len(points)*len(faelle)} probes per variant")
+        sys.exit(check_one(faelle, points, a.procs))
+    for vid, (name, rows) in run_name(faelle, a.a, a.q, a.procs, a.variante).items():
         print(f"\n=== variant {vid}: {name} ===")
         print(f"  {'knot':<32}{'n':>3}  {'regina':>14}  {'own':>14}  {'quotient':>16}")
-        for f, rr, ro, qu in zeilen:
+        for f, rr, ro, qu in rows:
             fmt = lambda z: ('—' if z is None else f"{z.real:14.6f}"
                              if abs(getattr(z, 'imag', 0)) < 1e-9 else f"{z:.4f}")
             print(f"  {f['name'][:32]:<32}{f['n']:>3}  {fmt(rr)}  {fmt(ro)}  {fmt(qu)}")

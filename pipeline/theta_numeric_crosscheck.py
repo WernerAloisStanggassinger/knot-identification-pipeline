@@ -39,15 +39,15 @@ THETA_DIR = site_config.THETA_DIR
 SAGE_BIN = site_config.SAGE_BIN
 
 
-def _parse_pd(pflicht: dict) -> list:
-    pd_list_str = pflicht.get("pd_list_str", "")
+def _parse_pd(mandatory: dict) -> list:
+    pd_list_str = mandatory.get("pd_list_str", "")
     if pd_list_str:
         try:
             pd_list = ast.literal_eval(pd_list_str)
             return [[int(x) for x in tup] for tup in pd_list]
         except Exception:
             pass
-    diag = pflicht.get("pflichtliste", {}).get("DIAGRAMM", {})
+    diag = mandatory.get("pflichtliste", {}).get("DIAGRAMM", {})
     pd_code = diag.get("pd_code")
     if pd_code:
         crossings = re.findall(r"X\s*\[\s*([\d\s,]+?)\s*\]", str(pd_code))
@@ -140,9 +140,9 @@ def main():
     ap.add_argument("--timeout", type=int, default=600)
     args = ap.parse_args()
 
-    pflicht = json.loads(Path(args.pflicht_json).read_text())
-    name = pflicht.get("name") or Path(args.pflicht_json).stem.split("_")[0]
-    pd_list = _parse_pd(pflicht)
+    mandatory = json.loads(Path(args.pflicht_json).read_text())
+    name = mandatory.get("name") or Path(args.pflicht_json).stem.split("_")[0]
+    pd_list = _parse_pd(mandatory)
     cs_rows, phi = pd_to_cs_phi(pd_list)
 
     print(f"[theta_numeric] {name}: c={len(pd_list)} PD-crossings")

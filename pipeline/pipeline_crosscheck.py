@@ -111,10 +111,10 @@ def _split_terms(s: str):
     t = re.sub(r"(\^|\*\*)\((-?\+?\d+)\)", r"\1\2", t)
     # Fractions 1/x^N or C/x^N → C*x^-N; also C*z**N/a**M → C*z**N*a**-M
     # Step by step: every '/var(^|**)N' becomes '*var^-N'
-    def _bruch(m):
+    def _fraction(m):
         var, op, exp = m.group(1), m.group(2), m.group(3)
         return f"*{var}^-{exp}"
-    t = re.sub(r"/([a-zA-Z])(\*\*|\^)(\d+)", _bruch, t)
+    t = re.sub(r"/([a-zA-Z])(\*\*|\^)(\d+)", _fraction, t)
     # Fraction without exponent: /x → *x^-1
     t = re.sub(r"/([a-zA-Z])(?![\^\*\d])", r"*\1^-1", t)
     # Split terms at '+' or '-' (not at the start, not directly after ^/** )
@@ -276,7 +276,7 @@ def alex_equal(pipeline_alex: str, knotinfo_alex: str) -> bool:
     return False
 
 
-def load_pflicht(path: Path) -> dict:
+def load_mandatory(path: Path) -> dict:
     d = json.loads(path.read_text())
     pl = d["pflichtliste"]
     D, A, H = pl["DIAGRAMM"], pl["ALGEBRA"], pl["HYPERBOLISCH"]
@@ -746,19 +746,19 @@ def snappy_census_match(inv: dict, env_name: str = "snappy_env", tol: float = 1e
     #   c<=10: keep the K prefix (K3_1, K8_19)
     #   c>=11: drop the K prefix + underscore between letter and number (12n_706)
     knot_names = []
-    _KLASSISCH_RE = re.compile(r"^K?(\d+)([an])_?(\d+)(m?)$")
+    _CLASSICAL_RE = re.compile(r"^K?(\d+)([an])_?(\d+)(m?)$")
     for raw in identify:
         m = re.match(r"^([A-Za-z]?\d+[an]?_?\d+|[KL]\d+[an]\d+|[a-z]\d+_\d+|[mstv]\d+)(?:\(.*\))?$", raw)
         bare = m.group(1) if m else raw.split("(")[0]
         # Normalise to the classical form
-        km = _KLASSISCH_RE.match(bare)
+        km = _CLASSICAL_RE.match(bare)
         if km:
             c = int(km.group(1))
             if c <= 10:
-                bare_klassisch = bare if bare.startswith("K") else "K" + bare
+                bare_classical = bare if bare.startswith("K") else "K" + bare
             else:
-                bare_klassisch = f"{km.group(1)}{km.group(2)}_{km.group(3)}{km.group(4)}"
-            knot_names.append(bare_klassisch)
+                bare_classical = f"{km.group(1)}{km.group(2)}_{km.group(3)}{km.group(4)}"
+            knot_names.append(bare_classical)
         else:
             knot_names.append(bare)
     out["identified_names"] = knot_names
@@ -801,7 +801,7 @@ def main():
     records = json.loads(KI_RECORDS.read_text())
     fremlin = json.loads(FREMLIN_CACHE.read_text()) if FREMLIN_CACHE.exists() else []
 
-    inv = load_pflicht(args.pflicht_json)
+    inv = load_mandatory(args.pflicht_json)
     ki = knotinfo_match(inv, idx, records)
     fr = fremlin_match(inv, ki, fremlin)
     if args.skip_snappy:

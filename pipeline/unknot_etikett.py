@@ -36,31 +36,31 @@ def main():
     for r in laden(a.regina):
         reg[os.path.basename(os.path.dirname(r['path']))] = r
 
-    einig, widerspruch, ohne = [], [], []
-    for stamm, t in sorted(tri.items()):
-        r = reg.get(stamm)
+    agree, contradiction, without = [], [], []
+    for stem, t in sorted(tri.items()):
+        r = reg.get(stem)
         if r is None:
             # duplicate: the same curve under a different folder name
-            treffer = [v for k, v in reg.items() if v['stem'] == t['stamm'].split('__')[-1]]
-            r = treffer[0] if treffer else None
+            hits = [v for k, v in reg.items() if v['stem'] == t['stamm'].split('__')[-1]]
+            r = hits[0] if hits else None
         if r is None or 'fehler' in r:
-            ohne.append(stamm); continue
+            without.append(stem); continue
         if not r['unknot']:
-            widerspruch.append((stamm, r['reduced'])); continue
-        einig.append((stamm, t, r))
+            contradiction.append((stem, r['reduced'])); continue
+        agree.append((stem, t, r))
 
     print(f"unknot candidates: {len(tri)}")
-    print(f"  ✅ both lines agree   : {len(einig)}")
-    print(f"  🔴 contradiction      : {len(widerspruch)}  {widerspruch}")
-    print(f"  ❔ no second opinion  : {len(ohne)}  {ohne}")
-    if widerspruch:
+    print(f"  ✅ both lines agree   : {len(agree)}")
+    print(f"  🔴 contradiction      : {len(contradiction)}  {contradiction}")
+    print(f"  ❔ no second opinion  : {len(without)}  {without}")
+    if contradiction:
         print("\n🔴 contradiction ⟹ NOTHING is labelled. Resolve it first.")
         return 1
 
-    eintraege = []
-    for stamm, t, r in einig:
+    entries = []
+    for stem, t, r in agree:
         v = {
-            "stem": stamm,
+            "stem": stem,
             "verdict": "unknot",
             "verdict_date": a.datum,
             "meaning": ("The Stage-2 abort for this curve is a CORRECT rejection, "
@@ -84,21 +84,21 @@ def main():
                     "source": "maschinen_ideen/_topo_gate_audit/audit_topology.py (Disc #264)"}},
             "independence": ("The two lines share no code, no camera model and no "
                              "(ti,tj) grid; they cannot fail the same way.")}
-        eintraege.append(v)
-        ziel = os.path.join(a.stand, stamm, f"{stamm}_unknot_verdict.json")
+        entries.append(v)
+        target = os.path.join(a.stand, stem, f"{stem}_unknot_verdict.json")
         if a.schreiben:
-            tmp = ziel + '.tmp'
+            tmp = target + '.tmp'
             json.dump(v, open(tmp, 'w'), indent=1)
-            os.replace(tmp, ziel)     # atomic, never a half-written file
+            os.replace(tmp, target)     # atomic, never a half-written file
     print(f"\n{'written' if a.schreiben else 'WOULD write'}: "
-          f"{len(eintraege)} × <stamm>_unknot_verdict.json under {a.stand}")
+          f"{len(entries)} × <stamm>_unknot_verdict.json under {a.stand}")
 
     if a.registry and a.schreiben:
         os.makedirs(os.path.dirname(a.registry), exist_ok=True)
         alt = laden(a.registry) if os.path.exists(a.registry) else {"entries": []}
-        vorhanden = {e['stem'] for e in alt['entries']}
-        neu = [e for e in eintraege if e['stem'] not in vorhanden]
-        alt['entries'] = sorted(alt['entries'] + neu, key=lambda e: e['stem'])
+        existing = {e['stem'] for e in alt['entries']}
+        new_entries = [e for e in entries if e['stem'] not in existing]
+        alt['entries'] = sorted(alt['entries'] + new_entries, key=lambda e: e['stem'])
         alt['updated'] = a.datum
         alt['note'] = ("Curves that the identification pipeline correctly refused to "
                        "process because they are unknotted. Two independent lines of "
@@ -106,7 +106,7 @@ def main():
         tmp = a.registry + '.tmp'
         json.dump(alt, open(tmp, 'w'), indent=1)
         os.replace(tmp, a.registry)
-        print(f"Registry: +{len(neu)} new, now {len(alt['entries'])} entries → {a.registry}")
+        print(f"Registry: +{len(new_entries)} new, now {len(alt['entries'])} entries → {a.registry}")
     return 0
 
 if __name__ == '__main__':

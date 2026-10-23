@@ -37,7 +37,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from hecke_homfly_fast import syt, partitions, shape_cells, content, hc
 
 # Primes just below 2^31 — the product of two residues stays in int64
-PRIMZAHLEN = [2147483647, 2147483629, 2147483587, 2147483579, 2147483563,
+PRIMES = [2147483647, 2147483629, 2147483587, 2147483579, 2147483563,
               2147483549, 2147483543, 2147483497, 2147483489, 2147483477,
               2147483423, 2147483399, 2147483353, 2147483323, 2147483269,
               2147483249, 2147483237, 2147483179, 2147483171, 2147483137]
@@ -52,9 +52,9 @@ def inv(x, p):
 
 def qint_mod(d, q, qi, p):
     """[d]_q = (q^d - q^-d)/(q - q^-1)."""
-    zaehler = (pow(q, d, p) - pow(qi, d, p)) % p if d >= 0 else \
+    numerator = (pow(q, d, p) - pow(qi, d, p)) % p if d >= 0 else \
               (pow(qi, -d, p) - pow(q, -d, p)) % p
-    return zaehler * inv((q - qi) % p, p) % p
+    return numerator * inv((q - qi) % p, p) % p
 
 
 def gen_mod(T, idx, i, q, qi, p):
@@ -96,9 +96,9 @@ def W_mod(lam, a, ai, q, qi, p):
             qc, qmc = pow(q, cont, p), pow(qi, cont, p)
         else:
             qc, qmc = pow(qi, -cont, p), pow(q, -cont, p)
-        zaehler = (a * qc - ai * qmc) % p
-        nenner = (pow(q, h, p) - pow(qi, h, p)) % p
-        P = P * zaehler % p * inv(nenner, p) % p
+        numerator = (a * qc - ai * qmc) % p
+        denominator = (pow(q, h, p) - pow(qi, h, p)) % p
+        P = P * numerator % p * inv(denominator, p) % p
     return P
 
 
@@ -126,11 +126,11 @@ def chis_mod(word, n, q, qi, p):
     return out
 
 
-def P_mod(word, n, a, q, p, vor=None):
+def P_mod(word, n, a, q, p, pre=None):
     """P_AZ(a, z=q-1/q) in F_p, including the normalisation K=(q-1/q)/(a-1/a)."""
     e = sum(1 if g > 0 else -1 for g in word)
     ai, qi = inv(a, p), inv(q, p)
-    cs = vor if vor is not None else chis_mod(word, n, q, qi, p)
+    cs = pre if pre is not None else chis_mod(word, n, q, qi, p)
     s = 0
     for lam, ch in cs:
         s = (s + W_mod(lam, a, ai, q, qi, p) * ch) % p
@@ -140,7 +140,7 @@ def P_mod(word, n, a, q, p, vor=None):
 
 
 # ── Linear algebra over F_p (sizes <= ~100, Gauss is enough) ─────────────
-def loese_mod(A, b, p):
+def solve_mod(A, b, p):
     """A x = b over F_p, A square. b may have several columns."""
     m = len(A)
     M = [list(map(lambda v: v % p, A[i])) + list(map(lambda v: v % p, b[i]))
@@ -160,14 +160,14 @@ def loese_mod(A, b, p):
     return [row[m:] for row in M]
 
 
-def crt(reste, primzahlen):
+def crt(residues, primes):
     """Chinese remainder theorem, result as the SYMMETRIC representative — otherwise
     every negative coefficient would come out as a huge positive number."""
     M = 1
-    for p in primzahlen:
+    for p in primes:
         M *= p
     x = 0
-    for r, p in zip(reste, primzahlen):
+    for r, p in zip(residues, primes):
         Mi = M // p
         x = (x + r * Mi * pow(Mi, -1, p)) % M
     return x - M if x > M // 2 else x
@@ -180,7 +180,7 @@ def _box(word, n, z_grad_max):
     return (a_lo - 1) // 2, (a_hi + 1) // 2, (z_grad_max + 2) // 2, e
 
 
-KERNE = None    # global; set from --kerne, otherwise EICH_KERNE (see below)
+CORES = None    # global; set from --kerne, otherwise EICH_KERNE (see below)
 # ---------------------------------------------------------------------------
 # CALIBRATED DEFAULT FOR THE WORKER COUNT — measured 2026-08-25, not guessed.
 #
@@ -210,11 +210,11 @@ KERNE = None    # global; set from --kerne, otherwise EICH_KERNE (see below)
 # HOMFLY_KERNE from the environment applies; only then this value. On another
 # box, re-calibrate (kern_eichung2.py), do not estimate.
 # ---------------------------------------------------------------------------
-EICH_KERNE = int(os.environ.get("HOMFLY_KERNE", 6))
+CALIBRATION_CORES = int(os.environ.get("HOMFLY_KERNE", 6))
 
 
 
-def _zeile_mod(aufgabe):
+def _row_mod(task):
     """One q sample point in F_p: returns (l, [P_mod(a_k) for all k]).
 
     PARALLELISED 2026-08-25. The exact path is the expensive one — the 30-hour run
@@ -223,13 +223,13 @@ def _zeile_mod(aufgabe):
     on the draw, not on the order of evaluation); only the computation is
     distributed, and it is independent per l — chis_mod depends on q alone.
     """
-    l, q, word, n, as_, p = aufgabe
+    l, q, word, n, as_, p = task
     qi = inv(q, p)
     cs = chis_mod(word, n, q, qi, p)
-    return l, [P_mod(word, n, a, q, p, vor=cs) for a in as_]
+    return l, [P_mod(word, n, a, q, p, pre=cs) for a in as_]
 
 
-def eine_primzahl(word, n, z_grad_max, p, rng, laut=False):
+def one_prime(word, n, z_grad_max, p, rng, laut=False):
     """Coefficients C[J][m] in F_p. A=a^2, Z=z^2 (both exponents even)."""
     I0, I1, J1, e = _box(word, n, z_grad_max)
     NA, NZ = I1 - I0 + 1, J1 + 1
@@ -237,10 +237,10 @@ def eine_primzahl(word, n, z_grad_max, p, rng, laut=False):
     # Draw sample points: q determines Z, a determines A. Both must be PAIRWISE
     # distinct and must not kill any denominator — otherwise draw again.
     qs, Zs = [], []
-    versuche = 0
+    attempts = 0
     while len(qs) < NZ:
-        versuche += 1
-        if versuche > 400 * NZ:
+        attempts += 1
+        if attempts > 400 * NZ:
             raise RuntimeError('no usable q sample points found')
         q = rng.randrange(2, p - 1)
         try:
@@ -277,21 +277,21 @@ def eine_primzahl(word, n, z_grad_max, p, rng, laut=False):
         as_.append(a); As.append(A)
 
     V = [[0] * NA for _ in range(NZ)]
-    aufgaben = [(l, q, word, n, as_, p) for l, q in enumerate(qs)]
-    k_soll = min(KERNE if KERNE else EICH_KERNE, NZ)
+    tasks = [(l, q, word, n, as_, p) for l, q in enumerate(qs)]
+    k_target = min(CORES if CORES else CALIBRATION_CORES, NZ)
 
-    def _seriell(grund=None):
-        if laut and grund:
-            print(f'      {grund} — serial', flush=True)
-        for auf in aufgaben:
-            l, werte = _zeile_mod(auf)
-            V[l] = werte
+    def _serial(reason=None):
+        if laut and reason:
+            print(f'      {reason} — serial', flush=True)
+        for auf in tasks:
+            l, row_values = _row_mod(auf)
+            V[l] = row_values
             if laut and NZ >= 6 and (l + 1) % max(1, NZ // 4) == 0:
                 print(f'      {l+1}/{NZ} q sample points', flush=True)
 
-    _mod = sys.modules.get(_zeile_mod.__module__)
-    _importierbar = _mod is not None and (
-        _zeile_mod.__module__ == '__main__' or getattr(_mod, '__spec__', None) is not None)
+    _mod = sys.modules.get(_row_mod.__module__)
+    _importable = _mod is not None and (
+        _row_mod.__module__ == '__main__' or getattr(_mod, '__spec__', None) is not None)
 
     # SELF-CALIBRATION instead of a guessed threshold (measured 25.08.): a
     # spawn pool costs ~0.9 s to set up, and it is rebuilt FOR EACH PRIME.
@@ -299,126 +299,126 @@ def eine_primzahl(word, n, z_grad_max, p, rng, laut=False):
     # (3_1: 0.01 s serial vs 0.88 s parallel). So: compute the first sample point
     # serially, estimate the remaining run time from it and only then
     # decide. No constant over n or NZ — that would be guessed.
-    POOL_KOSTEN = 1.2          # s, set-up + tear-down of a spawn pool, generous
-    if k_soll > 1 and _importierbar and NZ > 1:
+    POOL_COST = 1.2          # s, set-up + tear-down of a spawn pool, generous
+    if k_target > 1 and _importable and NZ > 1:
         _t = time.time()
-        _l0, _w0 = _zeile_mod(aufgaben[0])
+        _l0, _w0 = _row_mod(tasks[0])
         _je = time.time() - _t
         V[_l0] = _w0
-        rest = aufgaben[1:]
-        seriell_rest = _je * len(rest)
-        if seriell_rest < POOL_KOSTEN * 2:
+        rest = tasks[1:]
+        serial_rest = _je * len(rest)
+        if serial_rest < POOL_COST * 2:
             if laut:
-                print(f'      {_je*1000:.0f} ms per sample point, remaining {seriell_rest:.1f}s '
+                print(f'      {_je*1000:.0f} ms per sample point, remaining {serial_rest:.1f}s '
                       f'— pool not worth it', flush=True)
-            k_soll = 1
-            aufgaben = rest
+            k_target = 1
+            tasks = rest
         else:
-            aufgaben = rest
+            tasks = rest
             if laut:
                 print(f'      {_je*1000:.0f} ms per sample point, remaining serial would be '
-                      f'{seriell_rest:.0f}s — pool with {k_soll} cores', flush=True)
+                      f'{serial_rest:.0f}s — pool with {k_target} cores', flush=True)
 
-    if k_soll <= 1:
-        _seriell()
-    elif not _importierbar:
-        _seriell(f"module name '{_zeile_mod.__module__}' not importable")
+    if k_target <= 1:
+        _serial()
+    elif not _importable:
+        _serial(f"module name '{_row_mod.__module__}' not importable")
     else:
         import concurrent.futures as _cf
         import multiprocessing as _mp
         try:
-            fertig = 0
-            with _cf.ProcessPoolExecutor(max_workers=k_soll,
+            n_done = 0
+            with _cf.ProcessPoolExecutor(max_workers=k_target,
                                          mp_context=_mp.get_context('spawn')) as ex:
-                for l, werte in ex.map(_zeile_mod, aufgaben, chunksize=1):
-                    V[l] = werte
-                    fertig += 1
-                    if laut and NZ >= 6 and fertig % max(1, NZ // 4) == 0:
-                        print(f'      {fertig}/{NZ} q sample points ({k_soll} cores)', flush=True)
+                for l, row_values in ex.map(_row_mod, tasks, chunksize=1):
+                    V[l] = row_values
+                    n_done += 1
+                    if laut and NZ >= 6 and n_done % max(1, NZ // 4) == 0:
+                        print(f'      {n_done}/{NZ} q sample points ({k_target} cores)', flush=True)
         except Exception as ex_:
-            _seriell(f'pool failed ({type(ex_).__name__})')
+            _serial(f'pool failed ({type(ex_).__name__})')
 
     MZ = [[pow(Z, J, p) for J in range(NZ)] for Z in Zs]
-    X = loese_mod(MZ, V, p)                              # over J
+    X = solve_mod(MZ, V, p)                              # over J
     MA = [[pow(A, I0 + m, p) if I0 + m >= 0
            else inv(pow(A, -(I0 + m), p), p) for m in range(NA)] for A in As]
     XT = [[X[J][k] for J in range(NZ)] for k in range(NA)]
-    CT = loese_mod(MA, XT, p)                            # over m
+    CT = solve_mod(MA, XT, p)                            # over m
     C = [[CT[m][J] for m in range(NA)] for J in range(NZ)]
     return C, I0, J1, e
 
 
-def interpoliere_exakt(word, n, z_grad_max, max_prim=12, seed=23, laut=False):
+def interpolate_exact(word, n, z_grad_max, max_prim=12, seed=23, laut=False):
     """Add primes until the CRT result stays fixed."""
     rng = random.Random(seed)
-    reste, benutzt = [], []
-    vorher = None
+    residues, used = [], []
+    before = None
     t0 = time.time()
-    for pi, p in enumerate(PRIMZAHLEN[:max_prim]):
-        C, I0, J1, e = eine_primzahl(word, n, z_grad_max, p, rng, laut)
-        reste.append(C); benutzt.append(p)
-        if len(benutzt) < 2:
+    for pi, p in enumerate(PRIMES[:max_prim]):
+        C, I0, J1, e = one_prime(word, n, z_grad_max, p, rng, laut)
+        residues.append(C); used.append(p)
+        if len(used) < 2:
             continue
-        jetzt = {}
+        now = {}
         NZ, NA = len(C), len(C[0])
         for J in range(NZ):
             for m in range(NA):
-                v = crt([r[J][m] for r in reste], benutzt)
+                v = crt([r[J][m] for r in residues], used)
                 if v:
-                    jetzt[(2 * (I0 + m), 2 * J)] = v
+                    now[(2 * (I0 + m), 2 * J)] = v
         if laut:
-            print(f'    {len(benutzt)} primes, {len(jetzt)} terms, '
+            print(f'    {len(used)} primes, {len(now)} terms, '
                   f'{time.time()-t0:.0f}s', flush=True)
-        if vorher is not None and jetzt == vorher:
-            return jetzt, I0, J1, e, {'primzahlen': len(benutzt),
+        if before is not None and now == before:
+            return now, I0, J1, e, {'primzahlen': len(used),
                                       'sek': round(time.time() - t0, 1),
                                       'stabil': True}
-        vorher = jetzt
-    return (vorher or {}), I0, J1, e, {'primzahlen': len(benutzt),
+        before = now
+    return (before or {}), I0, J1, e, {'primzahlen': len(used),
                                        'sek': round(time.time() - t0, 1),
                                        'stabil': False}
 
 
 def selbsttest():
     """Two known knots exactly, plus three counter-cases."""
-    from homfly_interpolation import det_exakt, als_regina_string
+    from homfly_interpolation import det_exact, as_regina_string
     ok = True
-    for nm, w, n, zg, det_soll, soll_str in [
+    for nm, w, n, zg, det_expected, expected_str in [
             ('Kleeblatt 3_1', [1, 1, 1], 2, 3, 3, 'x^-2 y^2 + 2 x^-2 - x^-4'),
             ('Achterknoten 4_1', [1, -2, 1, -2], 3, 4, 5, None)]:
-        p, I0, J1, e, d = interpoliere_exakt(w, n, zg)
-        det = det_exakt(p)
-        gut = (det == det_soll and d['stabil'])
-        print(f'  {nm:<18} det={det} (expected {det_soll}) · {d["primzahlen"]} '
+        p, I0, J1, e, d = interpolate_exact(w, n, zg)
+        det = det_exact(p)
+        good = (det == det_expected and d['stabil'])
+        print(f'  {nm:<18} det={det} (expected {det_expected}) · {d["primzahlen"]} '
               f'primes · stable={d["stabil"]} · {d["sek"]}s '
-              f'{"✅" if gut else "🔴"}')
-        print(f'     {als_regina_string(p)}')
-        if soll_str:
-            gleich = als_regina_string(p) == soll_str
+              f'{"✅" if good else "🔴"}')
+        print(f'     {as_regina_string(p)}')
+        if expected_str:
+            equal = as_regina_string(p) == expected_str
             print(f'     against the floating-point version: '
-                  f'{"✅ identical" if gleich else "🔴 different"}')
-            gut &= gleich
-        ok &= gut
+                  f'{"✅ identical" if equal else "🔴 different"}')
+            good &= equal
+        ok &= good
 
     # COUNTER-CASE 1: box too short on the z axis ⟹ det must come out wrong
-    p, I0, J1, e, d = interpoliere_exakt([1, 1, 1], 2, 0)
+    p, I0, J1, e, d = interpolate_exact([1, 1, 1], 2, 0)
     # z_grad_max=0 ⟹ J1=1, that is still enough; so harder: check directly
     # that a DELIBERATELY wrong box does not give the same determinant.
-    from homfly_interpolation import interpoliere, als_dict
-    C2, I02, J12, e2, dg, _ = interpoliere([1, 1, 1], 2, 3, zwang_box=(2, 3, 1))
-    det_falsch = det_exakt(als_dict(C2, I02))
-    print(f'  COUNTER-CASE wrong box    : det={det_falsch} (must not be 3) '
-          f'{"✅" if det_falsch != 3 else "🔴"}')
-    ok &= (det_falsch != 3)
+    from homfly_interpolation import interpolate, as_dict
+    C2, I02, J12, e2, dg, _ = interpolate([1, 1, 1], 2, 3, forced_box=(2, 3, 1))
+    det_wrong = det_exact(as_dict(C2, I02))
+    print(f'  COUNTER-CASE wrong box    : det={det_wrong} (must not be 3) '
+          f'{"✅" if det_wrong != 3 else "🔴"}')
+    ok &= (det_wrong != 3)
 
     # COUNTER-CASE 2: CRT with ONE prime must not count as "stable"
-    _, _, _, _, d1 = interpoliere_exakt([1, 1, 1], 2, 3, max_prim=1)
+    _, _, _, _, d1 = interpolate_exact([1, 1, 1], 2, 3, max_prim=1)
     print(f'  COUNTER-CASE 1 prime      : stable={d1["stabil"]} '
           f'(must be False) {"✅" if not d1["stabil"] else "🔴"}')
     ok &= not d1['stabil']
 
     # COUNTER-CASE 3: the symmetric CRT representative must give negative numbers
-    neg = crt([(-7) % p for p in PRIMZAHLEN[:3]], PRIMZAHLEN[:3])
+    neg = crt([(-7) % p for p in PRIMES[:3]], PRIMES[:3])
     print(f'  COUNTER-CASE CRT of -7    : {neg} {"✅" if neg == -7 else "🔴"}')
     ok &= (neg == -7)
 
@@ -426,28 +426,28 @@ def selbsttest():
     return 0 if ok else 1
 
 
-def als_json(word, n, z_grad_max, max_prim=12):
+def as_json(word, n, z_grad_max, max_prim=12):
     """ONE line of JSON — so that the pipeline can call this as its own process with
     its own clock (Footgun 13: isolation belongs at the process level)."""
-    from homfly_interpolation import det_exakt, als_regina_string
+    from homfly_interpolation import det_exact, as_regina_string
     t0 = time.time()
-    p, I0, J1, e, md = interpoliere_exakt(word, n, z_grad_max, max_prim=max_prim)
-    tr, ges = pruefe_frisch_mod(p, word, n)
-    return {'homfly': als_regina_string(p), 'det': det_exakt(p),
+    p, I0, J1, e, md = interpolate_exact(word, n, z_grad_max, max_prim=max_prim)
+    tr, total_pts = check_fresh_mod(p, word, n)
+    return {'homfly': as_regina_string(p), 'det': det_exact(p),
             'primzahlen': md['primzahlen'], 'stabil': md['stabil'],
-            'frisch_treffer': tr, 'frisch_gesamt': ges,
+            'frisch_treffer': tr, 'frisch_gesamt': total_pts,
             'terme': len(p), 'sek': round(time.time() - t0, 1),
             'alexander_punkte': None}
 
 
-def pruefe_frisch_mod(p_koef, word, n, anzahl=3, seed=777):
+def check_fresh_mod(p_coef, word, n, count_n=3, seed=777):
     """Fresh points, but EXACT: in F_q at points that were not on the grid.
     The floating-point test is no longer usable here — with coefficients around 1e12 and
     massive cancellation it measures its own noise. A comparison in F_p
     is either equal or not; there is nothing in between."""
     rng = random.Random(seed)
-    treffer = 0
-    for pr in PRIMZAHLEN[-anzahl:]:
+    hits = 0
+    for pr in PRIMES[-count_n:]:
         for _ in range(500):
             q = rng.randrange(2, pr - 1)
             a = rng.randrange(2, pr - 1)
@@ -464,17 +464,17 @@ def pruefe_frisch_mod(p_koef, word, n, anzahl=3, seed=777):
                             raise ZeroDivisionError
                         if qint_mod(d, q, qi, pr) == 0:
                             raise ZeroDivisionError
-                soll = P_mod(word, n, a, q, pr)
+                expected = P_mod(word, n, a, q, pr)
             except (ZeroDivisionError, ValueError):
                 continue
             z = (q - qi) % pr
-            ist = 0
-            for (i, j), c in p_koef.items():
+            actual = 0
+            for (i, j), c in p_coef.items():
                 ai_pot = pow(a, i, pr) if i >= 0 else pow(ai, -i, pr)
-                ist = (ist + c * ai_pot % pr * pow(z, j, pr)) % pr
-            treffer += int(ist % pr == soll % pr)
+                actual = (actual + c * ai_pot % pr * pow(z, j, pr)) % pr
+            hits += int(actual % pr == expected % pr)
             break
-    return treffer, anzahl
+    return hits, count_n
 
 
 if __name__ == '__main__':
@@ -489,14 +489,14 @@ if __name__ == '__main__':
     if a.selbsttest:
         sys.exit(selbsttest())
     if a.wort:
-        from homfly_interpolation import alexander_zeuge
+        from homfly_interpolation import alexander_witness
         try:
             w = json.loads(a.wort)
-            out = als_json([int(g) for g in w], a.n, a.zgrad, a.max_prim)
+            out = as_json([int(g) for g in w], a.n, a.zgrad, a.max_prim)
             if a.alex_evals:
                 from homfly_eichung import parse_homfly
                 pp = parse_homfly(out['homfly'])
-                az, txt = alexander_zeuge(pp, json.loads(a.alex_evals))
+                az, txt = alexander_witness(pp, json.loads(a.alex_evals))
                 out['alexander_punkte'] = az
                 out['alexander_punkte_text'] = txt
         except Exception as ex:

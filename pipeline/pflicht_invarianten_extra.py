@@ -611,19 +611,19 @@ MEM_PRELUDE = (
 ) % STAGE6_MEM_GB
 
 
-def _unknot_zu_gross(mass, wert, grenze, was):
+def _unknot_too_large(measure, value, limit, what):
     """Labelled rejection instead of a silent gap — an empty cell looks
     like a finding and is none (Disc #674/#680)."""
     return {'unknotting_number': None,
             'unknotting_uebersprungen': True,
-            'grund': (f'{was} {wert} > {grenze} ({mass}). The brute force is '
+            'grund': (f'{what} {value} > {limit} ({measure}). The brute force is '
                       f'exponential; measured over 474 records, '
                       f'unknotting_number was never obtained above c=64 or braid length 201. '
                       f'Above the threshold it is not computed '
                       f'but rejected — otherwise the run hits the '
                       f'memory wall (23.08.: 20 min, 9 earlyoom kills).'),
-            'schwelle': grenze, 'gemessen': wert,
-            'nachholbar_mit': f'{mass}=<larger> as environment variable'}
+            'schwelle': limit, 'gemessen': value,
+            'nachholbar_mit': f'{measure}=<larger> as environment variable'}
 
 
 # 4. UNKNOTTING NUMBER — Sage brute-force braid (Discovery #60)
@@ -639,7 +639,7 @@ def unknotting_number_brute_force(braid_word, n_strands, max_subset=4,
     Scales as 2^n with n = braid_length, but we go through subset sizes
     in ascending order → early abort."""
     if braid_word is not None and len(braid_word) > UNKNOT_L_MAX:
-        return _unknot_zu_gross('UNKNOT_L_MAX', len(braid_word), UNKNOT_L_MAX,
+        return _unknot_too_large('UNKNOT_L_MAX', len(braid_word), UNKNOT_L_MAX,
                                 'braid length')
     code = SEAL_PRELUDE + MEM_PRELUDE + textwrap.dedent(f"""
         import json, sys
@@ -744,7 +744,7 @@ def unknotting_via_signed_gauss_flip(signed_gauss, max_subset=4, processes=12):
     indices = sorted({int(idx) for _, idx, _ in crossings})
     n_crossings = len(indices)
     if n_crossings > UNKNOT_C_MAX:
-        return _unknot_zu_gross('UNKNOT_C_MAX', n_crossings, UNKNOT_C_MAX,
+        return _unknot_too_large('UNKNOT_C_MAX', n_crossings, UNKNOT_C_MAX,
                                 'diagram size')
     code = SEAL_PRELUDE + MEM_PRELUDE + textwrap.dedent(f"""
         import json, re, sys

@@ -48,7 +48,7 @@ from pathlib import Path
 # === Paths ===
 ROOT = Path(site_config.ROOT)
 ERZ = Path(site_config.GENERATED_KNOTS_DIR)
-BEKANNT = ERZ / 'bekannt'
+KNOWN = ERZ / 'bekannt'
 FAILURES = ERZ / 'pipeline_failures'
 SINGLETONS = ERZ / 'new_found_knots' / 'singletons_novelty'
 FREEZE = Path(site_config.FREEZE_DIR)
@@ -69,15 +69,15 @@ def is_knotinfo_folder(name: str) -> bool:
     return bool(KNOTINFO_PREFIX_RE.match(name))
 
 
-def find_pflicht_complete(d: Path) -> Path | None:
+def find_mandatory_complete(d: Path) -> Path | None:
     """Find <stem>_pflicht_invarianten*_complete.json in folder."""
     candidates = sorted(d.glob('*_pflicht_invarianten*_complete.json'))
     return candidates[0] if candidates else None
 
 
-def load_pflicht_data(pfl: Path) -> dict | None:
+def load_mandatory_data(mand: Path) -> dict | None:
     try:
-        return json.load(open(pfl))
+        return json.load(open(mand))
     except Exception:
         return None
 
@@ -90,12 +90,12 @@ def load_crosscheck_data(d: Path, stem: str) -> dict | None:
     return None
 
 
-def is_failure(d: Path, pfl: Path | None, pdata: dict | None) -> tuple[bool, str]:
+def is_failure(d: Path, mand: Path | None, pdata: dict | None) -> tuple[bool, str]:
     """Failure detection.
     Type a: no _complete.json
     Type b: _complete.json exists but the mandatory core fields are all None.
     """
-    if pfl is None or pdata is None:
+    if mand is None or pdata is None:
         return True, 'type_a (no _complete.json)'
     pl = pdata.get('pflichtliste', {})
     alg = pl.get('ALGEBRA', {}) or {}
@@ -127,7 +127,7 @@ def get_knotinfo_match(cdata: dict | None) -> str | None:
     return None
 
 
-def fingerprint_from_pflicht(pdata: dict) -> tuple[int|None, int|None, str|None, str|None]:
+def fingerprint_from_mandatory(pdata: dict) -> tuple[int|None, int|None, str|None, str|None]:
     """Compute (c, det, sym, chir) for cluster-fingerprint."""
     pl = pdata.get('pflichtliste', {})
     diag = pl.get('DIAGRAMM', {}) or {}
@@ -187,9 +187,9 @@ def load_theta_numeric(folder: Path, stem: str) -> str | None:
 def theta_match(folder_a: Path, folder_b: Path) -> bool:
     """True if both folders have theta values AND they are identical."""
     stem_a = re.sub(r'_pflicht_invarianten.*_complete\.json$', '',
-                    find_pflicht_complete(folder_a).name) if find_pflicht_complete(folder_a) else folder_a.name
+                    find_mandatory_complete(folder_a).name) if find_mandatory_complete(folder_a) else folder_a.name
     stem_b = re.sub(r'_pflicht_invarianten.*_complete\.json$', '',
-                    find_pflicht_complete(folder_b).name) if find_pflicht_complete(folder_b) else folder_b.name
+                    find_mandatory_complete(folder_b).name) if find_mandatory_complete(folder_b) else folder_b.name
     ta = load_theta_numeric(folder_a, stem_a)
     tb = load_theta_numeric(folder_b, stem_b)
     if ta is None or tb is None:
@@ -223,13 +223,13 @@ def find_singleton_match(c, det, sym, chir, exclude: Path) -> Path | None:
         if cand == exclude:
             continue
         # Load pflicht of candidate to compare fingerprint
-        pfl = find_pflicht_complete(cand)
-        if not pfl:
+        mand = find_mandatory_complete(cand)
+        if not mand:
             continue
-        pdata = load_pflicht_data(pfl)
+        pdata = load_mandatory_data(mand)
         if not pdata:
             continue
-        cc, dd, ss, ch = fingerprint_from_pflicht(pdata)
+        cc, dd, ss, ch = fingerprint_from_mandatory(pdata)
         if cc == c and dd == det and ss == sym and ch == chir:
             return cand
     return None
@@ -296,7 +296,7 @@ def patch_content_refs(target_dir: Path, old_name: str, new_name: str, dry_run: 
     return n
 
 
-def klassisch_target_name(klassisch_id: str, original_stem: str) -> str:
+def classical_target_name(classical_id: str, original_stem: str) -> str:
     """Compose a multi-hit folder name or a singleton name.
 
     Rules:
@@ -305,11 +305,11 @@ def klassisch_target_name(klassisch_id: str, original_stem: str) -> str:
           single name.
       - Else: <klassisch_id>__<original_stem>.
     """
-    if original_stem == klassisch_id:
-        return klassisch_id
-    if original_stem.startswith(klassisch_id + '__'):
+    if original_stem == classical_id:
+        return classical_id
+    if original_stem.startswith(classical_id + '__'):
         return original_stem  # already correctly Multi-Hit
-    return f'{klassisch_id}__{original_stem}'
+    return f'{classical_id}__{original_stem}'
 
 
 def determine_target(folder: Path, dry_run: bool = False) -> tuple[str, Path, str]:
@@ -321,27 +321,27 @@ def determine_target(folder: Path, dry_run: bool = False) -> tuple[str, Path, st
     if any(part == 'own_knots' for part in rel.parts):
         return 'own_knots_skip', folder, 'own_knots: artist names stay (doctrine)'
 
-    pfl = find_pflicht_complete(folder)
-    pdata = load_pflicht_data(pfl) if pfl else None
+    mand = find_mandatory_complete(folder)
+    pdata = load_mandatory_data(mand) if mand else None
 
     # Failure check
-    fail, reason = is_failure(folder, pfl, pdata)
+    fail, reason = is_failure(folder, mand, pdata)
     if fail:
         target = FAILURES / folder.name
         return 'failure', target, reason
 
     # KnotInfo check
-    stem_match = re.match(r'(.+?)_pflicht_invarianten.*_complete\.json$', pfl.name)
+    stem_match = re.match(r'(.+?)_pflicht_invarianten.*_complete\.json$', mand.name)
     stem = stem_match.group(1) if stem_match else folder.name
     cdata = load_crosscheck_data(folder, stem)
     ki_id = get_knotinfo_match(cdata)
     if ki_id:
-        new_name = klassisch_target_name(ki_id, folder.name)
-        target = BEKANNT / new_name
+        new_name = classical_target_name(ki_id, folder.name)
+        target = KNOWN / new_name
         return 'knotinfo', target, f'KnotInfo hit: {ki_id}'
 
     # Cluster fingerprint + Theta check (Discovery #177)
-    c, det, sym, chir = fingerprint_from_pflicht(pdata)
+    c, det, sym, chir = fingerprint_from_mandatory(pdata)
     if c is not None and det is not None and sym and chir:
         existing = find_existing_cluster(c, det, sym, chir)
         if existing:
@@ -350,14 +350,14 @@ def determine_target(folder: Path, dry_run: bool = False) -> tuple[str, Path, st
             if members:
                 ref_member = members[0]
                 if theta_match(folder, ref_member):
-                    target = existing / klassisch_target_name(existing.name, folder.name)
+                    target = existing / classical_target_name(existing.name, folder.name)
                     return 'cluster', target, f'cluster match (theta-verified): {existing.name}'
                 else:
                     # Mandatory fingerprint matched but Theta did not — separate class
                     return 'singleton', SINGLETONS / folder.name, f'mandatory-list match {existing.name}, but theta differs → own class, stays a singleton'
             else:
                 # Cluster folder empty → simply move in
-                target = existing / klassisch_target_name(existing.name, folder.name)
+                target = existing / classical_target_name(existing.name, folder.name)
                 return 'cluster', target, f'cluster match (empty cluster): {existing.name}'
         # Check for a 2nd singleton with Theta verification
         sib = find_singleton_match(c, det, sym, chir, exclude=folder)
@@ -436,7 +436,7 @@ def process_folder(folder: Path, render: bool = True, dry_run: bool = False) -> 
         #  1. Create new family folder = target
         #  2. Move BOTH the current folder + sibling singleton into it
         sib = None
-        c, det, sym, chir = fingerprint_from_pflicht(load_pflicht_data(find_pflicht_complete(folder)))
+        c, det, sym, chir = fingerprint_from_mandatory(load_mandatory_data(find_mandatory_complete(folder)))
         sib = find_singleton_match(c, det, sym, chir, exclude=folder)
         if not sib:
             print('  ERROR: sibling not found')

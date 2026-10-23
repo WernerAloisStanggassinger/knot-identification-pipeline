@@ -117,7 +117,7 @@ def crt_lift(residues, primes):
 
 
 # --------------------------------------------------- Alexander matrix from PD
-def boegen(pd):
+def arcs(pd):
     """Merge PD EDGES into ARCS (Wirtinger generators).
 
     🔑 The mistake of the first draft (26.07., caught by the calibration): taking the 2n
@@ -145,12 +145,12 @@ def boegen(pd):
     for a, b, c, d in pd:
         find(a); find(b); find(c); find(d)
         union(b, d)                      # over-strand: one edge, one arc
-    wurzeln = sorted({find(e) for e in par})
-    idx = {w: i for i, w in enumerate(wurzeln)}
-    return {e: idx[find(e)] for e in par}, len(wurzeln)
+    roots = sorted({find(e) for e in par})
+    idx = {w: i for i, w in enumerate(roots)}
+    return {e: idx[find(e)] for e in par}, len(roots)
 
 
-def vorzeichen(pd):
+def signs(pd):
     """Sign per crossing from the PD.
 
     In X[a,b,c,d] the under-strand runs a->c, the over-strand connects b and d.
@@ -178,8 +178,8 @@ def alexander_matrix(pd, t: int, variante: int, p: int):
     by the calibration — NOTHING is asserted here.
     """
     n = len(pd)
-    idx, m = boegen(pd)
-    sg = vorzeichen(pd)
+    idx, m = arcs(pd)
+    sg = signs(pd)
     A = np.zeros((n, m), dtype=np.int64)
     for row, (a, b, c, d) in enumerate(pd):
         over = idx[b]                       # == idx[d], merged
@@ -221,7 +221,7 @@ def alexander_poly(pd, variante: int):
 
 
 # ------------------------------------------------------------ comparison
-def normiere(co):
+def normalise(co):
     """Make comparable up to a unit +-t^k (Footgun 12: NEVER compare absolutely)."""
     c = list(co)
     while c and c[0] == 0:
@@ -262,20 +262,20 @@ FIG8 = parse_pd('X[4,2,5,1] X[8,6,1,5] X[6,3,7,2] X[2,7,3,8]')
 
 if __name__ == '__main__':
     print('=== CALIBRATION: which crossing convention reproduces known results? ===', flush=True)
-    soll = {'Kleeblatt': (TREFOIL, normiere(parse_regina('x^2 - x + 1'))),
-            'Achterknoten': (FIG8, normiere(parse_regina('x^2 - 3 x + 1')))}
-    gut = []
+    expected = {'Kleeblatt': (TREFOIL, normalise(parse_regina('x^2 - x + 1'))),
+            'Achterknoten': (FIG8, normalise(parse_regina('x^2 - 3 x + 1')))}
+    good = []
     for v in range(8):
-        zeile, ok = [], True
-        for name, (pd, s_) in soll.items():
+        table_row, ok = [], True
+        for name, (pd, s_) in expected.items():
             try:
-                got = normiere(alexander_poly(pd, v))
+                got = normalise(alexander_poly(pd, v))
             except Exception as e:
                 got = f'error {type(e).__name__}'
-            zeile.append(f'{name} {got}')
+            table_row.append(f'{name} {got}')
             ok &= (got == s_)
-        print(f'  variant {v}: ' + ' · '.join(zeile) + ('   ✓✓' if ok else ''), flush=True)
-        if ok: gut.append(v)
-    print(f'\npassed: {gut}', flush=True)
-    print(f'arcs in the trefoil: {boegen(TREFOIL)[1]} (expected 3) · '
-          f'in the figure-eight knot: {boegen(FIG8)[1]} (expected 4)', flush=True)
+        print(f'  variant {v}: ' + ' · '.join(table_row) + ('   ✓✓' if ok else ''), flush=True)
+        if ok: good.append(v)
+    print(f'\npassed: {good}', flush=True)
+    print(f'arcs in the trefoil: {arcs(TREFOIL)[1]} (expected 3) · '
+          f'in the figure-eight knot: {arcs(FIG8)[1]} (expected 4)', flush=True)

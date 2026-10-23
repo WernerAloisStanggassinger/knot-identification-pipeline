@@ -127,6 +127,17 @@ def keyword_callees(tree, acc):
                 if k.arg: acc.setdefault(k.arg, set()).add(name)
     return acc
 
+def name_strings(tree, acc):
+    """Strings that spell an identifier: globals()/locals()/vars()[...] and getattr/setattr/hasattr/delattr(obj, 'name')."""
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Subscript) and isinstance(n.value, ast.Call) and isinstance(n.value.func, ast.Name) \
+                and n.value.func.id in ('globals', 'locals', 'vars') and isinstance(n.slice, ast.Constant):
+            acc.append(n.slice)
+        elif isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in ('getattr', 'setattr', 'hasattr', 'delattr') \
+                and len(n.args) > 1 and isinstance(n.args[1], ast.Constant):
+            acc.append(n.args[1])
+    return acc
+
 class Walk:
     def __init__(self, fname): self.f = fname; self.idents = []; self.strings = []; self.errors = []
     def cmp(self, a, b, path='root'):
@@ -235,6 +246,14 @@ def main():
     # keyword arguments: renaming allowed only when every callee is a repository function with that parameter
     funcs, kwc = {}, {}
     for t in old_trees.values(): repo_functions(t, funcs); keyword_callees(t, kwc)
+    # strings that spell identifiers must follow the identifier renaming
+    for p in py_old:
+        q = renames.get(p, p)
+        if p not in old_trees: continue
+        na, nb = name_strings(old_trees[p], []), name_strings(new_trees[q], [])
+        for x, y in zip(na, nb):
+            if isinstance(x.value, str) and x.value in ren and y.value != ren[x.value]:
+                errors.append(f'{q}:{x.lineno}: string {x.value!r} names the identifier renamed to {ren[x.value]!r}, but reads {y.value!r}')
     # strings
     keys_old = set()
     for t in old_trees.values(): key_strings(t, keys_old)

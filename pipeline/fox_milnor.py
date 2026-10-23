@@ -58,7 +58,7 @@ def parse_alexander(s):
     return sp.Poly(c, t)
 
 
-def _reziprok(q):
+def _reciprocal(q):
     """q*(t) = t^deg(q) * q(1/t), primitive and normalised to a positive leading coefficient."""
     c = q.all_coeffs()
     r = sp.Poly(list(reversed(c)), t)
@@ -86,11 +86,11 @@ def fox_milnor(alex_str):
     if P.total_degree() == 0:
         return True, 'Delta is constant (= 1 up to units): Fox-Milnor trivially satisfied', {}
     try:
-        _, faktoren = sp.factor_list(P.as_expr(), t)
+        _, factors = sp.factor_list(P.as_expr(), t)
     except Exception as e:
         return None, 'factorisation failed: %s' % str(e)[:80], {}
     mult = {}
-    for f, e in faktoren:
+    for f, e in factors:
         try:
             q = _norm(sp.Poly(f, t))
         except Exception:
@@ -102,7 +102,7 @@ def fox_milnor(alex_str):
     details = {'faktoren': {str(k): v for k, v in mult.items()}}
     for k, e in mult.items():
         q = sp.Poly(k, t)
-        qs = _reziprok(q).as_expr()
+        qs = _reciprocal(q).as_expr()
         if sp.simplify(qs - k) == 0:
             if e % 2 == 1:
                 return False, ('self-reciprocal factor (%s) with ODD multiplicity %d'

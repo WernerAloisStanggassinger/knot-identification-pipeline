@@ -40,7 +40,7 @@ import sys, glob, os, json, argparse
 import numpy as np, pandas as pd
 from concurrent.futures import ProcessPoolExecutor
 
-def eine(pq):
+def one_curve(pq):
     try:
         df = pd.read_parquet(pq, columns=['t_step'])
     except Exception as e:
@@ -49,44 +49,44 @@ def eine(pq):
         return dict(pq=pq, n=0, frames=0, minc=0, medc=0, nullanteil=1.0, sorte='UNKNOTEN')
     ts = df['t_step'].to_numpy()
     n_frames = int(ts.max()) + 1
-    voll = np.bincount(ts, minlength=n_frames)
-    null = float((voll == 0).mean())
-    minc = int(voll.min())
+    full = np.bincount(ts, minlength=n_frames)
+    null = float((full == 0).mean())
+    minc = int(full.min())
     sorte = 'UNKNOTEN' if minc == 0 else 'VERSCHMIERT'
     return dict(pq=pq, n=int(len(df)), frames=n_frames, minc=minc,
-                medc=int(np.median(voll)), nullanteil=null, sorte=sorte)
+                medc=int(np.median(full)), nullanteil=null, sorte=sorte)
 
 def selbsttest():
     """Counter-case built in: the test must catch both kinds AND a mix-up."""
     import tempfile
     ok = 0; total = 0
-    def pruef(name, ist, soll):
+    def check(name, actual, expected):
         nonlocal ok, total
         total += 1
-        gut = ist == soll
-        ok += gut
-        print(f"  {'✅' if gut else '🔴'} {name}: {ist!r} (expected {soll!r})")
+        good = actual == expected
+        ok += good
+        print(f"  {'✅' if good else '🔴'} {name}: {actual!r} (expected {expected!r})")
     with tempfile.TemporaryDirectory() as d:
         # (1) curve with a crossing-free projection ⟹ UNKNOTEN
         p1 = os.path.join(d, 'a.parquet')
         pd.DataFrame({'t_step': [0,0,0, 2,2, 3]}).to_parquet(p1)   # frame 1 empty
-        pruef('empty frame ⟹ UNKNOTEN', eine(p1)['sorte'], 'UNKNOTEN')
+        check('empty frame ⟹ UNKNOTEN', one_curve(p1)['sorte'], 'UNKNOTEN')
         # (2) every projection carries crossings ⟹ VERSCHMIERT
         p2 = os.path.join(d, 'b.parquet')
         pd.DataFrame({'t_step': [0,0, 1,1, 2,2, 3,3]}).to_parquet(p2)
-        pruef('no empty frame ⟹ VERSCHMIERT', eine(p2)['sorte'], 'VERSCHMIERT')
+        check('no empty frame ⟹ VERSCHMIERT', one_curve(p2)['sorte'], 'VERSCHMIERT')
         # (3) COUNTER-CASE: a single gap must be enough to flip (2) —
         #     otherwise the test measures the amount instead of the minimum.
         p3 = os.path.join(d, 'c.parquet')
         pd.DataFrame({'t_step': [0]*500 + [1]*500 + [3]*500}).to_parquet(p3)
-        pruef('ONE gap among 1500 points flips it', eine(p3)['sorte'], 'UNKNOTEN')
+        check('ONE gap among 1500 points flips it', one_curve(p3)['sorte'], 'UNKNOTEN')
         # (4) empty file ⟹ UNKNOTEN, no crash
         p4 = os.path.join(d, 'e.parquet')
         pd.DataFrame({'t_step': pd.Series([], dtype='int64')}).to_parquet(p4)
-        pruef('empty file ⟹ UNKNOTEN', eine(p4)['sorte'], 'UNKNOTEN')
+        check('empty file ⟹ UNKNOTEN', one_curve(p4)['sorte'], 'UNKNOTEN')
         # (5) canary: a result that must NOT be true
-        pruef('canary (must be red if the test is blind)',
-              eine(p2)['sorte'] == 'UNKNOTEN', False)
+        check('canary (must be red if the test is blind)',
+              one_curve(p2)['sorte'] == 'UNKNOTEN', False)
     print(f"\n  {ok}/{total} probes")
     return 0 if ok == total else 1
 
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     if a.selbsttest:
         sys.exit(selbsttest())
     if a.gate:
-        r = eine(a.gate)
+        r = one_curve(a.gate)
         if 'fehler' in r:
             print(f"[GATE] unreadable: {r['fehler']}", file=sys.stderr)
             sys.exit(2)
@@ -131,16 +131,16 @@ if __name__ == '__main__':
             pqs.append(g[0])
     print(f"{len(pqs)} candidates without a record, with scanner output")
     with ProcessPoolExecutor(a.workers) as ex:
-        res = list(ex.map(eine, pqs))
+        res = list(ex.map(one_curve, pqs))
     res = [r for r in res if 'fehler' not in r]
     for r in res:
         r['stamm'] = os.path.basename(os.path.dirname(r['pq']))
     for sorte in ('UNKNOTEN', 'VERSCHMIERT'):
-        teil = sorted([r for r in res if r['sorte'] == sorte],
+        part = sorted([r for r in res if r['sorte'] == sorte],
                       key=lambda r: -r['n'])
-        print(f"\n=== {sorte}: {len(teil)} ===")
+        print(f"\n=== {sorte}: {len(part)} ===")
         print(f"  {'stem':<44}{'crossings':>11}{'min/frame':>10}{'med':>6}{'zero frames':>13}")
-        for r in teil:
+        for r in part:
             print(f"  {r['stamm']:<44}{r['n']:>11,}{r['minc']:>10}{r['medc']:>6}"
                   f"{r['nullanteil']*100:>12.1f}%")
     if a.json:

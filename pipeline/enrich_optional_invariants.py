@@ -468,11 +468,11 @@ def derive_meridional_rank_and_bridge(report, optional):
     g_K = a.get('genus')
     if g_K is None:
         g_K = (a.get('knot_floer_homology') or {}).get('seifert_genus')
-    nichttrivial = (g_K is not None and int(g_K) > 0) or (det_K and abs(int(det_K)) > 1)
+    nontrivial = (g_K is not None and int(g_K) > 0) or (det_K and abs(int(det_K)) > 1)
 
     out['meridional_rank_upper_bound']         = mr_upper
     # Trivial lower bound: nontrivial knot ⇒ mr >= 2 (genus > 0 OR det > 1)
-    out['meridional_rank_lower_bound']         = 2 if nichttrivial else 1
+    out['meridional_rank_lower_bound']         = 2 if nontrivial else 1
     out['meridional_rank_method']              = 'Sage simplification_isomorphism().codomain().ngens() (Wirtinger heuristic as in Discovery #103)'
 
     # Berge status
@@ -488,7 +488,7 @@ def derive_meridional_rank_and_bridge(report, optional):
     # (do NOT inherit the possibly wrong pflicht_extra bound — see Discovery #109:
     #  pflicht_extra sets 'Schubert b>=g+1', which is NOT a general theorem; counterexample
     #  the (5,2) torus knot with g=2, b=2.)
-    fresh_lo = 2 if nichttrivial else 1     # (2026-08-10: genus instead of det, see above)
+    fresh_lo = 2 if nontrivial else 1     # (2026-08-10: genus instead of det, see above)
     if optional.get('two_bridge') is False:
         fresh_lo = max(fresh_lo, 3)
     # Boileau-Zieschang: bridge >= meridional_rank >= mr_lower

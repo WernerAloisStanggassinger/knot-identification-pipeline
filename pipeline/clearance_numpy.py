@@ -48,7 +48,7 @@ def _seg_seg_dist(p1, q1, p2, q2):
     return np.linalg.norm(diff, axis=1)
 
 
-def _punkt_mca_chunked(points, ring_skip, chunk=2048):
+def _point_mca_chunked(points, ring_skip, chunk=2048):
     """Point distance as a COARSE upper bound — chunked, so no n^2 memory.
        (The old version built the full matrix and died at n=32768 on 24 GB.)"""
     n = len(points)
@@ -77,42 +77,42 @@ def clearance(points, ring_skip, radius=None):
     a = points.astype(float)
     b = np.roll(a, -1, axis=0)
     mitten = 0.5 * (a + b)
-    laengen = np.linalg.norm(b - a, axis=1)
+    lengths = np.linalg.norm(b - a, axis=1)
 
     if radius is None:
-        radius = _punkt_mca_chunked(a, ring_skip)
+        radius = _point_mca_chunked(a, ring_skip)
     # Two segments can only come closer than `radius` if their
     # midpoints lie at most radius + (half length + half length) apart.
     # The longest edge serves as the bound.
-    zell = float(radius + laengen.max())
-    if not np.isfinite(zell) or zell <= 0:
-        zell = float(np.linalg.norm(a.max(axis=0) - a.min(axis=0))) or 1.0
+    cell = float(radius + lengths.max())
+    if not np.isfinite(cell) or cell <= 0:
+        cell = float(np.linalg.norm(a.max(axis=0) - a.min(axis=0))) or 1.0
 
     # spatial grid: cell -> segment indices
-    schluessel = np.floor(mitten / zell).astype(np.int64)
-    gitter = {}
-    for i, k in enumerate(map(tuple, schluessel)):
-        gitter.setdefault(k, []).append(i)
+    key_name = np.floor(mitten / cell).astype(np.int64)
+    grid = {}
+    for i, k in enumerate(map(tuple, key_name)):
+        grid.setdefault(k, []).append(i)
 
     idx = np.arange(n)
     best = np.inf
-    nachbarn = [(dx, dy, dz) for dx in (-1, 0, 1) for dy in (-1, 0, 1) for dz in (-1, 0, 1)]
-    paare_i, paare_j = [], []
-    for k, iliste in gitter.items():
-        for d in nachbarn:
+    neighbours = [(dx, dy, dz) for dx in (-1, 0, 1) for dy in (-1, 0, 1) for dz in (-1, 0, 1)]
+    pairs_i, pairs_j = [], []
+    for k, ilist in grid.items():
+        for d in neighbours:
             nk = (k[0] + d[0], k[1] + d[1], k[2] + d[2])
-            jliste = gitter.get(nk)
-            if not jliste:
+            jlist = grid.get(nk)
+            if not jlist:
                 continue
-            ii = np.repeat(np.asarray(iliste), len(jliste))
-            jj = np.tile(np.asarray(jliste), len(iliste))
+            ii = np.repeat(np.asarray(ilist), len(jlist))
+            jj = np.tile(np.asarray(jlist), len(ilist))
             m = ii < jj                      # each pair exactly once
             if not m.any():
                 continue
-            paare_i.append(ii[m]); paare_j.append(jj[m])
-    if not paare_i:
+            pairs_i.append(ii[m]); pairs_j.append(jj[m])
+    if not pairs_i:
         return float('inf'), 0
-    I = np.concatenate(paare_i); J = np.concatenate(paare_j)
+    I = np.concatenate(pairs_i); J = np.concatenate(pairs_j)
     # discard neighbours ALONG the curve (the same rule as for the points)
     rd = np.abs(I - J)
     rd = np.minimum(rd, n - rd)
@@ -131,7 +131,7 @@ def clearance(points, ring_skip, radius=None):
     return best, len(I)
 
 
-def _kreis(n, r=1.0, dz=0.0, phase=0.0):
+def _circle(n, r=1.0, dz=0.0, phase=0.0):
     t = np.linspace(0, 2 * np.pi, n, endpoint=False) + phase
     return np.stack([r * np.cos(t), r * np.sin(t), np.full(n, dz)], axis=1)
 
@@ -156,7 +156,7 @@ def eichen():
     print('   (as ONE closed curve this does not work: the jump edges between the')
     print('    rings would come arbitrarily close to themselves. Hence the segment function directly.)')
     for dz in (0.5, 0.05, 0.005):
-        k1 = _kreis(64, 1.0, 0.0)
+        k1 = _circle(64, 1.0, 0.0)
         k2 = k1 + np.array([0, 0, dz])
         d = float(_seg_seg_dist(k1, np.roll(k1, -1, 0), k2, np.roll(k2, -1, 0)).min())
         ok = abs(d - dz) < 1e-9
@@ -164,8 +164,8 @@ def eichen():
         fehler += (not ok)
 
     print('\n2) THE SHARP ONE — segment beats point at coarse, twisted sampling')
-    k1 = _kreis(16, 1.0, 0.0)
-    k2 = _kreis(16, 1.0, 0.01, phase=np.pi / 16)
+    k1 = _circle(16, 1.0, 0.0)
+    k2 = _circle(16, 1.0, 0.01, phase=np.pi / 16)
     d_seg = float(_seg_seg_dist(k1, np.roll(k1, -1, 0), k2, np.roll(k2, -1, 0)).min())
     d_pkt = float(np.linalg.norm(k1[:, None, :] - k2[None, :, :], axis=2).min())
     ok = d_seg < d_pkt and abs(d_seg - 0.01) < 1e-3
@@ -176,43 +176,43 @@ def eichen():
     print('   (the real counter-case of this version: a cell that is too small would miss the')
     print('    closest pair and report a distance that is TOO LARGE — i.e. look safe.)')
     rng = np.random.default_rng(20260904)
-    schlimm = 0
+    worst_k = 0
     for k in range(12):
         p = rng.normal(size=(400, 3))
         g, _ = clearance(p, ring_skip=3)
         bf = _brute(p, ring_skip=3)
         if abs(g - bf) > 1e-12:
-            schlimm += 1
+            worst_k += 1
             print(f'   ERROR polygon {k}: grid {g:.12f} vs brute {bf:.12f}')
-    print(f'   {"OK " if schlimm == 0 else "ERROR"} {12 - schlimm}/12 polygons bit-identical to brute force')
-    fehler += (schlimm != 0)
+    print(f'   {"OK " if worst_k == 0 else "ERROR"} {12 - worst_k}/12 polygons bit-identical to brute force')
+    fehler += (worst_k != 0)
 
     print('\n4) LOWER BOUND — segment must never be LARGER than the point distance')
-    schlimm = 0
+    worst_k = 0
     for _ in range(20):
         p = rng.normal(size=(300, 3))
         ds, _ = clearance(p, ring_skip=3)
-        dp = _punkt_mca_chunked(p, ring_skip=3)
+        dp = _point_mca_chunked(p, ring_skip=3)
         if ds > dp + 1e-12:
-            schlimm += 1
-    print(f'   {"OK " if schlimm == 0 else "ERROR"} {20 - schlimm}/20 hold the bound')
-    fehler += (schlimm != 0)
+            worst_k += 1
+    print(f'   {"OK " if worst_k == 0 else "ERROR"} {20 - worst_k}/20 hold the bound')
+    fehler += (worst_k != 0)
 
     print('\n5) AGAINST THE scipy REFERENCE — the same number to 1e-12')
     try:
         sys.path.insert(0, site_config.TOOLS_DIR)
         from clearance_segment import clearance as ref_clearance
-        schlimm = 0
+        worst_k = 0
         for k in range(5):
             p = rng.normal(size=(1500, 3))
             mine, _ = clearance(p, ring_skip=4)
             ref = ref_clearance(p, ring_skip=4)
             ref = ref[0] if isinstance(ref, tuple) else ref
             if abs(mine - ref) > 1e-12:
-                schlimm += 1
+                worst_k += 1
                 print(f'   ERROR polygon {k}: numpy {mine:.12f} · scipy {ref:.12f}')
-        print(f'   {"OK " if schlimm == 0 else "ERROR"} {5 - schlimm}/5 polygons bit-identical to the scipy reference')
-        fehler += (schlimm != 0)
+        print(f'   {"OK " if worst_k == 0 else "ERROR"} {5 - worst_k}/5 polygons bit-identical to the scipy reference')
+        fehler += (worst_k != 0)
     except ImportError as e:
         print(f'   SKIPPED — scipy reference not importable ({e})')
         print('     (run in gnottheorie_env, scipy is there)')

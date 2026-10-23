@@ -109,7 +109,7 @@ def auto_bevel_depth(points, max_bevel, safety=0.4):
     ds = arc_length_total / n
     min_arc_dist = max(0.05 * arc_length_total, 2.0 * max_bevel)
     ring_skip = max(3, int(np.ceil(min_arc_dist / max(ds, 1e-9))))
-    mca, _n_paare = _segment_clearance(points, ring_skip)
+    mca, _n_pairs = _segment_clearance(points, ring_skip)
     bevel = min(max_bevel, mca * 0.5 * safety)
     return bevel, mca, ring_skip
 

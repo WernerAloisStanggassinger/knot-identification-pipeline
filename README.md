@@ -63,3 +63,4 @@ GNU General Public License v3.0 or later (`LICENSE.txt`, SPDX `GPL-3.0-or-later`
 
 ## Citation
 See `CITATION.cff`. Each GitHub release is archived on Zenodo with its own DOI.
+Author: Werner Alois Stanggassinger, ORCID [0009-0005-8569-8317](https://orcid.org/0009-0005-8569-8317) — all deposits and preprints are listed there.

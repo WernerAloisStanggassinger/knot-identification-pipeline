@@ -326,7 +326,7 @@ fi
 if [ "$MIN_CELL_USED" != "2000" ]; then
     log "⚠️ Tracker needed --min-cell-count $MIN_CELL_USED instead of 2000 (Disc #670)."
 fi
-printf '{"min_cell_count_used": %s, "eps": 0.01, "herkunft": "Leiter Disc #670"}\n' \
+printf '{"min_cell_count_used": %s, "eps": 0.01, "provenance": "tracker ladder, Disc #670"}\n' \
     "$MIN_CELL_USED" > "$PROJ_DIR/${KNOT}_tracker_params.json"
 ok "Tracker done in $(($(date +%s)-T2))s (--min-cell-count $MIN_CELL_USED)"
 

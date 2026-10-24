@@ -102,7 +102,7 @@ def auto_bevel_depth(points, max_bevel, safety=0.4):
         n=16384  point 0.001050  segment 0.000633   (10.6 s)
     The segment number is already stable at n=4096; the point number was still off
     by a factor of 1.66 at 16384. The radius therefore never gets larger, only more correct.
-    Calibrated in clearance_numpy.eichen() (analytic + brute force + scipy reference)."""
+    Calibrated in clearance_numpy.calibrate() (analytic + brute force + scipy reference)."""
     n = len(points)
     diffs_seq = np.linalg.norm(np.diff(points, axis=0, append=points[:1]), axis=1)
     arc_length_total = float(diffs_seq.sum())

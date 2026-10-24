@@ -220,7 +220,6 @@ def interpolate(word, n, z_grad_max, phase=0.31, verbose=False, forced_box=None,
     # Latch: spawn children import the module under its name. If it was
     # loaded under an invented name (importlib.spec_from_file_location),
     # pickling _zeile fails — then continue serially instead of dying.
-    # (The texts passed to _seriell() are data for the gate and stay German.)
     _mod = sys.modules.get(_row.__module__)
     _importable = _mod is not None and (
         _row.__module__ == '__main__' or getattr(_mod, '__spec__', None) is not None)
@@ -655,7 +654,6 @@ def target_entries(wall_file, n_max=12, target_list=None):
 # the result there IS not representable. The path that can do it is named in the
 # label: --exact (F_p + CRT, homfly_modular) has no cancellation, and
 # for it the latch is switched off.
-# The reason text returned by mantissen_riegel() is data (stored in 'gruende') and stays German.
 # ============================================================================
 MANTISSA_A = 0.1968          # decades of residue per crossing
 MANTISSA_B = -15.613         # intercept = log10(machine epsilon)
@@ -697,8 +695,7 @@ def process_target(t, residue_max=1e-3, fresh_max=1e-8, exact=False,
        2. fresh points that were not on the grid
        3. det = |P(1,2i)| exactly against the determinant in the record
        4. |Alexander(-1)| from the stored Alexander polynomial
-    If one breaks, NOTHING is written and the reason is given.
-    The reason texts in 'gruende' and 'frisch_text' are data (returned/stored) and stay German."""
+    If one breaks, NOTHING is written and the reason is given."""
     from homfly_crosscheck import record_det, record_alexander, det_from_alexander
     t0 = time.time()
     # The target list is frozen at START. If a second path runs alongside

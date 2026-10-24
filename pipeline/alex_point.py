@@ -174,7 +174,7 @@ def signs(pd):
 def alexander_matrix(pd, t: int, variant: int, p: int):
     """One row per crossing, one column per ARC; last row + column deleted.
 
-    `variante` selects the role assignment at the crossing. Which one is right is decided
+    `variant` selects the role assignment at the crossing. Which one is right is decided
     by the calibration — NOTHING is asserted here.
     """
     n = len(pd)

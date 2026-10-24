@@ -266,6 +266,15 @@ def main():
         if u in dests_old and v not in dests_new: errors.append(f'identifier {u!r} -> {v!r}: {u!r} is an argparse dest, but no option now yields {v!r}')
     for d in dests_old - dests_new:
         if d in attrs_new: errors.append(f'argparse dest {d!r} is gone (option renamed) but the attribute {d!r} is still read')
+    # the same per file: an option of ANOTHER script that yields the new name does not cover this one (hole found by
+    # the E2E run 23.10.2026: positional 'wurzel' kept, a.wurzel -> a.root, while some other file has --root)
+    for p in py_old:
+        q = renames.get(p, p)
+        if p not in old_trees: continue
+        d_old, d_new = argparse_dests(old_trees[p], set()), argparse_dests(new_trees[q], set())
+        for u, v, k, qq, l in idents:
+            if qq == q and k == 'Attribute' and u != v and u in d_old and v not in d_new:
+                errors.append(f'{q}:{l}: attribute {u!r} -> {v!r}: {u!r} is an argparse dest of this file, but no option here yields {v!r}')
     # keyword arguments: renaming allowed only when every callee is a repository function with that parameter
     funcs, kwc = {}, {}
     for t in old_trees.values(): repo_functions(t, funcs); keyword_callees(t, kwc)
@@ -310,6 +319,16 @@ def main():
             except SyntaxError as e: errors.append(f'{f}: syntax error {e}'); continue
             for u in sfwd:
                 if sfwd[u] != u and u in consts: errors.append(f'{f}: old key {u!r} still present (renamed to {sfwd[u]!r} elsewhere)')
+            # embedded code that does not parse on its own (templates, f-strings): its string literals are not constants
+            # of the outer tree, so look for the old key as a quoted literal inside it (hole found by the E2E run
+            # 23.10.2026: a template still wrote 'signature_konvention' while the reader asked 'signature_convention')
+            body = strip_docstrings(ast.parse(src))   # docstrings are free text, as in the comparison above
+            texts = [n.value for n in ast.walk(body) if isinstance(n, ast.Constant) and isinstance(n.value, str)] + \
+                    [template(n) for n in ast.walk(body) if isinstance(n, ast.JoinedStr)]
+            frags = [t for t in texts if looks_like_code(t) and parse_code(t) is None]
+            for u in sfwd:
+                if sfwd[u] != u and any(re.search(r'([\'"])' + re.escape(u) + r'\1', t) for t in frags):
+                    errors.append(f'{f}: old key {u!r} still present inside embedded code (renamed to {sfwd[u]!r} elsewhere)')
         else:
             for u in sfwd:
                 if sfwd[u] != u and re.search(r'(?<![A-Za-z0-9_])' + re.escape(u) + r'(?![A-Za-z0-9_])', src):

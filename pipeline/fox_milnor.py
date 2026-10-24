@@ -77,9 +77,8 @@ def _norm(q):
 
 
 def fox_milnor(alex_str):
-    """-> (besteht, grund, details) = (passes, reason, details). besteht=False means PROVEN not slice.
-    besteht=None means: not decidable (no/unreadable Delta).
-    Note: the reason strings and the 'faktoren' key are returned data and stay German in this release."""
+    """-> (passes, reason, details). passes=False means PROVEN not slice.
+    passes=None means: not decidable (no/unreadable Delta)."""
     P = parse_alexander(alex_str)
     if P is None:
         return None, 'no readable Alexander polynomial', {}

@@ -37,7 +37,7 @@ _REGISTER = None
 
 
 def proof_entry(name, identity=None):
-    """Receipt-backed override from proof_register.json — ONLY with a non-empty 'beweis' (proof).
+    """Receipt-backed override from proof_register.json — ONLY with a non-empty 'proof'.
     An entry without proof text is ignored; the register must not become a back door.
 
     Lookup order (2026-08-19):

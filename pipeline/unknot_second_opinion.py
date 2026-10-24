@@ -42,8 +42,7 @@ def one_curve(path):
 
 def self_test():
     """A tool that is meant to confirm UNKNOT needs the case built in
-    that it must REJECT (Footgun 16). Otherwise green is worthless.
-    Note: the probe names passed to pruef() are data for the gate and stay German."""
+    that it must REJECT (Footgun 16). Otherwise green is worthless."""
     ok = tot = 0
     def check(name, actual, expected):
         nonlocal ok, tot

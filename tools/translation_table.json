@@ -529,6 +529,7 @@
   "gespeichertes Arf=%s widerspricht det=%s mod 8 (=> Arf=%s); der Satz gilt, das Feld nicht": "stored Arf=%s contradicts det=%s mod 8 (=> Arf=%s); the theorem holds, the field does not",
   ", aus det mod 8": ", from det mod 8",
   "det=%s keine Quadratzahl (Fox-Milnor, Punkt-Auswertung bei t=-1)": "det=%s not a square (Fox-Milnor, point evaluation at t=-1)",
+  "Fox-Milnor verletzt: %s": "Fox-Milnor violated: %s",
   "bewiesen NICHT slice: ": "proven NOT slice: ",
   "Unknoten (genus 0) — trivial slice": "unknot (genus 0) — trivially slice",
   "unbestimmt: alle geprueften notwendigen Bedingungen erfuellt (tau=s=signature=Arf=0, det Quadratzahl), das ist NICHT hinreichend — die Pipeline kann slice nicht beweisen": "undetermined: all checked necessary conditions hold (tau=s=signature=Arf=0, det a square), that is NOT sufficient — the pipeline cannot prove slice",

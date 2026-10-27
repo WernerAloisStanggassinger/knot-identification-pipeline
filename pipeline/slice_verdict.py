@@ -121,7 +121,7 @@ def slice_verdict(a):
             from fox_milnor import fox_milnor as _fm
             passes, reason, _d = _fm(alex)
             if passes is False:
-                obstr.append('Fox-Milnor verletzt: %s' % reason)
+                obstr.append('Fox-Milnor violated: %s' % reason)
         except Exception:
             pass
 

@@ -1,5 +1,5 @@
 {
- "revision": "proven-equivalent",
+ "revision": "proven-equivalent-20261027",
  "files": {
   "pipeline/pflicht_invarianten.py": "pipeline/mandatory_invariants.py",
   "pipeline/pflicht_invarianten_extra.py": "pipeline/mandatory_invariants_extra.py",

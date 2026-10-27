@@ -49,8 +49,12 @@ The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summ
 - Every file in `pipeline/` was translated from German in two steps. 22.10.2026: comments, docstrings and messages. 23.10.2026:
   also identifiers, module and file names, command-line options, environment variables, JSON field names, category labels and
   the remaining texts. `tools/map_equivalence.py` proves for every file that the translated version is the program proven
-  equivalent to the originals on 22.10.2026 (git tag `proven-equivalent`, see the next points) up to one consistent renaming,
-  and writes that renaming to `tools/translation_table.json` (identifiers, keys, file renames, free texts). The gate was
+  equivalent to the originals (git tag `proven-equivalent-20261027`, see the next points) up to one consistent renaming,
+  and writes that renaming to `tools/translation_table.json` (identifiers, keys, file renames, free texts).
+  The originals were proven equivalent on 22.10.2026 (tag `proven-equivalent`). On 27.10.2026 every one of the 43 originals was
+  compared again with that state: 42 differ only in texts (their comments and messages were translated in place on 25.10.), one
+  changed as a program: `build_curve_json.py` labels each curve with its licence (sculpture curves all rights reserved, machine-knot
+  curves CC-BY-NC-4.0). Tag `proven-equivalent-20261027` = `proven-equivalent` plus exactly that change. The gate was
   counter-tested with 25 deliberate changes it must catch or pass; the built-in self-tests of six modules give the same
   results before and after (45 of 45 checks).
 - **Results the authors published before this release (knot corpus, website downloads, Zenodo deposits) use the German

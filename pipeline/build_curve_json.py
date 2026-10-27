@@ -239,7 +239,7 @@ def process_one(fseries_path, n_ctrl, n_bevel, bevel_frac, safety):
                               "self-intersects (Werner 2026-06-04, r3_phantom_diag clearance)")
     return {
         "name": name,
-        "license": "CC-BY-NC-4.0",
+        "license": "CC-BY-NC-4.0",   # curves: set per group in main() (sculptures: all rights reserved), 22.10.2026
         "attribution": "Werner Alois Stanggassinger & Claude Code (Anthropic)",
         "points": pts_list,
         "radius": round(radius_n, 5),
@@ -325,6 +325,13 @@ def main():
             fail += 1
             continue
         rec["group"] = group_for(fp, args.root)
+        # licence scheme 22.10.2026 (LICENSE.txt): machine-knot curves CC BY-NC 4.0, sculpture curves all rights reserved
+        if rec["group"] == "sculptures":
+            rec["license"] = "LicenseRef-All-Rights-Reserved"
+            rec["license_note"] = ("Sculpture by Werner Alois Stanggassinger, all rights reserved; viewing, downloading and "
+                                   "computing invariants permitted. See LICENSE.txt.")
+        else:
+            rec["license"] = "CC-BY-NC-4.0"
         # Unique file key: on a basename collision prepend the folder
         # (two knots with the same base name in different folders). name stays the display label.
         key = rec["name"]
@@ -355,7 +362,7 @@ def main():
     groups = sorted({m["group"] for m in manifest})
     with open(os.path.join(out, "curve_manifest.json"), "w") as f:
         json.dump({"count": len(manifest), "groups": groups,
-                   "license": "CC-BY-NC-4.0",
+                   "license": "per curve: machine-knot curves CC-BY-NC-4.0, sculpture curves all rights reserved",
                    "attribution": "Werner Alois Stanggassinger & Claude Code (Anthropic)",
                    "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
                    "knots": manifest}, f, indent=1)

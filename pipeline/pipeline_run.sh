@@ -399,7 +399,7 @@ SKIP_S4=0; SKIP_S4_REASON=""
 if [ "${SKIP_AGGRESSIVE_SIMPLIFY:-0}" = "1" ]; then
     SKIP_S4=1; SKIP_S4_REASON="SKIP_AGGRESSIVE_SIMPLIFY=1 (Discovery #147)"
 elif [ "${STAGE4_CMAX:-0}" -gt 0 ] && [ "$C4" -gt "${STAGE4_CMAX}" ]; then
-    SKIP_S4=1; SKIP_S4_REASON="c=$C4 > STAGE4_CMAX=${STAGE4_CMAX} (Hoch-c-Deckel 2026-06-17)"
+    SKIP_S4=1; SKIP_S4_REASON="c=$C4 > STAGE4_CMAX=${STAGE4_CMAX} (high-c cap 2026-06-17)"
 fi
 if [ "$SKIP_S4" = "1" ]; then
     log "Stage 4 + 4a SKIPPED — $SKIP_S4_REASON"
@@ -493,7 +493,7 @@ if [ "${STAGE5_CMAX:-0}" -gt 0 ] && [ "$C5" -gt "${STAGE5_CMAX}" ]; then
     MANDATORY_PE_ARG="--point-eval"
 fi
 
-stage "5" "PFLICHT-INVARIANTEN (mandatory invariants) — multi-env orchestrator"
+stage "5" "MANDATORY INVARIANTS — multi-env orchestrator"
 T5=$(date +%s)
 conda run -n gnottheorie_env python "$PIPE/mandatory_invariants.py" \
     --kinematic-result "$KIN" \
@@ -501,7 +501,7 @@ conda run -n gnottheorie_env python "$PIPE/mandatory_invariants.py" \
     --output "$PFL" \
     ${SKIP_KNOTJOB:+--skip-knotjob} \
     ${MANDATORY_PE_ARG} \
-    || { err "Stage 5 (Pflicht) failed"; exit 3; }
+    || { err "Stage 5 (Mandatory) failed"; exit 3; }
 ok "Mandatory invariants done in $(($(date +%s)-T5))s"
 
 # STAGE 6 HIGH-c CAP (Werner's go 2026-06-15, monster-timeout lesson): stage 6 (HFK/khovanov/
@@ -516,16 +516,16 @@ fi
 
 # R3 DET ADJUDICATOR: only up to stage 5 (det quartet regina/Jones@i/HFK is in $PFL) —
 # stage 6+ (homfly/khovanov/length_spectrum) are exponential + unnecessary for the det
-# adjudication. STOP_AFTER_PFLICHT=1 -> clean exit 0 (backward compatible: unset -> continue).
-if [ "${STOP_AFTER_PFLICHT:-0}" = "1" ]; then
-    log "Stage 6+ skipped — STOP_AFTER_PFLICHT=1 (R3 det adjudicator, det in $PFL)"
+# adjudication. STOP_AFTER_MANDATORY=1 -> clean exit 0 (backward compatible: unset -> continue).
+if [ "${STOP_AFTER_MANDATORY:-0}" = "1" ]; then
+    log "Stage 6+ skipped — STOP_AFTER_MANDATORY=1 (R3 det adjudicator, det in $PFL)"
     exit 0
 fi
 
 # ─────────────────────────────────────────────
 # 6. Mandatory invariants, extra (mandatory_invariants_extra)
 # ─────────────────────────────────────────────
-stage "6" "PFLICHT-EXTRA — khovanov, length_spectrum, s, unknotting, kauffman"
+stage "6" "MANDATORY-EXTRA — khovanov, length_spectrum, s, unknotting, kauffman"
 T6=$(date +%s)
 # OOM brake (hole A, OOM 2026-07-01, Hard Rule 6 exception = documented path):
 # the unknotting pool in mandatory_invariants_extra grows on densified
@@ -545,12 +545,12 @@ elif [ "$TARGET" -gt 24 ]; then
 else
     PE_PROC=12
 fi
-log "Pflicht-Extra unknotting pool: $PE_PROC workers (TARGET-c=${TARGET:-?})"
+log "Mandatory-extra unknotting pool: $PE_PROC workers (TARGET-c=${TARGET:-?})"
 conda run -n gnottheorie_env python "$PIPE/mandatory_invariants_extra.py" "$PFL" \
     --max-unknotting-subset "${R3_MAX_UNKNOT:-4}" \
     --processes "$PE_PROC" \
-    || { err "Stage 6 (Pflicht-Extra) failed"; exit 3; }
-ok "Pflicht-Extra done in $(($(date +%s)-T6))s"
+    || { err "Stage 6 (Mandatory-Extra) failed"; exit 3; }
+ok "Mandatory-extra done in $(($(date +%s)-T6))s"
 
 # ─────────────────────────────────────────────
 # 7. Enrichments (in place on _complete.json)
@@ -672,7 +672,7 @@ def cl(o):
     rec(o); return p,n
 pp,pn = cl(d['mandatory_list'])
 op,on = cl(d['optional_invariants'])
-print(f'  Pflichtliste:        {pp}/{pn} populated  ({pp/pn*100:.1f}%)')
+print(f'  Mandatory list:      {pp}/{pn} populated  ({pp/pn*100:.1f}%)')
 print(f'  Optional:            {op}/{on} populated  ({op/on*100:.1f}%)')
 print(f'  Konsistenz:          {\"OK\" if d.get(\"consistency_ok\") else \"FAIL\"}')
 print()

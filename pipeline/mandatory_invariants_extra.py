@@ -980,7 +980,7 @@ def main():
     # The generated regina pool (line ~571: fromSignedGauss/homfly/jones/pd per t_step)
     # grew to 5-9GB/worker for densified high-c knots -> 12 workers = OOM.
     # MANDATORY_EXTRA_PROCESSES throttles ONLY this multiprocessing stage (hard-rule-6
-    # exception = documented OOM path). Set by r3_reresolve.py via R3_PFLICHT_EXTRA.
+    # exception = documented OOM path). Set by r3_reresolve.py via R3_MANDATORY_EXTRA.
     _env_pe = os.environ.get("MANDATORY_EXTRA_PROCESSES")
     if _env_pe:
         args.processes = max(1, int(_env_pe))

@@ -689,7 +689,7 @@ def homfly_fallback_level(report, point_eval):
     ev = a.get('alexander_point_evals')
     if ev:
         cmd += ['--alex-evals', json.dumps(ev)]
-    print(f"\n[PFLICHT] (3b) HOMFLY fallback (Hecke trace over F_p, "
+    print(f"\n[MANDATORY] (3b) HOMFLY fallback (Hecke trace over F_p, "
           f"n={int(n)}, c={int(zg)}) …")
     t0 = time.time()
     try:
@@ -874,7 +874,7 @@ def main():
 
     point_eval = args.point_eval or os.environ.get('MANDATORY_POINT_EVAL') == '1'
     if point_eval:
-        print("[PFLICHT] POINT-EVAL mode (Disc #248): homfly/jones/bracket/HFK/khovanov "
+        print("[MANDATORY] POINT-EVAL mode (Disc #248): homfly/jones/bracket/HFK/khovanov "
               "skipped — value instead of symbol. det via Alexander(-1)+Goeritz+Seifert.")
 
     if args.kinematic_result:
@@ -887,8 +887,8 @@ def main():
         print("--signed-gauss or --kinematic-result required.", file=sys.stderr)
         sys.exit(2)
 
-    print(f"[PFLICHT] Name: {args.name}")
-    print(f"[PFLICHT] Signed-Gauss ({len(signed_gauss)//3} Tokens):")
+    print(f"[MANDATORY] Name: {args.name}")
+    print(f"[MANDATORY] Signed-Gauss ({len(signed_gauss)//3} Tokens):")
     print(f"          {signed_gauss}")
 
     report = {
@@ -902,7 +902,7 @@ def main():
         'raw_subprocess_outputs': {},
     }
 
-    print(f"\n[PFLICHT] (1) Regina (base) — algebra + diagram codes")
+    print(f"\n[MANDATORY] (1) Regina (base) — algebra + diagram codes")
     t0 = time.time()
     reg = regina_full(signed_gauss, point_eval=point_eval)
     report['raw_subprocess_outputs']['regina'] = reg
@@ -979,7 +979,7 @@ def main():
             print(f"  🔴 No stage-4 PD found — fallback not possible.")
 
     if pd_code and not args.skip_snappy:
-        print(f"\n[PFLICHT] (2) Snappy/Spherogram (snappy_env) — hyperbolic + HFK + Seifert")
+        print(f"\n[MANDATORY] (2) Snappy/Spherogram (snappy_env) — hyperbolic + HFK + Seifert")
         # PD code format conversion: regina delivers "PD[ X(...), X(...), ... ]"
         # spherogram needs either 'PD[X[...], ...]' or a list of tuples
         pd_for_snappy = pd_code.replace('PD[', '').replace(']', '').strip()
@@ -1040,11 +1040,11 @@ def main():
             a['determinant_seifert'] = snp['det_via_seifert']
             a['determinant_seifert_method'] = snp.get('det_via_seifert_method')
     else:
-        if not pd_code: print(f"\n[PFLICHT] (2) Snappy skipped (no PD code)")
-        else: print(f"\n[PFLICHT] (2) Snappy skipped (--skip-snappy)")
+        if not pd_code: print(f"\n[MANDATORY] (2) Snappy skipped (no PD code)")
+        else: print(f"\n[MANDATORY] (2) Snappy skipped (--skip-snappy)")
 
     if pd_code and not args.skip_sage:
-        print(f"\n[PFLICHT] (3) Sage (sage_stable) — Signature, Arf, Braid")
+        print(f"\n[MANDATORY] (3) Sage (sage_stable) — Signature, Arf, Braid")
         crossings = re.findall(r'X[\(\[](\-?\d+(?:,\s*\-?\d+){3})[\)\]]', pd_code)
         tuples = [tuple(int(v.strip()) for v in cr.split(',')) for cr in crossings]
         pd_list_str = repr(tuples)
@@ -1062,8 +1062,8 @@ def main():
         d['braid_length']    = sage_out.get('braid_length')
         d['braid_index']     = sage_out.get('braid_n_strands')  # NOT minimal
     else:
-        if not pd_code: print(f"\n[PFLICHT] (3) Sage skipped (no PD code)")
-        else: print(f"\n[PFLICHT] (3) Sage skipped (--skip-sage)")
+        if not pd_code: print(f"\n[MANDATORY] (3) Sage skipped (no PD code)")
+        else: print(f"\n[MANDATORY] (3) Sage skipped (--skip-sage)")
 
     # Cause closed (Werner 2026-08-23): a skipped computation must not
     # leave an empty field. Either the second route fills it — or the
@@ -1079,7 +1079,7 @@ def main():
               f"run continues")
 
     if pd_code and not args.skip_knotjob and not point_eval:
-        print(f"\n[PFLICHT] (4) KnotJob — Khovanov + s invariant")
+        print(f"\n[MANDATORY] (4) KnotJob — Khovanov + s invariant")
         crossings = re.findall(r'X[\(\[](\-?\d+(?:,\s*\-?\d+){3})[\)\]]', pd_code)
         tuples = [tuple(int(v.strip()) for v in cr.split(',')) for cr in crossings]
         pd_list_str = repr(tuples)
@@ -1108,7 +1108,7 @@ def main():
     # consistent with the theorem). Saturn/Mercury are alternating ⇒ thin
     # ⇒ rank=det. orbit is non-alternating (Khov width=6) ⇒ rank>det
     # with even difference is the correct observation.
-    print(f"\n[PFLICHT] (5) Consistency quartet (Discovery #76, stratified #112):")
+    print(f"\n[MANDATORY] (5) Consistency quartet (Discovery #76, stratified #112):")
     a = report['mandatory_list']['ALGEBRA']
     diag = report['mandatory_list'].get('DIAGRAM', {})
 
@@ -1251,18 +1251,18 @@ def main():
                                         'run — only the bound is the old one.'),
                     'when': '2026-07-25',
                 }
-                print(f"\n[PFLICHT] 🛡  c guard: this run found {_new}, record carried {_alt} "
+                print(f"\n[MANDATORY] 🛡  c guard: this run found {_new}, record carried {_alt} "
                       f"→ keeping {_alt} (never raise, Disc #562).")
     except Exception as _e:
-        print(f"[PFLICHT] ⚠ c guard skipped: {type(_e).__name__}: {_e}")
+        print(f"[MANDATORY] ⚠ c guard skipped: {type(_e).__name__}: {_e}")
 
     with open(args.output, 'w') as f:
         json.dump(report, f, indent=2, default=str)
-    print(f"\n[PFLICHT] Writing {args.output}")
+    print(f"\n[MANDATORY] Writing {args.output}")
 
     # Pretty print
     print(f"\n{'='*60}")
-    print(f"PFLICHTLISTE — {args.name}")
+    print(f"MANDATORY LIST — {args.name}")
     print(f"{'='*60}")
     for category, items in report['mandatory_list'].items():
         print(f"\n=== {category} ===")
@@ -1283,7 +1283,7 @@ def main():
     # MANDATORY_ALLOW_EMPTY=1 = deliberate diagnostic run without this gate
     # (same one-line switch mechanism as REGINA_TIMEOUT).
     if not det_paths and os.environ.get('MANDATORY_ALLOW_EMPTY') != '1':
-        print(f"\n[PFLICHT] ERROR: minimum population violated — no det witness "
+        print(f"\n[MANDATORY] ERROR: minimum population violated — no det witness "
               f"(regina_failed={report.get('regina_failed', False)}). "
               f"Report kept for diagnosis in {args.output}. Exit 4.")
         sys.exit(4)

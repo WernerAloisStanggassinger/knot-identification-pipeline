@@ -5,10 +5,10 @@
 # Full license: LICENSE.txt at repository root (GNU General Public License v3 or later).
 # Part of the Knot-Identification Pipeline.
 """
-pipeline_crosscheck.py — database cross-check for one mandatory-invariants (Pflicht) JSON.
+pipeline_crosscheck.py — database cross-check for one mandatory-invariants JSON.
 
 EXPLICITLY NOT blind-test compliant: this script is allowed to look up knot tables
-(KnotInfo via database_knotinfo, Fremlin cache, snappy census). The Pflicht JSONs
+(KnotInfo via database_knotinfo, Fremlin cache, snappy census). The mandatory JSONs
 stay untouched; the output is a SEPARATE <knot>_crosscheck.json.
 
 IMPORTANT: NO seal_all() import here — crosscheck is allowed table lookups. snappy

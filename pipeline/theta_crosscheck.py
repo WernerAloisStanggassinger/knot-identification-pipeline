@@ -285,7 +285,7 @@ def main():
     args = ap.parse_args()
 
     if not args.mandatory_json.exists():
-        raise SystemExit(f"Pflicht JSON missing: {args.mandatory_json}")
+        raise SystemExit(f"mandatory JSON missing: {args.mandatory_json}")
     mandatory = json.loads(args.mandatory_json.read_text())
     name = mandatory.get("name", args.mandatory_json.stem)
 

@@ -530,7 +530,7 @@ def deep_round(x, n, best_D, log_lines, iters=DEEP_ROUND_ITERS,
         xr = resample_uniform(xr, n_deep)
         xr, _, _, _ = wall_block(xr, n_deep, h, Dd, circle)
     log_lines.append(f"deep_round: n_deep={n_deep} Dd={Dd:.5f} "
-                     f"({iters} Iter) fertig")
+                     f"({iters} iter) done")
     return resample_uniform(xr, n)
 
 
@@ -599,10 +599,10 @@ def flow(x, n, allow_circle, log_lines):
             if deep_used > 0 and x_cycle is not None and not deep_dead:
                 tunnel_hits += 1
                 log_lines.append(
-                    f"it {it}: K_tot < {KTOT_CIRCLE} nach Deep-Zyklus "
-                    f"-> getunnelt (Waechter {tunnel_hits}) -> Restore "
+                    f"it {it}: K_tot < {KTOT_CIRCLE} after deep cycle "
+                    f"-> tunnelled (guard {tunnel_hits}) -> restore "
                     f"x_cycle (n={n_cycle}, RL={2.0/D_cycle:.1f}), "
-                    f"Deep-Maschine stillgelegt")
+                    f"deep machine shut down")
                 x, n = x_cycle.copy(), n_cycle
                 h = 1.0 / n
                 best_D = D_cycle
@@ -614,7 +614,7 @@ def flow(x, n, allow_circle, log_lines):
                 continue
             status = "CIRCLE_COLLAPSE"                   # (c) circle alarm
             log_lines.append(f"it {it}: K_tot < {KTOT_CIRCLE} -> "
-                             f"Faery-Milnor verletzt -> getunnelt, ABBRUCH")
+                             f"Fary-Milnor violated -> tunnelled, ABORT")
             break
         if it % 50 == 0 and n > N_BEADS:
             # (e) in reverse: couple n to D — the start n protects the THIN
@@ -629,7 +629,7 @@ def flow(x, n, allow_circle, log_lines):
             # 4x jumps and never triggered at halving
             if n_t < n:
                 log_lines.append(f"it {it}: D={D:.5f} -> Downsample "
-                                 f"n {n} -> {n_t} (h <= D/16 gehalten)")
+                                 f"n {n} -> {n_t} (h <= D/16 kept)")
                 x = resample_uniform(x, n_t)
                 n = n_t
                 h = 1.0 / n
@@ -650,11 +650,11 @@ def flow(x, n, allow_circle, log_lines):
                     and best_D > TUNNEL_GUARD * best_at_cycle):
                 tunnel_hits += 1
                 log_lines.append(
-                    f"it {it}: TUNNEL-WAECHTER {tunnel_hits}: best_D "
-                    f"{best_D:.5f} > {TUNNEL_GUARD}x Zyklus-Marke "
+                    f"it {it}: TUNNEL GUARD {tunnel_hits}: best_D "
+                    f"{best_D:.5f} > {TUNNEL_GUARD}x cycle mark "
                     f"{best_at_cycle:.5f} (RL {2.0/best_D:.1f} << "
-                    f"{2.0/best_at_cycle:.1f}) -> Strang-Durchgang -> "
-                    f"Restore x_cycle (n={n_cycle}), Deep stillgelegt")
+                    f"{2.0/best_at_cycle:.1f}) -> strand passage -> "
+                    f"restore x_cycle (n={n_cycle}), deep shut down")
                 x, n = x_cycle.copy(), n_cycle
                 h = 1.0 / n
                 best_D = D_cycle
@@ -669,7 +669,7 @@ def flow(x, n, allow_circle, log_lines):
             if n < need and n < N_MAX:
                 n_new = min(N_MAX, 1 << math.ceil(math.log2(need)))
                 log_lines.append(f"it {it}: Plateau RL={RL:.1f}, "
-                                 f"n {n} -> {n_new} (Rezept e: n>=4*RL)")
+                                 f"n {n} -> {n_new} (recipe e: n>=4*RL)")
                 x = resample_uniform(x, n_new)
                 n = n_new
                 h = 1.0 / n
@@ -691,9 +691,9 @@ def flow(x, n, allow_circle, log_lines):
                     and not allow_circle):
                 status = "CONVERGED"
                 log_lines.append(
-                    f"it {it}: FLOPPY-SKIP nach {deep_used} Deep-Cycles — RL={rl_now:.1f} "
-                    f"> {FLOPPY_KEEP_FRAC}*Deep-Start({rl_deep_start:.1f}) = nicht-"
-                    f"kollabierend, abgebrochen (Plateau akzeptiert)")
+                    f"it {it}: FLOPPY-SKIP after {deep_used} deep cycles — RL={rl_now:.1f} "
+                    f"> {FLOPPY_KEEP_FRAC}*deep start({rl_deep_start:.1f}) = not "
+                    f"collapsing, stopped (plateau accepted)")
                 break
             if (deep_used < DEEP_CYCLES_MAX and deep_fails < DEEP_FAILS_STOP
                     and not deep_dead):
@@ -718,17 +718,17 @@ def flow(x, n, allow_circle, log_lines):
                 stall, fails = 0, 0
                 continue
             status = "CONVERGED"
-            log_lines.append(f"konvergiert @ it {it}: D-Plateau {best_D:.5f}, "
+            log_lines.append(f"converged @ it {it}: D plateau {best_D:.5f}, "
                              f"RL={RL:.1f}, n={n}, curv_resid={curv_resid:.3f}")
             break
     if status == "RUNNING":
         status = "MAX_ITERS"
-        log_lines.append(f"MAX_ITERS {MAX_ITERS} erreicht, D={D:.5f} "
+        log_lines.append(f"MAX_ITERS {MAX_ITERS} reached, D={D:.5f} "
                          f"RL={2.0/D:.1f}")
     if D < 0.97 * best_D:
         # v3.4 snapshot restore: end state worse than the best plateau
         # (e.g. a failed last deep cycle) -> the best D counts
-        log_lines.append(f"Snapshot-Restore: End-D={D:.5f} < best "
+        log_lines.append(f"snapshot restore: final D={D:.5f} < best "
                          f"{best_D:.5f} -> x_best (n={n_best})")
         x, n = x_best, n_best
     return (x, n, best_D, it, status, curv_resid, deep_spent,
@@ -751,9 +751,9 @@ def polish(x, n, best_D, log_lines, circle=False):
         n_pairs = len(ii)
         deep = n_pairs and float(D - dist.min()) > TOL_DEPTH * D
         if curv_resid == 0.0 and not deep:
-            log_lines.append(f"polish: sauber nach {it} Iter "
-                             f"(D=0.98*Plateau, Restpaare {n_pairs} "
-                             f"alle <= {TOL_DEPTH:.0%} Tiefe)")
+            log_lines.append(f"polish: clean after {it} iter "
+                             f"(D=0.98*plateau, remaining pairs {n_pairs} "
+                             f"all <= {TOL_DEPTH:.0%} depth)")
             return x
         if n_pairs:
             d = x[ii] - x[jj]
@@ -766,7 +766,7 @@ def polish(x, n, best_D, log_lines, circle=False):
             dn = np.linalg.norm(disp, axis=1)
             scale = np.minimum(1.0, cap / np.maximum(dn, 1e-12))
             x = x + disp * scale[:, None]
-    log_lines.append(f"polish: Restbestand nach {POLISH_ITERS} Iter "
+    log_lines.append(f"polish: remainder after {POLISH_ITERS} iter "
                      f"(curv_resid={curv_resid:.3f}, pairs={n_pairs})")
     return x
 
@@ -794,7 +794,7 @@ def run_record(job):
         fp0 = polyline_fingerprint(x)
         log_lines = []
         if n != n0:
-            log_lines.append(f"Start-Dichte t0={t0:.5f} -> n={n} "
+            log_lines.append(f"start density t0={t0:.5f} -> n={n} "
                              f"(porous={wall_porous})")
         (x, n_fin, best_D, steps, status, curv_resid, deep_spent,
          tunnel_hits, deep_dead) = flow(x, n, allow_circle, log_lines)
@@ -841,7 +841,7 @@ def run_record(job):
             "degenerate_thickness": bool(degenerate),
             "fingerprint_start": fp0, "fingerprint": fp,
             "flow_log": log_lines,
-            "machine": "canonical_flow SONO-v3.5b 2026-06-07 (Disc #262: Tunnel-Waechter + deep_dead nach Tunnel; #260: konst. Deep-Budget)",
+            "machine": "canonical_flow SONO-v3.5b 2026-06-07 (Disc #262: tunnel guard + deep_dead after tunnel; #260: constant deep budget)",
         }
         os.makedirs(OUT_DIR, exist_ok=True)
         with open(os.path.join(OUT_DIR, stem + "_sixd2.json"), "w") as f:

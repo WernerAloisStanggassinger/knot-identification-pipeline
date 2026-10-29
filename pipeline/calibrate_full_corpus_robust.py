@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Knot-Identification Pipeline — Werner Alois Stanggassinger & Claude Code (Anthropic).
 # ============================================================================
-# eich_vollkorpus_robust.py — full-corpus re-calibration on the robust
+# calibrate_full_corpus_robust.py — full-corpus re-calibration on the robust
 #   route-C SONO form (sixd_robust, Disc #263), GPU at full steam.
 #
 # WHY: corpus_db still sits on the old add.at form (order-dependent,
@@ -45,8 +45,8 @@
 # the standstill only became visible via the mtime of the output files.
 #
 # Call (gnottheorie_env python):
-#   python eich_vollkorpus_robust.py [--workers 8] [--min-n 0] [--only s1 s2]
-#                                    [--resume] [--max-versuche 3]
+#   python calibrate_full_corpus_robust.py [--workers 8] [--min-n 0] [--only s1 s2]
+#                                    [--resume] [--max-attempts 3]
 # ============================================================================
 import argparse, concurrent.futures as cf, json, multiprocessing as mp
 import site_config
@@ -103,14 +103,14 @@ def collect_jobs(min_n, only=None):
     return jobs, missing
 
 
-def _uhr():
+def _clock():
     return time.strftime("%m-%d %H:%M:%S")
 
 
-def run_jobs(jobs, workers, max_versuche=3, fn=None):
+def run_jobs(jobs, workers, max_attempts=3, fn=None):
     """Work off all jobs and survive worker death.
 
-    Returns: (n_ok, n_fail, n_aufgegeben, neustarts).
+    Returns: (n_ok, n_fail, n_given_up, restarts).
 
     A dead worker tears the whole executor down: ALL open futures
     get BrokenProcessPool, even those of tasks that have not even
@@ -126,27 +126,27 @@ def run_jobs(jobs, workers, max_versuche=3, fn=None):
     """
     fn = fn or _worker
     ctx = mp.get_context("spawn")
-    offen = list(jobs)
-    versuche = {j[0]: 0 for j in jobs}
-    n_ges = len(jobs)
-    n_ok = n_fail = n_auf = neustarts = 0
-    fertig = 0
-    isoliert = False
+    pending = list(jobs)
+    attempts = {j[0]: 0 for j in jobs}
+    n_total = len(jobs)
+    n_ok = n_fail = n_given_up = restarts = 0
+    n_done = 0
+    isolated = False
 
-    while offen:
-        runde, offen = offen, []
-        portion = 1 if isoliert else len(runde)
-        if isoliert:
-            print(f"[{_uhr()}] 🔍 ISOLATION — {len(runde)} task(s) one by one, "
+    while pending:
+        round_jobs, pending = pending, []
+        portion = 1 if isolated else len(round_jobs)
+        if isolated:
+            print(f"[{_clock()}] 🔍 ISOLATION — {len(round_jobs)} task(s) one by one, "
                   f"to find the poisonous record", flush=True)
-        fortschritt = 0
+        progress = 0
         i = 0
-        while i < len(runde):
-            teil = runde[i:i + portion]
+        while i < len(round_jobs):
+            part = round_jobs[i:i + portion]
             i += portion
             ex = cf.ProcessPoolExecutor(max_workers=workers, mp_context=ctx)
-            futs = {ex.submit(fn, j): j for j in teil}
-            gebrochen = []
+            futs = {ex.submit(fn, j): j for j in part}
+            broken = []
             try:
                 for f in cf.as_completed(futs):
                     job = futs[f]
@@ -154,39 +154,39 @@ def run_jobs(jobs, workers, max_versuche=3, fn=None):
                         stem, dt, gpu, line = f.result()
                     except BrokenProcessPool:
                         # Exactly the spot where mp.Pool silently stood still.
-                        gebrochen.append(job)
+                        broken.append(job)
                         continue
                     except Exception as e:
-                        n_fail += 1; fertig += 1; fortschritt += 1
-                        print(f"[{_uhr()}] [{fertig}/{n_ges}] FAIL {job[0]}: "
+                        n_fail += 1; n_done += 1; progress += 1
+                        print(f"[{_clock()}] [{n_done}/{n_total}] FAIL {job[0]}: "
                               f"{type(e).__name__}: {e}", flush=True)
                         continue
                     bad = line.startswith("FAIL")
-                    n_fail += bad; n_ok += (not bad); fertig += 1; fortschritt += 1
-                    print(f"[{_uhr()}] [{fertig}/{n_ges}] {dt:6.1f}s gpu={gpu} "
+                    n_fail += bad; n_ok += (not bad); n_done += 1; progress += 1
+                    print(f"[{_clock()}] [{n_done}/{n_total}] {dt:6.1f}s gpu={gpu} "
                           f"{line}", flush=True)
             finally:
                 ex.shutdown(wait=False, cancel_futures=True)
 
-            if gebrochen:
-                neustarts += 1
-                print(f"[{_uhr()}] ⚠️  WORKER DIED — new executor, "
-                      f"{len(gebrochen)} task(s) back in the queue "
-                      f"(restart {neustarts}). Cause usually earlyoom: "
+            if broken:
+                restarts += 1
+                print(f"[{_clock()}] ⚠️  WORKER DIED — new executor, "
+                      f"{len(broken)} task(s) back in the queue "
+                      f"(restart {restarts}). Cause usually earlyoom: "
                       f"journalctl -u earlyoom --since '-10min'", flush=True)
-                for job in gebrochen:
-                    if len(teil) == 1:          # rule (1)
-                        versuche[job[0]] += 1
-                    if versuche[job[0]] >= max_versuche:
-                        n_auf += 1
-                        print(f"[{_uhr()}] 🔴 GIVEN UP after {max_versuche} "
+                for job in broken:
+                    if len(part) == 1:          # rule (1)
+                        attempts[job[0]] += 1
+                    if attempts[job[0]] >= max_attempts:
+                        n_given_up += 1
+                        print(f"[{_clock()}] 🔴 GIVEN UP after {max_attempts} "
                               f"solo runs (the worker died every time): "
                               f"{job[0]}", flush=True)
                     else:
-                        offen.append(job)
+                        pending.append(job)
 
-        isoliert = (fortschritt == 0 and len(runde) > 1)   # rule (2)
-    return n_ok, n_fail, n_auf, neustarts
+        isolated = (progress == 0 and len(round_jobs) > 1)   # rule (2)
+    return n_ok, n_fail, n_given_up, restarts
 
 
 def main():
@@ -196,7 +196,7 @@ def main():
     ap.add_argument("--only", nargs="*", default=None)
     ap.add_argument("--resume", action="store_true",
                     help="skip out2_robust/<stem>_sixd2.json files that already exist")
-    ap.add_argument("--max-versuche", type=int, default=3,
+    ap.add_argument("--max-attempts", type=int, default=3,
                     help="how often a task is reissued after worker death")
     args = ap.parse_args()
     os.makedirs(CURVES, exist_ok=True)
@@ -205,23 +205,23 @@ def main():
         done = {f[:-len("_sixd2.json")] for f in os.listdir(OUT)
                 if f.endswith("_sixd2.json")}
         jobs = [j for j in jobs if j[0] not in done]
-    print(f"[{_uhr()}] [EICH-ROBUST] {len(jobs)} Records, {args.workers} Worker "
+    print(f"[{_clock()}] [CALIB-ROBUST] {len(jobs)} Records, {args.workers} Worker "
           f"(spawn/PPE), GPU_MIN_N={args.min_n}, missing={len(missing)} -> {OUT}",
           flush=True)
     for m in missing:
         print(f"  MISSING {m}")
     t0 = time.time()
-    n_ok, n_fail, n_auf, neustarts = run_jobs(jobs, args.workers, args.max_versuche)
+    n_ok, n_fail, n_given_up, restarts = run_jobs(jobs, args.workers, args.max_attempts)
     wall = time.time() - t0
-    print(f"\n[{_uhr()}] [EICH-ROBUST] DONE {n_ok} ok, {n_fail} fail, "
-          f"{n_auf} given up, {len(missing)} missing, {neustarts} worker restarts  "
+    print(f"\n[{_clock()}] [CALIB-ROBUST] DONE {n_ok} ok, {n_fail} fail, "
+          f"{n_given_up} given up, {len(missing)} missing, {restarts} worker restarts  "
           f"WALL {wall/60:.1f} min", flush=True)
     # Bookkeeping that the old run did not have: what went in must come out.
-    if n_ok + n_fail + n_auf != len(jobs):
+    if n_ok + n_fail + n_given_up != len(jobs):
         print(f"🔴 BALANCE DOES NOT ADD UP: {len(jobs)} in, "
-              f"{n_ok + n_fail + n_auf} out — check!", flush=True)
+              f"{n_ok + n_fail + n_given_up} out — check!", flush=True)
         sys.exit(2)
-    sys.exit(1 if n_auf else 0)
+    sys.exit(1 if n_given_up else 0)
 
 
 if __name__ == "__main__":

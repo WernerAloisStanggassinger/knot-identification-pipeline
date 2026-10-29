@@ -23,6 +23,14 @@ programs it calls (SnapPy, spherogram, SageMath, Regina, KnotJob, Theta), not fr
    KnotInfo, Fremlin and the SnapPy census.
 9. **Sort and render** — folder placement and a Blender render (`SKIP_SORT_RENDER=1` skips it).
 
+**6D geometry cross-check** (separate from the stages above). `pipeline/sixd_scan.py` measures what the diagram throws away:
+curvature, torsion, writhe and average crossing number of the curve itself, from analytic Fourier derivatives.
+`pipeline/canonical_flow.py` first relaxes the curve towards a tight, reproducible shape (the SONO flow), made order-independent
+on CPU and GPU by `sixd_robust.py` (`sixd_gpu.py` = optional CuPy fast path); `calibrate_full_corpus_robust.py` runs that over a
+whole corpus and survives dying workers (`test_run_jobs_workertod.py` checks it). `sixd_clean_analysis.py` holds the calibrated
+validity filter and `sixd_crosscheck.py` compares fingerprints with the algebraic identification. It is a counter-check: it
+separates most distinct knots but is blind to mutants, so the invariants decide. The flow takes minutes per knot on a GPU.
+
 **Blind test.** During identification no knot table is consulted: `pipeline_seal.py` blocks the table lookups of SnapPy,
 spherogram and Sage. Tables are read only in stage 8, to compare.
 
@@ -68,6 +76,13 @@ The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summ
   as the one used in the authors' runs (abstract syntax trees compared after the allowed changes; both gates counter-tested with
   deliberate changes that they must detect). The originals themselves are not public; the proof was run by the authors on
   22.10.2026 for all 43 modules.
+- The eight 6D modules were added on 29.10.2026 the same way: comments, docstrings and messages translated and paths moved into
+  `site_config.py` (`SIXD_DIR`), proven EQUIVALENT to the originals by `strict_equivalence.py` and `path_equivalence.py` (tag
+  `proven-equivalent-sixd-20261029`); then identifiers, one command-line option and the remaining texts translated, proven by
+  `map_equivalence.py` against that tag, renaming in `tools/translation_table_sixd.json` (for example `eich_vollkorpus_robust.py`
+  → `calibrate_full_corpus_robust.py`, `--max-versuche` → `--max-attempts`). The only change to the earlier files is the new
+  name `SIXD_DIR` in `site_config.py`. On the example `examples/trefoil.fseries` the released `sixd_scan.py` writes the same
+  fingerprint file as the original, byte for byte.
 - `tests/test_scanner_vs_numpy.py` checks the GPU scanner against an independent NumPy brute force (22.10.2026: 261 reference
   crossings, 0 differing).
 

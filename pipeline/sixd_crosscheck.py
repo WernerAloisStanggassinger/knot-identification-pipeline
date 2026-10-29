@@ -10,7 +10,7 @@ CONFIRMS it geometrically where it separates, and FLAGS the pairs where it is 6D
 (mutant-like) — there the algebra decides. No outside claim until mail-ready.
 
 TRUTH ABOUT COSTS (verified 2026-07-02): the robust 6D scan (SONO-canonical_flow,
-`eich_vollkorpus_robust.py`) takes 6–13 min/knot — NOT faster than the algebra. What is
+`calibrate_full_corpus_robust.py`) takes 6–13 min/knot — NOT faster than the algebra. What is
 fast is the COMPARISON of already computed fingerprints (ms). This tool therefore reads
 the existing store (`out2_robust/`, 269 fingerprints, full calibration 2026-06-13); it does not
 SCAN. Scanning new knots = a separate optional, cost-flagged stage.

@@ -98,11 +98,11 @@ def main():
     print(f"=== CORRECTED 6D ANALYSIS (machine 236) ===")
     print(f"Records: {n_total} | deep_dead (junk): {n_dd} ({100*n_dd//max(n_total,1)}%) | "
           f"VALID (converged∧¬deep_dead): {n_valid} | distinct knots: {len(raw)}\n")
-    for tag, comps in [("alle 5 (roh)", ALLC), ("STABIL ACN+K_tot+Wr", STABLE),
+    for tag, comps in [("all 5 (raw)", ALLC), ("STABLE ACN+K_tot+Wr", STABLE),
                        ("OPTIMAL Wr+ropelength", OPTIMAL)]:
         r = sep_ratio(raw, comps)
         if r:
-            verdict = "TRENNT (>1)" if r[0] > 1 else "Überlapp (<1)"
+            verdict = "SEPARATES (>1)" if r[0] > 1 else "overlap (<1)"
             print(f"  {tag:22} Separation p5/p95={r[0]:.2f} ({verdict})  median-ratio={r[1]:.1f}")
     # per-knot RL reliability
     print("\n  per-knot RL-CV (reliability):")

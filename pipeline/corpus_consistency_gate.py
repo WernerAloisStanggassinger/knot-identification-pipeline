@@ -85,7 +85,7 @@ def check_record(r):
         dm = abs(int(det)) % 8
         exp = 0 if dm in (1, 7) else (1 if dm in (3, 5) else None)
         if exp is not None and arf != exp:
-            out.append(("arf_det_mod8", f"Arf={arf} aber det≡{dm} mod 8 (erwartet Arf={exp})"))
+            out.append(("arf_det_mod8", f"Arf={arf} aber det≡{dm} mod 8 (expected Arf={exp})"))
 
     a = _alex(r)
     if a is not None:

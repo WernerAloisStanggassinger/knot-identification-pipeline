@@ -268,7 +268,7 @@ def tier1_flag(complete: dict):
     # Tier 0 thereby stays stdlib-pure — now even stricter than before.
     import os as _os, sys as _sys
     _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
-    from regina_bridge import einer as _regina_einer
+    from regina_bridge import single as _regina_einer
     pd_s = complete.get("pd_list_str")
     pf = complete.get("pflichtliste") or {}
     det = _int((pf.get("ALGEBRA") or {}).get("determinant"))
@@ -342,7 +342,7 @@ def _signed(r, p):
     return r - p if r > p // 2 else r
 
 
-def det_stimmt(S, rec_det):
+def det_matches(S, rec_det):
     """Does the determinant of the reconstructed projection hit that of the record?
 
     The comparison is MODULAR ON BOTH SIDES, over several primes. Thus
@@ -353,24 +353,24 @@ def det_stimmt(S, rec_det):
     """
     if rec_det is None:
         return False, None
-    reste = []
+    remainders = []
     for p in DET_PRIMES:
         r = _det_mod_prime(S, p) % p
-        reste.append((p, r))
+        remainders.append((p, r))
         if r != (rec_det % p) and r != ((-rec_det) % p):
             # Sign with the SAME prime the remainder comes from — otherwise
             # the error message shows a number that exists nowhere.
-            p0, r0 = reste[0]
+            p0, r0 = remainders[0]
             return False, _signed(r0, p0)
     p0 = DET_PRIMES[0]
-    exakt = abs(_signed(reste[0][1], p0)) if abs(rec_det) < p0 // 2 else None
-    return True, (exakt if exakt is not None else f"congruent mod {len(DET_PRIMES)} primes")
+    exact_val = abs(_signed(remainders[0][1], p0)) if abs(rec_det) < p0 // 2 else None
+    return True, (exact_val if exact_val is not None else f"congruent mod {len(DET_PRIMES)} primes")
 
 
-VOL_RANDOMIZE = 30          # like the calibrated ladder in zertifiziere_hyperbolizitaet.py
+VOL_RANDOMIZE = 30          # like the calibrated ladder in certify_hyperbolicity.py
 
 
-def _volumen_eskaliert(E, log=None):
+def _volume_escalated(E, log=None):
     """Volume of a manifold — with ESCALATION instead of a single attempt.
 
     🔴 Why (Werner 2026-08-27: „den guard reparieren" (EN: "repair the guard")): up to here it read
@@ -380,7 +380,7 @@ def _volumen_eskaliert(E, log=None):
     first triangulation is almost never positively oriented; the guard then reported
     NO_DATA and thereby measured the mood of the first triangulation, not the knot.
     Caught on 27.08. at `UEBER_k3_s3` (247 crossings): the guard said
-    `vol=None`, while `zertifiziere_hyperbolizitaet.py` **rigorously proved**
+    `vol=None`, while `certify_hyperbolicity.py` **rigorously proved**
     the same manifold hyperbolic with `ManifoldHP + randomize#4`
     (interval arithmetic). det and |sig| already hit in the guard.
 
@@ -390,7 +390,7 @@ def _volumen_eskaliert(E, log=None):
     proof** and only means: the triangulation is not degenerate.
 
     ⚠️ The ladder must NOT turn a degenerate manifold into a valid one.
-    Exactly that is what the counter-case in `--selbsttest-vol` checks: a
+    Exactly that is what the counter-case in `--self-test-vol` checks: a
     connected sum stays without volume even after full escalation.
 
     Returns: (vol_or_None, path).
@@ -432,7 +432,7 @@ def _volumen_eskaliert(E, log=None):
     return None, "fully escalated, no valid triangulation"
 
 
-def _abgleich(ist, soll, trifft):
+def _compare(actual, expected_, applies):
     """Three-valued instead of two-valued: 'trifft' | 'weicht_ab' | 'kein_sollwert'
     | 'nicht_gerechnet'.
 
@@ -447,22 +447,22 @@ def _abgleich(ist, soll, trifft):
     (The signature was always treated correctly: `rec_sig is None or …`.
     The asymmetry was the error.)
     """
-    if soll is None:
+    if expected_ is None:
         return "kein_sollwert"
-    if ist is None:
+    if actual is None:
         return "nicht_gerechnet"
-    return "trifft" if trifft else "weicht_ab"
+    return "trifft" if applies else "weicht_ab"
 
 
-def _urteil(vol_ok, rec_vol, vol, det_st, sig_st):
+def _verdict(vol_ok, rec_vol, vol, det_st, sig_st):
     """The decision, factored out of the expensive machinery — so that it can
-    be tested without a single knot (`--selbsttest-urteil`)."""
-    widerspruch = "weicht_ab" in (det_st, sig_st)
-    belegt = sum(1 for x in (det_st, sig_st) if x == "trifft")
+    be tested without a single knot (`--self-test-verdict`)."""
+    contradiction = "weicht_ab" in (det_st, sig_st)
+    receipted = sum(1 for x in (det_st, sig_st) if x == "trifft")
     if vol_ok:
-        if widerspruch:
+        if contradiction:
             return "FRANKENSTEIN"          # geometry matches, algebra contradicts
-        if belegt >= 1:
+        if receipted >= 1:
             return "OK"
         # Volume hits, but NO algebraic quantity could be checked.
         # That is weaker than OK and therefore gets a name of its own —
@@ -471,17 +471,17 @@ def _urteil(vol_ok, rec_vol, vol, det_st, sig_st):
     if rec_vol is None:
         if vol is not None:
             return "WIDERSPRUCH_HYPERBOLISCH"
-        if widerspruch:
+        if contradiction:
             return "NO_DATA"
-        if belegt >= 1:
+        if receipted >= 1:
             return "OK_ALGEBRAISCH"
     return "NO_DATA"
 
 
-def selbsttest_urteil():
+def self_test_verdict():
     """Counter-cases for the verdict logic. Purely logical, no computation —
     hence it runs in seconds and is actually run."""
-    faelle = [
+    cases = [
         ("A everything hits",                 (True,  9.0, 9.0, "trifft",       "trifft"),        "OK"),
         ("B det contradicts",             (True,  9.0, 9.0, "weicht_ab",    "trifft"),        "FRANKENSTEIN"),
         ("C |sig| contradicts",           (True,  9.0, 9.0, "trifft",       "weicht_ab"),     "FRANKENSTEIN"),
@@ -493,17 +493,17 @@ def selbsttest_urteil():
         ("I both without vol, contradiction",  (False, None, None,"weicht_ab",   "trifft"),        "NO_DATA"),
         ("J vol missed",                 (False, 9.0, 3.0, "trifft",       "trifft"),        "NO_DATA"),
     ]
-    schlecht = 0
-    for name, arg, soll in faelle:
-        ist = _urteil(*arg)
-        gut = ist == soll
-        schlecht += not gut
-        print(f"  {'✅' if gut else '🔴'} {name:32s} -> {ist:26s} expected {soll}")
-    print(f"\n  {'ALL GREEN' if not schlecht else f'{schlecht} FAILED'}")
-    return 0 if not schlecht else 1
+    bad = 0
+    for name, arg, expected_ in cases:
+        actual = _verdict(*arg)
+        gut = actual == expected_
+        bad += not gut
+        print(f"  {'✅' if gut else '🔴'} {name:32s} -> {actual:26s} expected {expected_}")
+    print(f"\n  {'ALL GREEN' if not bad else f'{bad} FAILED'}")
+    return 0 if not bad else 1
 
 
-def selbsttest_vol():
+def self_test_vol():
     """Counter-cases for the volume escalation. WITHOUT them the ladder is decoration —
     one that eventually squeezes a volume out of ANY manifold would be
     worse than the single attempt from before.
@@ -516,23 +516,23 @@ def selbsttest_vol():
     import spherogram, snappy  # noqa: F401
     # Braid closures instead of PD lists: spherogram builds them directly, and regina
     # is not in this environment (gnottheorie_env).
-    faelle = [
+    cases = [
         ("A 4_1      hyperbolic",        [1, -2, 1, -2],          True),
         ("B 3_1#3_1  connected sum",    [1, 1, 1, 2, 2, 2],      False),
         ("C T(2,5)   torus knot",         [1, 1, 1, 1, 1],         False),
         ("D 5_2      hyperbolic",        [1, 1, 1, 2, -1, 2],     True),
     ]
-    schlecht = 0
-    for name, wort, soll_vol in faelle:
-        L = spherogram.Link(braid_closure=wort)
+    bad = 0
+    for name, word, expected_vol in cases:
+        L = spherogram.Link(braid_closure=word)
         L.simplify(mode="global")
-        vol, weg = _volumen_eskaliert(L.exterior())
-        gut = (vol is not None) == soll_vol
-        schlecht += not gut
+        vol, weg = _volume_escalated(L.exterior())
+        gut = (vol is not None) == expected_vol
+        bad += not gut
         print(f"  {'✅' if gut else '🔴'} {name:32s} vol={('%.6f' % vol) if vol else 'None':>12}  "
-              f"[{weg}]   expected {'volume' if soll_vol else 'NO volume'}")
-    print(f"\n  {'ALL GREEN' if not schlecht else f'{schlecht} FAILED'}")
-    return 0 if not schlecht else 1
+              f"[{weg}]   expected {'volume' if expected_vol else 'NO volume'}")
+    print(f"\n  {'ALL GREEN' if not bad else f'{bad} FAILED'}")
+    return 0 if not bad else 1
 
 
 def _tier2_work(task):
@@ -568,7 +568,7 @@ def _tier2_work(task):
             L = spherogram.Link(pd)
             L.simplify(mode="global")
             E = L.exterior()
-            vol, vol_weg = _volumen_eskaliert(E)
+            vol, vol_route = _volume_escalated(E)
             # snappy PRINTS a number even for non-hyperbolic knots and marks it
             # invalid only via solution_type. Whoever does not ask that
             # reads a degenerate number as a volume. This is exactly how this
@@ -586,27 +586,27 @@ def _tier2_work(task):
         try:
             V = np.array(L.seifert_matrix(), dtype=object)
             S = (V + V.T).tolist()
-            det_ok, det = det_stimmt(S, rec_det)
+            det_ok, det = det_matches(S, rec_det)
             ev = np.linalg.eigvalsh(np.array(S, dtype=float))
             sig = int((ev > 1e-8).sum() - (ev < -1e-8).sum())
         except Exception:
             pass
-        det_st = _abgleich(det, rec_det, det_ok)
-        sig_st = _abgleich(None if sig is None else abs(sig),
+        det_st = _compare(det, rec_det, det_ok)
+        sig_st = _compare(None if sig is None else abs(sig),
                            None if rec_sig is None else abs(rec_sig),
                            sig is not None and rec_sig is not None
                            and abs(sig) == abs(rec_sig))
         sig_ok = sig_st in ("trifft", "kein_sollwert")
-        info = {"seed": seed, "raw_crossings": C, "vol_weg": vol_weg, "simpl_crossings": len(L.crossings),
+        info = {"seed": seed, "raw_crossings": C, "vol_weg": vol_route, "simpl_crossings": len(L.crossings),
                 "vol": None if vol is None else round(vol, 6),
                 "vol_gueltig": vol is not None,
                 "det": det, "abs_sig": None if sig is None else abs(sig),
                 "record_det": rec_det, "record_vol": rec_vol, "record_sig": rec_sig,
                 "vol_ok": vol_ok, "det_ok": det_ok, "sig_ok": sig_ok,
                 "det_status": det_st, "sig_status": sig_st}
-        urteil = _urteil(vol_ok, rec_vol, vol, det_st, sig_st)
+        verdict = _verdict(vol_ok, rec_vol, vol, det_st, sig_st)
         if vol_ok:
-            info["verdict"] = urteil
+            info["verdict"] = verdict
             return stem, info
         if rec_vol is None:
             # The record has NO volume — for torus knots and
@@ -619,12 +619,12 @@ def _tier2_work(task):
                 # That is a contradiction and is reported, not waved through.
                 info["verdict"] = "WIDERSPRUCH_HYPERBOLISCH"
                 return stem, info
-            if urteil == "OK_ALGEBRAISCH":
+            if verdict == "OK_ALGEBRAISCH":
                 # Both sides say "not hyperbolic", and det AND |sig| of the
                 # independently reconstructed projection hit the record.
                 # Weaker than a vol certificate and therefore a verdict OF ITS OWN —
                 # it must never be confused with "OK".
-                info["verdict"] = urteil
+                info["verdict"] = verdict
                 return stem, info
         best = {**info, "verdict": "NO_DATA"}   # vol miss: next seed
     return stem, best
@@ -850,9 +850,9 @@ def main():
     ap.add_argument("--pd", action="store_true", help="with --scan also Tier 1 (regina)")
     ap.add_argument("--seed-registry", action="store_true")
     ap.add_argument("--guard-new", action="store_true")
-    ap.add_argument("--selbsttest-urteil", action="store_true",
+    ap.add_argument("--self-test-verdict", action="store_true",
                     help="Counter-cases for the verdict logic — purely logical, seconds")
-    ap.add_argument("--selbsttest-vol", action="store_true",
+    ap.add_argument("--self-test-vol", action="store_true",
                     help="Counter-cases for the volume escalation (Disc: guard repair 27.08.)")
     ap.add_argument("--registry-status", action="store_true")
     ap.add_argument("--jobs", type=int, default=12)
@@ -869,10 +869,10 @@ def main():
         globals()["GUARD_N"] = args.guard_n
         print(f"[guard] reconstruction with N={args.guard_n} instead of the default 2048",
               flush=True)
-    if args.selbsttest_urteil:
-        sys.exit(selbsttest_urteil())
-    if args.selbsttest_vol:
-        sys.exit(selbsttest_vol())
+    if args.self_test_verdict:
+        sys.exit(self_test_verdict())
+    if args.self_test_vol:
+        sys.exit(self_test_vol())
     if args.scan:
         sys.exit(cmd_scan(with_pd=args.pd))
     if args.seed_registry:

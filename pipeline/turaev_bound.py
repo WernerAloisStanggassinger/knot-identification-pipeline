@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Knot-Identification Pipeline — Werner Alois Stanggassinger & Claude Code (Anthropic).
-"""turaev_schranke.py — crossing-number lower bound c(K) >= span V(K) + g_T(K), with g_T(K) >= w_HF(K) - 1. No table.
+"""turaev_bound.py — crossing-number lower bound c(K) >= span V(K) + g_T(K), with g_T(K) >= w_HF(K) - 1. No table.
 
 THEOREMS (receipts, versions read 2026-10-28; PDFs + text in quellen_scans/):
   [CK]  Champanerkar–Kofman, "A survey on the Turaev genus of knots", arXiv:1406.1945v1, eq. (1):
@@ -17,8 +17,8 @@ FRESH MEASUREMENT per knot: Jones via regina (Link.fromPD(...).jones(), Laurent 
 knot_floer_homology.pd_to_hfk (Szabo's program). The stored record Jones is compared as a second witness.
 
 Usage (sage_stable env):
-  turaev_schranke.py --eichen N [N ...]      calibration on Burton census knots of crossing number N (bound <= N, must never exceed)
-  turaev_schranke.py --records [--limit K]   all distinct representatives of class unresolved_c_le_20
+  turaev_bound.py --calibrate-census N [N ...]      calibration on Burton census knots of crossing number N (bound <= N, must never exceed)
+  turaev_bound.py --records [--limit K]   all distinct representatives of class unresolved_c_le_20
 Werner Alois Stanggassinger + Claude Code, 2026-10-28.
 """
 import argparse, ast, bz2, csv, glob, json, re, signal, sys
@@ -83,7 +83,7 @@ def dt_to_pd(dt_letters):
     return [tuple(e + 1 for e in c) for c in S.Link('DT: [(%s)]' % ','.join(map(str, code))).PD_code()]
 
 
-def eichen(ns, secs):
+def calibrate_census(ns, secs):
     bad = 0
     for n in ns:
         files = sorted(glob.glob(f'{CENSUS}/{n}a-*.csv.bz2') + glob.glob(f'{CENSUS}/{n}n-*.csv.bz2'))
@@ -134,12 +134,12 @@ def records(limit, secs):
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('--eichen', type=int, nargs='*')
+    ap.add_argument('--calibrate-census', type=int, nargs='*')
     ap.add_argument('--records', action='store_true')
     ap.add_argument('--limit', type=int, default=10**9)
     ap.add_argument('--secs', type=int, default=1800)
     a = ap.parse_args()
-    if a.eichen:
-        sys.exit(eichen(a.eichen, a.secs))
+    if a.calibrate_census:
+        sys.exit(calibrate_census(a.calibrate_census, a.secs))
     if a.records:
         records(a.limit, a.secs)

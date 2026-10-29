@@ -551,25 +551,25 @@ def main():
     #   _CROSSING_EXACTNESS_*      -> c_exact      (span_t V(K)=cmin  OR reduced alternating)
     #   _HYPERBOLICITY_CERT_*      -> vol_valid + hyperbolicity_proof
     # That way the corpus heals itself on every rebuild instead of rotting.
-    def _zertifikate(pfad):
-        if not pfad or not Path(pfad).exists():
+    def _certificates(path_):
+        if not path_ or not Path(path_).exists():
             return (None, None, None)
         try:
-            d = json.load(open(pfad))
+            d = json.load(open(path_))
         except Exception:
             return (None, None, None)
         cx = [v for k, v in d.items() if k.startswith("_CROSSING_EXACTNESS") and isinstance(v, dict)]
         c_exact = any(str(v.get("verdikt", "")).upper() == "EXAKT" for v in cx) if cx else None
         hy = [v for k, v in d.items() if k.startswith("_HYPERBOLICITY_CERT") and isinstance(v, dict)]
         if hy:
-            bewiesen = any(str(v.get("verdikt", "")).upper().startswith("HYPERBOLISCH BEWIESEN") for v in hy)
-            proof = "hyperbolic_rigorous_verify_20260813" if bewiesen else None
-            return (c_exact, bool(bewiesen), proof)
+            proven = any(str(v.get("verdikt", "")).upper().startswith("HYPERBOLISCH BEWIESEN") for v in hy)
+            proof = "hyperbolic_rigorous_verify_20260813" if proven else None
+            return (c_exact, bool(proven), proof)
         return (c_exact, None, None)
 
     n_cx = n_vv = 0
     for r in real:
-        c_exact, vol_valid, proof = _zertifikate(r.get("pflicht_path"))
+        c_exact, vol_valid, proof = _certificates(r.get("pflicht_path"))
         if c_exact:
             r["c_exact"] = True; n_cx += 1
         if vol_valid is not None:

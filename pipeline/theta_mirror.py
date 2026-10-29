@@ -23,10 +23,10 @@ from fractions import Fraction
 _MONOM = re.compile(r'^t(\d+)(?:\^(\d+))?$')
 
 
-def _monome(ausdruck):
+def _monomials(expression):
     """'a*t1^2*t2 - 3*t1 + 1' -> {monomial_key: coeff}. No parentheses allowed."""
-    terme = {}
-    for st in re.findall(r'[+-]?[^+-]+', ausdruck.replace(' ', '')):
+    terms = {}
+    for st in re.findall(r'[+-]?[^+-]+', expression.replace(' ', '')):
         st = st.strip()
         if not st:
             continue
@@ -34,22 +34,22 @@ def _monome(ausdruck):
         st = st.lstrip('+-')
         if not st:
             continue
-        koeff, mon = 1, []
+        coeff_, mon = 1, []
         for t in st.split('*'):
             if not t:
                 continue
             if t.lstrip('-').isdigit():
-                koeff *= int(t)
+                coeff_ *= int(t)
             elif _MONOM.match(t):
                 mon.append(t)
             else:
                 raise ValueError(f"unknown piece {t!r} in {st!r}")
-        schluessel = '*'.join(sorted(mon))
-        terme[schluessel] = terme.get(schluessel, 0) + vz * koeff
-    return {k: v for k, v in terme.items() if v != 0}
+        key_ = '*'.join(sorted(mon))
+        terms[key_] = terms.get(key_, 0) + vz * coeff_
+    return {k: v for k, v in terms.items() if v != 0}
 
 
-def zerlege(s):
+def decompose(s):
     """'K*(NUMERATOR)/(DENOMINATOR)' or '(NUMERATOR)/(DENOMINATOR)' or 'NUMERATOR'
     -> (dict{monom: coeff}, denominator_monomials) or None."""
     if not s or not isinstance(s, str):
@@ -58,54 +58,54 @@ def zerlege(s):
     # Denominator: split at the LAST '/(' (the numerator may itself have parentheses)
     i = s.rfind('/(')
     if i != -1 and s.endswith(')'):
-        zaehler_teil, nenner_teil = s[:i], s[i + 2:-1]
+        numerator_part, denominator_part = s[:i], s[i + 2:-1]
     else:
-        zaehler_teil, nenner_teil = s, ''
+        numerator_part, denominator_part = s, ''
     try:
-        nenner = _monome(nenner_teil) if nenner_teil.strip() else {'': 1}
+        denominator = _monomials(denominator_part) if denominator_part.strip() else {'': 1}
     except ValueError:
         return None
-    if len(nenner) != 1:
+    if len(denominator) != 1:
         return None                      # the denominator is always ONE monomial
-    nmon, nkoeff = next(iter(nenner.items()))
+    nmon, nkoeff = next(iter(denominator.items()))
 
     # Numerator: optional prefactor before the parenthesis -> 'K*(...)'
-    zaehler_teil = zaehler_teil.strip()
-    vorfaktor = 1
-    m = re.match(r'^([+-]?\d+)\s*\*\s*\((.*)\)$', zaehler_teil, re.S)
+    numerator_part = numerator_part.strip()
+    prefactor = 1
+    m = re.match(r'^([+-]?\d+)\s*\*\s*\((.*)\)$', numerator_part, re.S)
     if m:
-        vorfaktor, zaehler_teil = int(m.group(1)), m.group(2)
-    elif zaehler_teil.startswith('(') and zaehler_teil.endswith(')'):
-        zaehler_teil = zaehler_teil[1:-1]
+        prefactor, numerator_part = int(m.group(1)), m.group(2)
+    elif numerator_part.startswith('(') and numerator_part.endswith(')'):
+        numerator_part = numerator_part[1:-1]
     try:
-        terme = _monome(zaehler_teil)
+        terms = _monomials(numerator_part)
     except ValueError:
         return None
-    if vorfaktor != 1:
-        terme = {k: v * vorfaktor for k, v in terme.items()}
-    return terme, (nmon, nkoeff)
+    if prefactor != 1:
+        terms = {k: v * prefactor for k, v in terms.items()}
+    return terms, (nmon, nkoeff)
 
 
-def auswerten(zerlegt, t1, t2):
+def evaluate(decomposed, t1, t2):
     """Evaluate polynomial at (t1, t2) — exactly, via Fraction."""
-    terme, (nmon, nkoeff) = zerlegt
-    def mon_wert(schluessel):
+    terms, (nmon, nkoeff) = decomposed
+    def mon_value(key_):
         w = Fraction(1)
-        if schluessel:
-            for t in schluessel.split('*'):
+        if key_:
+            for t in key_.split('*'):
                 m = _MONOM.match(t)
                 basis = t1 if m.group(1) == '1' else t2
                 w *= basis ** int(m.group(2) or 1)
         return w
-    zaehler = sum(Fraction(v) * mon_wert(k) for k, v in terme.items())
-    return zaehler / (Fraction(nkoeff) * mon_wert(nmon))
+    numerator = sum(Fraction(v) * mon_value(k) for k, v in terms.items())
+    return numerator / (Fraction(nkoeff) * mon_value(nmon))
 
 
-def ist_negiert(a, b):
+def is_negated(a, b):
     """theta_full a == -b?  ⚠️ SUFFICIENT, NOT NECESSARY: different denominators
     are counted as 'not negated'. A missed case does NOT collapse —
     that is the safe direction (better count two than wrongly one)."""
-    za, zb = zerlege(a), zerlege(b)
+    za, zb = decompose(a), decompose(b)
     if za is None or zb is None:
         return False
     (ta, na), (tb, nb) = za, zb
@@ -115,7 +115,7 @@ def ist_negiert(a, b):
 
 
 # ────────────────────────── Mirror detection ──────────────────────────
-def theta_punkt(m):
+def theta_point(m):
     """Bare theta at the point (22/7, 21/13) as Fraction — or None.
 
     ⚠️ DIFFERENT NORMALISATION THAN theta_full (Memory project_theta_two_normalizations_in_corpus):
@@ -132,7 +132,7 @@ def theta_punkt(m):
         return None
 
 
-def sind_spiegel(d, e):
+def are_mirrors(d, e):
     """Are d and e mirror images? -> 'sig' | 'theta' | None.  (Disc #808)
 
     TWO WAYS, because one alone has a hole:
@@ -160,9 +160,9 @@ def sind_spiegel(d, e):
     if si == -ei and si != 0:
         return 'sig'
     if si == ei == 0:
-        ta, tb = theta_punkt(d), theta_punkt(e)
+        ta, tb = theta_point(d), theta_point(e)
         if ta is None or tb is None or ta == 0 or ta != -tb:
             return None
-        if ist_negiert(d.get('theta_full'), e.get('theta_full')):
+        if is_negated(d.get('theta_full'), e.get('theta_full')):
             return 'theta'
     return None

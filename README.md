@@ -34,6 +34,15 @@ whole corpus and survives dying workers (`test_run_jobs_workertod.py` checks it)
 validity filter and `sixd_crosscheck.py` compares fingerprints with the algebraic identification. It is a counter-check: it
 separates most distinct knots but is blind to mutants, so the invariants decide. The flow takes minutes per knot on a GPU.
 
+**Corpus layer** (what turns many identified knots into the knot corpus). `build_corpus_db.py` collects every record into
+`corpus_db.json`, refusing records that fail `validate_complete_json.py` (schema) or `frankenstein_gate.py` (diagram, curve and
+algebra must belong to the same knot); `corpus_consistency_gate.py` checks the corpus against unconditional theorems.
+`label_distinct_knots.py` decides which records are the same knot and labels each distinct knot (known, novel hyperbolic,
+non-hyperbolic, unresolved), using the table-free lower bounds for the crossing number in `span_lower_bound.py`,
+`yamada_c_bound.py` and `turaev_bound.py`; `certify_hyperbolicity.py` proves hyperbolicity with interval arithmetic.
+The JSON field names these modules read and write stay German (for example `pflicht_path`, `n_realisierungen`), because they
+are the field names of the published corpus files.
+
 **Blind test.** During identification no knot table is consulted: `pipeline_seal.py` blocks the table lookups of SnapPy,
 spherogram and Sage. Tables are read only in stage 8, to compare.
 
@@ -86,6 +95,13 @@ The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summ
   → `calibrate_full_corpus_robust.py`, `--max-versuche` → `--max-attempts`). The only change to the earlier files is the new
   name `SIXD_DIR` in `site_config.py`. On the example `examples/trefoil.fseries` the released `sixd_scan.py` writes the same
   fingerprint file as the original, byte for byte.
+- The corpus layer (15 modules) was added on 29.10.2026 the same way: stage 1 proven EQUIVALENT by `strict_equivalence.py` and
+  `path_equivalence.py` (tag `proven-equivalent-corpus-20261029`); stage 2 translated identifiers, seven command-line options and
+  seven messages, proven by `map_equivalence.py`, renaming in `tools/translation_table_corpus.json` (for example
+  `span_untere_schranke.py` → `span_lower_bound.py`, `--eichen` → `--calibrate-census`). JSON field names were left unchanged on
+  purpose. Built from the same records, the released `build_corpus_db.py` writes the same `corpus_db.json` as the original
+  (all 843 records; only the build timestamp differs), and a dry run of the released `label_distinct_knots.py` prints exactly
+  the same report as the original.
 - `worldline_tracker.py` was added on 29.10.2026 too (already English; its one path moved into `site_config.py`): `path_equivalence.py`
   EQUIVALENT to the original; on the crossings of `examples/trefoil.fseries` both write the same result file, byte for byte.
 - `tests/test_scanner_vs_numpy.py` checks the GPU scanner against an independent NumPy brute force (22.10.2026: 261 reference

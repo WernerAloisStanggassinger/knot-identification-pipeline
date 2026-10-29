@@ -25,7 +25,7 @@ import re
 _TERM = re.compile(r'[+-]?\s*[^+-]+')
 
 
-def terme(s):
+def terms(s):
     """'-x^18 + 13 x^17 - 1' -> {monomial: coeff}, or None if not parsable."""
     if s is None or not isinstance(s, str) or not s.strip():
         return None
@@ -64,19 +64,19 @@ def _grad(mon):
     return 1 if mon == 'x' else 0
 
 
-def kanonisch(s):
+def canonical(s):
     """Canonical notation: leading coefficient positive, sorted by degree.
 
     Returns the ORIGINAL STRING if not parsable — then the key acts as before
     (no silent degradation, Disc #809).
     """
-    t = terme(s)
+    t = terms(s)
     if not t:
         # Not parsable (also: alex missing entirely) -> exactly the old behaviour str(alex).
         # MUST be a string: the key is frozen via json.dumps, and
         # None vs "None" are DIFFERENT keys there.
         return str(s)
-    hoechst = max(t, key=_grad)
-    if t[hoechst] < 0:
+    highest = max(t, key=_grad)
+    if t[highest] < 0:
         t = {k: -v for k, v in t.items()}
     return '|'.join(f"{_grad(k)}:{v}" for k, v in sorted(t.items(), key=lambda kv: -_grad(kv[0])))

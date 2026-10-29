@@ -7,7 +7,7 @@ Certifies hyperbolicity of a corpus record with snappy verify_hyperbolicity()
 
 MUST run in sage_stable — only there do snappy AND sage live together:
   PATH=/home/squeezy/miniforge3/envs/sage_stable/bin:$PATH \
-  /home/squeezy/miniforge3/envs/sage_stable/bin/python zertifiziere_hyperbolizitaet.py <stem> [...]
+  /home/squeezy/miniforge3/envs/sage_stable/bin/python certify_hyperbolicity.py <stem> [...]
 
 Builds the manifold from the PD code OF THE RECORD (not from a table) —
 blind-test doctrine. The stored isosig serves only as counter-check.
@@ -18,16 +18,16 @@ MANDATORY ESCALATION (HOT_FOOTGUNS footgun 14 / Disc #538):
       ManifoldHP  ->  up to 30x randomize()  ->  canonical_retriangulation
   On 19.07. exactly this rescued 26 of 26.
 
---selbsttest runs known cases in BOTH directions (hyperbolic AND torus).
+--self-check runs known cases in BOTH directions (hyperbolic AND torus).
 """
 import json, sys, os, argparse
 import site_config
 
-KORPUS = '@PIPELINE_DIR@/corpus_db.json'.replace('@PIPELINE_DIR@', site_config.PIPELINE_DIR)
+CORPUS = '@PIPELINE_DIR@/corpus_db.json'.replace('@PIPELINE_DIR@', site_config.PIPELINE_DIR)
 
 
 def hole_record(stem):
-    db = json.load(open(KORPUS))
+    db = json.load(open(CORPUS))
     for eimer in ('knots', 'validation_knots'):
         for r in db.get(eimer, []):
             if r.get('stem') == stem:
@@ -35,18 +35,18 @@ def hole_record(stem):
     return None, None
 
 
-def pd_aus_record(rec):
+def pd_from_record(rec):
     """Pull the PD list from the record file. Several fields, because the records
        grew historically — the first usable one wins, the origin is reported."""
     d = json.load(open(rec['pflicht_path']))
-    kandidaten = [
+    candidates = [
         ('pd_list_str', d.get('pd_list_str')),
         ('raw_subprocess_outputs.snappy.pd_input',
          (d.get('raw_subprocess_outputs') or {}).get('snappy', {}).get('pd_input')),
         ('pflichtliste.DIAGRAMM.pd_code',
          (d.get('pflichtliste') or {}).get('DIAGRAMM', {}).get('pd_code')),
     ]
-    for name, v in kandidaten:
+    for name, v in candidates:
         if not v:
             continue
         s = str(v).strip()
@@ -62,7 +62,7 @@ def pd_aus_record(rec):
     return None, None
 
 
-def _versuch(M):
+def _attempt(M):
     """verify_hyperbolicity(), but an exception abort is a FAILED ATTEMPT,
        not a crash. For non-geometric solutions (e.g. connected sums) snappy
        throws ZeroDivisionError/LinAlgError from the Krawczyk engine — that is a
@@ -73,16 +73,16 @@ def _versuch(M):
         return False, f'<{type(e).__name__}: {e}>'
 
 
-def eskalation(M0, bauen, log):
+def escalation(M0, build, log):
     """Footgun 14: only after full escalation may 'not hyperbolic' be said."""
-    ok, cert = _versuch(M0)
+    ok, cert = _attempt(M0)
     log(f"    Stage 1  Manifold             -> {ok}")
     if ok:
         return True, cert, 'Manifold'
 
     try:
-        MH = bauen(hoch=True)
-        ok, cert = _versuch(MH)
+        MH = build(high=True)
+        ok, cert = _attempt(MH)
         log(f"    Stage 2  ManifoldHP           -> {ok}")
         if ok:
             return True, cert, 'ManifoldHP'
@@ -97,7 +97,7 @@ def eskalation(M0, bauen, log):
             except Exception as e:
                 log(f"    Stage 3  randomize() #{i:<2d}     -> error {type(e).__name__}")
                 break
-            ok, cert = _versuch(MH)
+            ok, cert = _attempt(MH)
             if ok:
                 log(f"    Stage 3  randomize() #{i:<2d}     -> True")
                 return True, cert, f'ManifoldHP+randomize#{i}'
@@ -106,36 +106,36 @@ def eskalation(M0, bauen, log):
 
         try:
             MC = MH.canonical_retriangulation()
-            ok, cert = _versuch(MC)
+            ok, cert = _attempt(MC)
             log(f"    Stage 4  canonical_retri.   -> {ok}")
             if ok:
                 return True, cert, 'canonical_retriangulation'
         except Exception as e:
             log(f"    Stage 4  canonical_retri.   -> error {type(e).__name__}: {e}")
-    return False, None, 'voll eskaliert, nicht zertifiziert'
+    return False, None, 'fully escalated, not certified'
 
 
-def eine(stem, log=print):
+def one(stem, log=print):
     import snappy
     rec, eimer = hole_record(stem)
     if rec is None:
         log(f"[{stem}] ❌ no record in corpus_db")
         return None
-    pd, quelle = pd_aus_record(rec)
+    pd, source = pd_from_record(rec)
     if pd is None:
         log(f"[{stem}] ❌ no usable PD code in the record")
         return None
 
-    log(f"[{stem}]  ({eimer})  PD from '{quelle}', {len(pd)} crossings")
+    log(f"[{stem}]  ({eimer})  PD from '{source}', {len(pd)} crossings")
     log(f"    Record says: is_hyperbolic={rec.get('is_hyperbolic')}  vol={rec.get('vol')}  "
         f"proof={rec.get('hyperbolicity_proof')}")
 
-    def bauen(hoch=False):
+    def build(high=False):
         L = snappy.Link(pd)
         M = L.exterior()
-        return M.high_precision() if hoch else M
+        return M.high_precision() if high else M
 
-    M = bauen()
+    M = build()
     iso = M.triangulation_isosig()
     vol_roh = None
     try:
@@ -144,9 +144,9 @@ def eine(stem, log=print):
         pass
     log(f"    built from PD: {M.num_tetrahedra()} tetrahedra, vol(roh)={vol_roh}")
 
-    ok, cert, weg = eskalation(M, bauen, log)
+    ok, cert, weg = escalation(M, build, log)
 
-    erg = dict(stem=stem, eimer=eimer, pd_quelle=quelle, kreuzungen=len(pd),
+    erg = dict(stem=stem, eimer=eimer, pd_quelle=source, kreuzungen=len(pd),
                verify=bool(ok), weg=weg, vol_roh=vol_roh,
                vol_record=rec.get('vol'), isosig_neu=iso,
                isosig_record=rec.get('isosig'),
@@ -154,7 +154,7 @@ def eine(stem, log=print):
                is_hyperbolic_alt=rec.get('is_hyperbolic'),
                zertifikat=(str(cert)[:400] if cert is not None else None),
                werkzeug=f"snappy {snappy.__version__} in sage_stable",
-               aufruf="snappy.Link(<PD aus Record>).exterior().verify_hyperbolicity()")
+               aufruf="snappy.Link(<PD from record>).exterior().verify_hyperbolicity()")
 
     if ok and rec.get('vol') is not None and vol_roh:
         d = abs(float(rec['vol']) - vol_roh)
@@ -164,31 +164,31 @@ def eine(stem, log=print):
     return erg
 
 
-def selbsttest():
+def self_check():
     """Does the checker bite? Known cases in BOTH directions."""
     import snappy
     print("=== SELFTEST (without corpus, snappy only) ===")
-    alles_gut = True
-    for name, soll in [('4_1', True), ('m004', True), ('6_2', True),
+    all_good = True
+    for name, expected_ in [('4_1', True), ('m004', True), ('6_2', True),
                        ('3_1', False), ('5_1', False), ('8_19', False)]:
         M = snappy.Manifold(name)
         ok, _ = M.verify_hyperbolicity()
-        gut = (ok == soll)
-        alles_gut &= gut
-        print(f"  {name:6s} verify={str(ok):5s} expected={str(soll):5s} {'✅' if gut else '❌'}")
-    print("SELFTEST", "GREEN" if alles_gut else "🔴 RED")
-    return 0 if alles_gut else 1
+        gut = (ok == expected_)
+        all_good &= gut
+        print(f"  {name:6s} verify={str(ok):5s} expected={str(expected_):5s} {'✅' if gut else '❌'}")
+    print("SELFTEST", "GREEN" if all_good else "🔴 RED")
+    return 0 if all_good else 1
 
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument('stems', nargs='*')
-    ap.add_argument('--selbsttest', action='store_true')
+    ap.add_argument('--self-check', action='store_true')
     ap.add_argument('--out', default=None, help='results as JSON to here')
     a = ap.parse_args()
-    if a.selbsttest:
-        sys.exit(selbsttest())
-    erg = [e for e in (eine(s) for s in a.stems) if e]
+    if a.self_check:
+        sys.exit(self_check())
+    erg = [e for e in (one(s) for s in a.stems) if e]
     if a.out:
         json.dump(erg, open(a.out, 'w'), indent=2, default=str)
         print("written:", a.out)

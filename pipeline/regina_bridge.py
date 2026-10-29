@@ -43,12 +43,12 @@ import os
 import subprocess
 import sys
 
-HIER = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.abspath(__file__))
 BASE_PY = site_config.PYTHON_BASE      # the env in which regina lives
 
 # The body into which the task-specific code is inserted. The blind-test lock
 # (hard rule 1) runs in the child too — otherwise the subprocess would be a loophole.
-_RUMPF = '''
+_SKELETON = '''
 import sys, json
 sys.path.insert(0, {manifest!r})
 try:
@@ -76,7 +76,7 @@ for _zeile in sys.stdin:
 '''
 
 
-def stapel(aufgaben, koerper, timeout=3600, python=BASE_PY):
+def batch(tasks, koerper, timeout=3600, python=BASE_PY):
     """Runs `koerper` for every task — in ONE Regina subprocess.
 
     `koerper` is Python source (indented, with `return`) that sees `auf` (the
@@ -84,61 +84,61 @@ def stapel(aufgaben, koerper, timeout=3600, python=BASE_PY):
     Returns: list of results, same order; errors stand as
     {'fehler': ...} in their place instead of aborting the run.
     """
-    manifest = os.path.dirname(HIER)
-    code = _RUMPF.format(manifest=manifest,
+    manifest = os.path.dirname(HERE)
+    code = _SKELETON.format(manifest=manifest,
                          koerper='\n'.join('    ' + z for z in koerper.strip('\n').split('\n')))
-    eingabe = '\n'.join(json.dumps(a) for a in aufgaben) + '\n'
-    p = subprocess.run([python, '-c', code], input=eingabe,
+    stdin_text = '\n'.join(json.dumps(a) for a in tasks) + '\n'
+    p = subprocess.run([python, '-c', code], input=stdin_text,
                        capture_output=True, text=True, timeout=timeout)
-    aus = []
+    results = []
     for z in p.stdout.splitlines():
         z = z.strip()
         if not z or not z.startswith('{'):
             continue
         try:
-            aus.append(json.loads(z))
+            results.append(json.loads(z))
         except Exception:
             pass
-    if len(aus) != len(aufgaben):
-        aus.append({'fehler': 'result count %d != task count %d; stderr: %s'
-                              % (len(aus), len(aufgaben), p.stderr[-400:])})
-    return aus
+    if len(results) != len(tasks):
+        results.append({'fehler': 'result count %d != task count %d; stderr: %s'
+                              % (len(results), len(tasks), p.stderr[-400:])})
+    return results
 
 
-def einer(aufgabe, koerper, **kw):
+def single(task, koerper, **kw):
     """Convenience for a single call."""
-    return stapel([aufgabe], koerper, **kw)[0]
+    return batch([task], koerper, **kw)[0]
 
 
 # ─────────────────────────── counter-cases ─────────────────────────
 
-def selbsttest():
+def self_check():
     """Four probes. The sharp one is the third: the result MUST agree with the
        direct import, otherwise the switch changed something."""
     print('SELF-TEST regina_bridge — four counter-cases\n')
-    fehler = 0
+    errors = 0
 
     print('1) ONE CALL through the bridge')
-    r = einer({'name': 'figureEight'}, """
+    r = single({'name': 'figureEight'}, """
 T = regina.Triangulation3(getattr(regina.Example3, auf['name'])())
 return {'tetraeder': T.size(), 'strikt': T.hasStrictAngleStructure()}
 """)
     ok = r.get('tetraeder') == 2 and r.get('strikt') is True
     print(f'   {"✅" if ok else "🔴"} figureEight -> {r}')
-    fehler += (not ok)
+    errors += (not ok)
 
     print('\n2) BATCH — one process, many tasks, order preserved')
-    namen = ['figureEight', 'trefoil', 'gieseking', 'figureEight']
-    rs = stapel([{'name': n} for n in namen], """
+    names = ['figureEight', 'trefoil', 'gieseking', 'figureEight']
+    rs = batch([{'name': n} for n in names], """
 T = regina.Triangulation3(getattr(regina.Example3, auf['name'])())
 return {'name': auf['name'], 'strikt': T.hasStrictAngleStructure()}
 """)
-    ok = [x.get('name') for x in rs] == namen
+    ok = [x.get('name') for x in rs] == names
     print(f'   {"✅" if ok else "🔴"} {[(x.get("name"), x.get("strikt")) for x in rs]}')
-    fehler += (not ok)
+    errors += (not ok)
 
     print('\n3) 🔑 THE SHARP ONE: bridge against direct import — bit for bit the same?')
-    vergleich = subprocess.run([BASE_PY, '-c', """
+    comparison = subprocess.run([BASE_PY, '-c', """
 import regina, json
 aus = {}
 for n in ('figureEight','trefoil','gieseking','whiteheadLink'):
@@ -146,29 +146,29 @@ for n in ('figureEight','trefoil','gieseking','whiteheadLink'):
     aus[n] = [T.size(), T.hasStrictAngleStructure(), T.isoSig()]
 print(json.dumps(aus))
 """], capture_output=True, text=True)
-    direkt = json.loads(vergleich.stdout)
-    ueber = stapel([{'name': n} for n in direkt], """
+    direct = json.loads(comparison.stdout)
+    over = batch([{'name': n} for n in direct], """
 T = regina.Triangulation3(getattr(regina.Example3, auf['name'])())
 return {'name': auf['name'], 'w': [T.size(), T.hasStrictAngleStructure(), T.isoSig()]}
 """)
-    gleich = all(direkt[x['name']] == x['w'] for x in ueber if 'name' in x)
-    print(f'   {"✅ identical" if gleich else "🔴 DEVIATION"} over {len(direkt)} cases')
-    for x in ueber:
+    same = all(direct[x['name']] == x['w'] for x in over if 'name' in x)
+    print(f'   {"✅ identical" if same else "🔴 DEVIATION"} over {len(direct)} cases')
+    for x in over:
         if 'name' in x:
-            print(f'      {x["name"]:14s} direct {direkt[x["name"]]}  ·  bridge {x["w"]}')
-    fehler += (not gleich)
+            print(f'      {x["name"]:14s} direct {direct[x["name"]]}  ·  bridge {x["w"]}')
+    errors += (not same)
 
     print('\n4) CANARY — an error in the body must NOT abort the batch')
-    rs = stapel([{'n': 1}, {'n': 0}, {'n': 3}], """
+    rs = batch([{'n': 1}, {'n': 0}, {'n': 3}], """
 return {'kehrwert': 1.0 / auf['n']}
 """)
     ok = len(rs) == 3 and 'fehler' in rs[1] and rs[2].get('kehrwert') == 1/3
     print(f'   {"✅" if ok else "🔴"} {rs}')
-    fehler += (not ok)
+    errors += (not ok)
 
-    print(f'\n{"✅ ALL COUNTER-CASES PASSED" if fehler==0 else f"🔴 {fehler} ERRORS"}')
-    return 0 if fehler == 0 else 1
+    print(f'\n{"✅ ALL COUNTER-CASES PASSED" if errors==0 else f"🔴 {errors} ERRORS"}')
+    return 0 if errors == 0 else 1
 
 
 if __name__ == '__main__':
-    sys.exit(selbsttest())
+    sys.exit(self_check())

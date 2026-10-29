@@ -102,11 +102,11 @@ def validate_file(path: Path) -> dict:
         d = json.load(open(path))
     except Exception as e:
         result["ok"] = False
-        result["errors"].append(f"JSON-Parse-Fehler: {type(e).__name__}: {e}")
+        result["errors"].append(f"JSON parse error: {type(e).__name__}: {e}")
         return result
     if not isinstance(d, dict):
         result["ok"] = False
-        result["errors"].append(f"Top-Level ist {type(d).__name__}, erwartet dict")
+        result["errors"].append(f"top level is {type(d).__name__}, expected dict")
         return result
     for fpath, allowed, optional in FIELD_SPEC:
         exists, val = _get(d, fpath)
@@ -114,7 +114,7 @@ def validate_file(path: Path) -> dict:
         if not exists:
             if not optional:
                 result["ok"] = False
-                result["errors"].append(f"PFLICHT-Feld fehlt: {dotted}")
+                result["errors"].append(f"MANDATORY field missing: {dotted}")
             continue
         if not isinstance(val, allowed):
             msg = f"Type mismatch {dotted}: is {type(val).__name__}, expected one of {[t.__name__ for t in allowed]}"

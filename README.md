@@ -14,6 +14,9 @@ programs it calls (SnapPy, spherogram, SageMath, Regina, KnotJob, Theta), not fr
 - **Preflight** — curve sanity, π-symmetry, target crossing count.
 1. **Scanner** (GPU) — a camera flight of 131 072 view directions around the curve; every crossing of every projection.
 2. **Tracker** — follows each crossing across the views (density clustering in curve parameters).
+   `pipeline/worldline_tracker.py` is a second, prototype tracker used by the authors' resolution sweeps: it takes one complete
+   projection frame (fewest crossings) with over/under from that frame alone, and uses the other frames only to confirm which
+   crossings persist. Not called by `pipeline_run.sh`.
 3. **Resolve** — chooses views and builds a signed Gauss code / PD code.
 4. **Aggressive simplify** (4a: merge) — Regina and spherogram simplification over many frames; keeps the smallest diagram.
 5. **Mandatory invariants** — Alexander, Jones, HOMFLY, Khovanov, signature, determinant, hyperbolic volume and more.
@@ -83,6 +86,8 @@ The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summ
   → `calibrate_full_corpus_robust.py`, `--max-versuche` → `--max-attempts`). The only change to the earlier files is the new
   name `SIXD_DIR` in `site_config.py`. On the example `examples/trefoil.fseries` the released `sixd_scan.py` writes the same
   fingerprint file as the original, byte for byte.
+- `worldline_tracker.py` was added on 29.10.2026 too (already English; its one path moved into `site_config.py`): `path_equivalence.py`
+  EQUIVALENT to the original; on the crossings of `examples/trefoil.fseries` both write the same result file, byte for byte.
 - `tests/test_scanner_vs_numpy.py` checks the GPU scanner against an independent NumPy brute force (22.10.2026: 261 reference
   crossings, 0 differing).
 

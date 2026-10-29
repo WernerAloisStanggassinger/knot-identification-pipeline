@@ -47,6 +47,7 @@ AUTHORS = {
     'PYTHON_BASE': _CONDA + '/bin/python',
     'CONDA_BIN': _CONDA + '/bin/conda',
     'BLENDER': '/home/squeezy/.local/bin/blender',
+    'SIXD_DIR': _K + '/sixd_machine',
 }
 
 def _which(prog):
@@ -76,6 +77,7 @@ PORTABLE = {
     'PYTHON_BASE': sys.executable,
     'CONDA_BIN': _which('conda'),
     'BLENDER': _which('blender'),
+    'SIXD_DIR': HERE,
 }
 assert set(AUTHORS) == set(PORTABLE)
 

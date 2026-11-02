@@ -1,0 +1,5 @@
+{"name": "4_1", "counter_case_ok": true, "sec": 0.21, "cs": "0.?e-59", "cs_over_pi2_4": "0.?e-59", "chiral": false, "verdict": "CS consistent with amphichiral"}
+{"name": "8_17", "counter_case_ok": true, "sec": 0.06, "cs": "0.?e-55", "cs_over_pi2_4": "0.?e-55", "chiral": false, "verdict": "CS consistent with amphichiral"}
+{"name": "5_2", "counter_case_ok": true, "sec": 0.02, "cs": "1.9106738240353776496972942782434745736723994613496600007034?", "cs_over_pi2_4": "0.7743669336227850536245160968089594849360581552483018048458?", "chiral": true, "verdict": "CHIRAL (CS not in {0, pi^2/4} mod pi^2/2)"}
+{"name": "9_42", "counter_case_ok": true, "sec": 0.02, "cs": "-2.041343158094505375112398690696078779921143275635011518423?", "cs_over_pi2_4": "-0.827325219993292501315529954192136299136309804173632111484?", "chiral": true, "verdict": "CHIRAL (CS not in {0, pi^2/4} mod pi^2/2)"}
+COUNTER-CASES OK

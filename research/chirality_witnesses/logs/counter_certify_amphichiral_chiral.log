@@ -1,0 +1,4 @@
+{"name": "4_1", "counter_case_ok": true, "sec": 0.0, "tets": 2, "proto_tets": 2, "automorphisms": [4, 4], "try_": 0, "homeo_pachner_distance_bound": 0, "verdict": "AMPHICHIRAL (exact: orientation-reversing automorphism of a triangulation shown homeomorphic to M)"}
+{"name": "5_2", "counter_case_ok": true, "sec": 0.28, "tets": 3, "verified_canonical_tets": 4, "verified_canonical_automorphisms": [4, 0], "verdict": "CHIRAL (exact: verified canonical retriangulation has no orientation-reversing automorphism)"}
+{"name": "15nh_048139", "counter_case_ok": true, "sec": 0.45, "tets": 22, "verified_canonical_tets": 28, "verified_canonical_automorphisms": [1, 0], "verdict": "CHIRAL (exact: verified canonical retriangulation has no orientation-reversing automorphism)"}
+COUNTER-CASES OK

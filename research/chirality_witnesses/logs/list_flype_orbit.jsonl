@@ -1,0 +1,3 @@
+{"name": "15ah_00001", "orbit_size": 1, "rejected": 0, "complete": true, "mirror_in_orbit": false, "alternating_diagram": true, "reduced_diagram": true, "verdict": "CHIRAL (mirror diagram not in the complete generated flype orbit)", "sec": 0.21}
+{"name": "15ah_00002", "orbit_size": 1, "rejected": 0, "complete": true, "mirror_in_orbit": false, "alternating_diagram": true, "reduced_diagram": true, "verdict": "CHIRAL (mirror diagram not in the complete generated flype orbit)", "sec": 0.22}
+{"name": "15nh_008268", "orbit_size": 1, "rejected": 160, "complete": true, "mirror_in_orbit": false, "alternating_diagram": false, "reduced_diagram": true, "verdict": "not usable (orbit incomplete or diagram not reduced alternating)", "sec": 0.19}

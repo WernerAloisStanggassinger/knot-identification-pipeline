@@ -1,0 +1,5 @@
+{"name": "3_1", "counter_case_ok": true, "sec": 0.86, "tl_values": [[0.523599, 0], [3.141593, 2], [5.759587, 0]], "margin": 0.2496888977739188, "verdict": "CHIRAL (Tristram-Levine signature nonzero, numeric)"}
+{"name": "9_42", "counter_case_ok": true, "sec": 0.04, "tl_values": [[0.889707, 0], [3.141593, -2], [5.393479, 0]], "margin": 0.12239221837081542, "verdict": "CHIRAL (Tristram-Levine signature nonzero, numeric)"}
+{"name": "4_1", "counter_case_ok": true, "sec": 0.0, "tl_values": [[3.141593, 0]], "margin": 4.47213595499958, "verdict": "TL all zero"}
+{"name": "8_3", "counter_case_ok": true, "sec": 0.11, "tl_values": [[3.141593, 0]], "margin": 0.32648681707289334, "verdict": "TL all zero"}
+COUNTER-CASES OK

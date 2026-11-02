@@ -1,0 +1,10 @@
+{"name": "4_1", "counter_case_ok": true, "sec": 0.01, "alternating_diagram": true, "n": 4, "writhe": 0, "sign_swap_compatible": true, "reduced_diagram": true, "verdict": "sign-swap compatible (no information)"}
+{"name": "6_3", "counter_case_ok": true, "sec": 0.0, "alternating_diagram": true, "n": 6, "writhe": 0, "sign_swap_compatible": true, "reduced_diagram": true, "verdict": "sign-swap compatible (no information)"}
+{"name": "8_3", "counter_case_ok": true, "sec": 0.0, "alternating_diagram": true, "n": 8, "writhe": 0, "sign_swap_compatible": true, "reduced_diagram": true, "verdict": "sign-swap compatible (no information)"}
+{"name": "8_9", "counter_case_ok": true, "sec": 0.0, "alternating_diagram": true, "n": 8, "writhe": 0, "sign_swap_compatible": true, "reduced_diagram": true, "verdict": "sign-swap compatible (no information)"}
+{"name": "8_12", "counter_case_ok": true, "sec": 0.0, "alternating_diagram": true, "n": 8, "writhe": 0, "sign_swap_compatible": true, "reduced_diagram": true, "verdict": "sign-swap compatible (no information)"}
+{"name": "8_17", "counter_case_ok": true, "sec": 0.0, "alternating_diagram": true, "n": 8, "writhe": 0, "sign_swap_compatible": true, "reduced_diagram": true, "verdict": "sign-swap compatible (no information)"}
+{"name": "8_18", "counter_case_ok": true, "sec": 0.0, "alternating_diagram": true, "n": 8, "writhe": 0, "sign_swap_compatible": true, "reduced_diagram": true, "verdict": "sign-swap compatible (no information)"}
+{"name": "3_1", "counter_case_ok": true, "sec": 0.0, "alternating_diagram": true, "n": 3, "writhe": -3, "sign_swap_compatible": false, "reduced_diagram": true, "verdict": "CHIRAL (no sign-swapping isomorphism of the signed interlace graph)"}
+{"name": "5_2", "counter_case_ok": true, "sec": 0.0, "alternating_diagram": true, "n": 5, "writhe": 5, "sign_swap_compatible": false, "reduced_diagram": true, "verdict": "CHIRAL (no sign-swapping isomorphism of the signed interlace graph)"}
+COUNTER-CASES OK

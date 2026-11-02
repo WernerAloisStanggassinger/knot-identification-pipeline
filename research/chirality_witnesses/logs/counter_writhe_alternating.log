@@ -1,0 +1,4 @@
+{"name": "4_1", "counter_case_ok": true, "sec": 0.0, "crossings": 4, "alternating_diagram": true, "reduced": true, "writhe": 0, "verdict": "writhe 0 (no information)"}
+{"name": "3_1", "counter_case_ok": true, "sec": 0.0, "crossings": 3, "alternating_diagram": true, "reduced": true, "writhe": -3, "verdict": "CHIRAL (writhe of a reduced alternating diagram != 0)"}
+{"name": "square knot, 7-crossing non-reduced diagram", "counter_case_ok": true, "sec": 0.17, "crossings": 7, "alternating_diagram": true, "reduced": false, "writhe": 1, "verdict": "not a reduced alternating diagram (no information)"}
+COUNTER-CASES OK

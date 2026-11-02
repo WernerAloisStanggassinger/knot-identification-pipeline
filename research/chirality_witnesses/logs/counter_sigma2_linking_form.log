@@ -1,0 +1,6 @@
+{"name": "3_1", "counter_case_ok": true, "sec": 0.7, "H1": [3], "det": 3, "symmetric": false, "verdict": "CHIRAL (linking form of \u03a32 not \u2245 its negative)"}
+{"name": "4_1", "counter_case_ok": true, "sec": 0.01, "H1": [5], "det": 5, "symmetric": true, "verdict": "linking form blind"}
+{"name": "8_17", "counter_case_ok": true, "sec": 0.01, "H1": [37], "det": 37, "symmetric": true, "verdict": "linking form blind"}
+{"name": "10_99", "counter_case_ok": true, "sec": 0.01, "H1": [9, 9], "det": 81, "symmetric": true, "verdict": "linking form blind"}
+{"name": "8_18", "counter_case_ok": true, "sec": 0.01, "H1": [3, 15], "det": 45, "symmetric": true, "verdict": "linking form blind"}
+COUNTER-CASES OK

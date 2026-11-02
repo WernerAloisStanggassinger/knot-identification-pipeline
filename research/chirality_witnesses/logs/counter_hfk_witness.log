@@ -1,0 +1,5 @@
+{"name": "3_1", "counter_case_ok": true, "sec": 0.0, "tau": -1, "epsilon": -1, "tau_mirror": 1, "total_rank": 3, "genus": 1, "fibered": true, "hfk_equal_mirror": false, "verdict": "CHIRAL (HFK differs from mirror)"}
+{"name": "4_1", "counter_case_ok": true, "sec": 0.0, "tau": 0, "epsilon": 0, "tau_mirror": 0, "total_rank": 5, "genus": 1, "fibered": true, "hfk_equal_mirror": true, "verdict": "HFK blind (equal to mirror)"}
+{"name": "8_17", "counter_case_ok": true, "sec": 0.0, "tau": 0, "epsilon": 0, "tau_mirror": 0, "total_rank": 37, "genus": 3, "fibered": true, "hfk_equal_mirror": true, "verdict": "HFK blind (equal to mirror)"}
+{"name": "10_17", "counter_case_ok": true, "sec": 0.0, "tau": 0, "epsilon": 0, "tau_mirror": 0, "total_rank": 41, "genus": 4, "fibered": true, "hfk_equal_mirror": true, "verdict": "HFK blind (equal to mirror)"}
+COUNTER-CASES OK

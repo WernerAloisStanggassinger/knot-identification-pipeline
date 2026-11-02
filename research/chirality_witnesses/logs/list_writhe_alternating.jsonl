@@ -1,0 +1,3 @@
+{"name": "15ah_00001", "crossings": 15, "alternating_diagram": true, "reduced": true, "writhe": 15, "verdict": "CHIRAL (writhe of a reduced alternating diagram != 0)", "sec": 0.0}
+{"name": "15ah_00002", "crossings": 15, "alternating_diagram": true, "reduced": true, "writhe": 15, "verdict": "CHIRAL (writhe of a reduced alternating diagram != 0)", "sec": 0.0}
+{"name": "15nh_008268", "crossings": 15, "alternating_diagram": false, "reduced": true, "writhe": 1, "verdict": "not a reduced alternating diagram (no information)", "sec": 0.0}

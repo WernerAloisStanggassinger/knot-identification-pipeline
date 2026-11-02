@@ -1,0 +1,3 @@
+{"name": "15nh_008268", "tau": 0, "epsilon": 0, "tau_mirror": 0, "total_rank": 69, "genus": 4, "fibered": true, "hfk_equal_mirror": true, "verdict": "HFK blind (equal to mirror)", "sec": 0.03}
+{"name": "15nh_048139", "tau": 0, "epsilon": 0, "tau_mirror": 0, "total_rank": 225, "genus": 5, "fibered": true, "hfk_equal_mirror": true, "verdict": "HFK blind (equal to mirror)", "sec": 0.03}
+{"name": "15nh_048140", "tau": 0, "epsilon": 0, "tau_mirror": 0, "total_rank": 225, "genus": 5, "fibered": true, "hfk_equal_mirror": true, "verdict": "HFK blind (equal to mirror)", "sec": 0.03}

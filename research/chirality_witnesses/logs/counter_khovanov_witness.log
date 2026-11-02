@@ -1,0 +1,4 @@
+{"name": "3_1", "kind": "counter", "kh_equal_mirror": false, "n_groups": [2, 2], "total_rank_K": [3, 4], "alg": "sl2Z", "verdict": "CHIRAL (sl2Z homology differs from mirror)", "sec": 0.1}
+{"name": "4_1", "kind": "counter", "kh_equal_mirror": true, "n_groups": [2, 2], "total_rank_K": [5, 6], "alg": "sl2Z", "verdict": "sl2Z blind (equal to mirror)", "sec": 0.1}
+{"name": "9_42", "kind": "counter", "kh_equal_mirror": false, "n_groups": [2, 2], "total_rank_K": [9, 10], "alg": "sl2Z", "verdict": "CHIRAL (sl2Z homology differs from mirror)", "sec": 0.2}
+{"name": "10_125", "kind": "counter", "kh_equal_mirror": false, "n_groups": [2, 2], "total_rank_K": [11, 12], "alg": "sl2Z", "verdict": "CHIRAL (sl2Z homology differs from mirror)", "sec": 0.3}

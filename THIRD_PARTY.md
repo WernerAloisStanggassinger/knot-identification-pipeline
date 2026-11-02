@@ -1,6 +1,6 @@
 # Third-party programs and data
 
-This repository contains only our own code. The pipeline calls the programs and reads the data below; they are **not included**.
+This repository contains only our own code, plus two start polygons derived from ridgerunner's example files (see its row). The pipeline calls the programs and reads the data below; they are **not included**.
 Get each one from its authors, then point the pipeline at it (`pipeline/site_config.py`: put it at the default location, or set
 the environment variable `KNOT_PIPELINE_<NAME>`). `python3 pipeline/site_config.py` lists every location the pipeline will use.
 
@@ -14,7 +14,8 @@ are listed per conda environment in `environments/`, not here.
 | **KnotJob** (`KnotJob.jar`): Khovanov homology, s-invariants | Dirk Schütz | https://www.maths.dur.ac.uk/users/dirk.schuetz/knotjob.html (GNU GPL v3) | `mandatory_invariants.py`, `mandatory_invariants_extra.py` | `KNOTJOB_JAR`, `JAVA_BIN` |
 | **KnotInfo** index (`index_c_det_sig.json`, `records.json`) | KnotInfo (C. Livingston, A. H. Moore) via the `database_knotinfo` package | built locally from `database_knotinfo`: `data/build_knotinfo_index.py` (see `data/README.md`) | `pipeline_crosscheck.py` — **after** identification only, never during it (blind test) | `KNOTINFO_INDEX`, `KNOTINFO_RECORDS` |
 | **Fremlin** cache (`fremlin_cache.json`) | David Fremlin, "Knots and their symmetries" | https://david.fremlin.de/knots/ — built locally: `data/build_fremlin_cache.py --fetch` (see `data/README.md`) | `pipeline_crosscheck.py` — after identification only | `FREMLIN_CACHE` |
-| **Burton's knot census** (`<c>{a,n}-{hyp,torus,satellite}.csv.bz2`, DT codes of all prime knots up to 19 crossings) | Benjamin A. Burton, *The next 350 million knots* (SoCG 2020) | https://people.smp.uq.edu.au/BenjaminBurton/knots/ (the files we downloaded) | `research/theta_census_gpu/` | — (paths are command-line arguments) |
+| **Burton's knot census** (`<c>{a,n}-{hyp,torus,satellite}.csv.bz2`, DT codes of all prime knots up to 19 crossings) | Benjamin A. Burton, *The next 350 million knots* (SoCG 2020) | https://people.smp.uq.edu.au/BenjaminBurton/knots/ (the files we downloaded) | `research/theta_census_gpu/`, `research/volume_census/`, `research/mutation_search/` | — (paths are command-line arguments; `BURTON_CENSUS_DIR` for the mutation search) |
+| **ridgerunner** 2.2.2 (example polygons `3.1.vect`, `10.124.vect`; the tightener we compare with) | Jason Cantarella, Michael Piatek (its AUTHORS file); method: Ashton, Cantarella, Piatek, Rawdon, arXiv:1002.1723 | its distribution (GNU GPL v3; `share/ridgerunner/`) | `research/ropelength/calibration/` (two start polygons made from its example files) | — |
 | **Blender** | Blender Foundation | https://www.blender.org/ | `sort_and_render.py` (renders, optional) | `BLENDER`, `RENDER_TEMPLATE` |
 
 Our own files that are needed but generated rather than shipped:

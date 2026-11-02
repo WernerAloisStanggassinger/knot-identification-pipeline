@@ -52,6 +52,11 @@ it instead of using an established program, and how it was checked.
 - `research/theta_census_gpu/` — θ of every knot of a census file and of its mirror, exactly modulo a prime on the GPU, as a
   filter that misses no θ-zero (given a correct kernel and diagram conversion, both calibrated); plus an attempt to certify,
   with verified computation (needs SageMath), whether the θ-zeros of hyperbolic knots are chiral or amphichiral.
+- `research/ropelength/` — polygonal ropelength checker, a GPU tightener, and an upper bound on the smooth ropelength from a
+  polygon (the corner-rounding of Ashton–Cantarella–Piatek–Rawdon).
+- `research/volume_census/` — SnapPy volume of every knot of a census file, resumable.
+- `research/mutation_search/` — search for a Conway mutation between two given census knots, on their census diagrams and on
+  many larger diagrams.
 
 ## Install
 - An NVIDIA GPU with CUDA (scanner and tracker use CuPy).

@@ -46,6 +46,13 @@ are the field names of the published corpus files.
 **Blind test.** During identification no knot table is consulted: `pipeline_seal.py` blocks the table lookups of SnapPy,
 spherogram and Sage. Tables are read only in stage 8, to compare.
 
+## Research tools
+`research/` holds tools we built for questions beyond the pipeline. Each folder has its own README: what it does, why we built
+it instead of using an established program, and how it was checked.
+- `research/theta_census_gpu/` — θ of every knot of a census file and of its mirror, exactly modulo a prime on the GPU, as a
+  filter that misses no θ-zero (given a correct kernel and diagram conversion, both calibrated); plus an attempt to certify,
+  with verified computation (needs SageMath), whether the θ-zeros of hyperbolic knots are chiral or amphichiral.
+
 ## Install
 - An NVIDIA GPU with CUDA (scanner and tracker use CuPy).
 - Four conda environments with these names, because the stages call them by name: `gnottheorie_env` (scanner, tracker, most
@@ -84,7 +91,7 @@ The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summ
 - A few names stay German on purpose because they name things outside the code: the authors' folder names
   (`erzeugte_knoten/`, `bekannt/`), the material `Edelstahl` in the Blender template, and historical file names.
 - All absolute paths moved into `pipeline/site_config.py`. With `KNOT_PIPELINE_PROFILE=authors` every location is the authors' own.
-- `tools/strict_equivalence.py` and `tools/path_equivalence.py` prove, file by file, that each released module is the same program
+- `tools/strict_equivalence.py` and `tools/path_equivalence.py` prove, file by file, that each released pipeline module is the same program
   as the one used in the authors' runs (abstract syntax trees compared after the allowed changes; both gates counter-tested with
   deliberate changes that they must detect). The originals themselves are not public; the proof was run by the authors on
   22.10.2026 for all 43 modules.

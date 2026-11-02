@@ -14,6 +14,7 @@ are listed per conda environment in `environments/`, not here.
 | **KnotJob** (`KnotJob.jar`): Khovanov homology, s-invariants | Dirk Schütz | https://www.maths.dur.ac.uk/users/dirk.schuetz/knotjob.html (GNU GPL v3) | `mandatory_invariants.py`, `mandatory_invariants_extra.py` | `KNOTJOB_JAR`, `JAVA_BIN` |
 | **KnotInfo** index (`index_c_det_sig.json`, `records.json`) | KnotInfo (C. Livingston, A. H. Moore) via the `database_knotinfo` package | built locally from `database_knotinfo`: `data/build_knotinfo_index.py` (see `data/README.md`) | `pipeline_crosscheck.py` — **after** identification only, never during it (blind test) | `KNOTINFO_INDEX`, `KNOTINFO_RECORDS` |
 | **Fremlin** cache (`fremlin_cache.json`) | David Fremlin, "Knots and their symmetries" | https://david.fremlin.de/knots/ — built locally: `data/build_fremlin_cache.py --fetch` (see `data/README.md`) | `pipeline_crosscheck.py` — after identification only | `FREMLIN_CACHE` |
+| **Burton's knot census** (`<c>{a,n}-{hyp,torus,satellite}.csv.bz2`, DT codes of all prime knots up to 19 crossings) | Benjamin A. Burton, *The next 350 million knots* (SoCG 2020) | https://people.smp.uq.edu.au/BenjaminBurton/knots/ (the files we downloaded) | `research/theta_census_gpu/` | — (paths are command-line arguments) |
 | **Blender** | Blender Foundation | https://www.blender.org/ | `sort_and_render.py` (renders, optional) | `BLENDER`, `RENDER_TEMPLATE` |
 
 Our own files that are needed but generated rather than shipped:

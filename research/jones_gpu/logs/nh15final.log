@@ -1,0 +1,26 @@
+{"workers": 4, "files": ["15n-hyp.csv.bz2"], "maxcells": 4194304}
+counter-cases OK (3_1 differs, 4_1 agrees)
+{"knots": 4096, "symmetric": 25, "chiral_proved": 4071, "errors": 0, "sec": 11}
+{"knots": 8192, "symmetric": 38, "chiral_proved": 8154, "errors": 0, "sec": 18}
+{"knots": 24576, "symmetric": 94, "chiral_proved": 24482, "errors": 0, "sec": 28}
+{"knots": 28672, "symmetric": 109, "chiral_proved": 28563, "errors": 0, "sec": 30}
+{"knots": 32768, "symmetric": 125, "chiral_proved": 32643, "errors": 0, "sec": 35}
+{"knots": 36864, "symmetric": 141, "chiral_proved": 36723, "errors": 0, "sec": 43}
+{"knots": 53248, "symmetric": 195, "chiral_proved": 53053, "errors": 0, "sec": 53}
+{"knots": 57344, "symmetric": 216, "chiral_proved": 57128, "errors": 0, "sec": 55}
+{"knots": 58368, "symmetric": 223, "chiral_proved": 58145, "errors": 0, "sec": 57}
+{"knots": 66560, "symmetric": 260, "chiral_proved": 66300, "errors": 0, "sec": 62}
+{"knots": 70656, "symmetric": 275, "chiral_proved": 70381, "errors": 0, "sec": 64}
+{"knots": 74752, "symmetric": 287, "chiral_proved": 74465, "errors": 0, "sec": 70}
+{"knots": 91136, "symmetric": 335, "chiral_proved": 90801, "errors": 0, "sec": 77}
+{"knots": 95232, "symmetric": 354, "chiral_proved": 94878, "errors": 0, "sec": 80}
+{"knots": 99328, "symmetric": 371, "chiral_proved": 98957, "errors": 0, "sec": 88}
+{"knots": 103424, "symmetric": 382, "chiral_proved": 103042, "errors": 0, "sec": 96}
+{"knots": 119808, "symmetric": 421, "chiral_proved": 119387, "errors": 0, "sec": 102}
+{"knots": 120832, "symmetric": 425, "chiral_proved": 120407, "errors": 0, "sec": 104}
+{"knots": 124928, "symmetric": 439, "chiral_proved": 124489, "errors": 0, "sec": 106}
+{"knots": 129024, "symmetric": 446, "chiral_proved": 128578, "errors": 0, "sec": 114}
+{"knots": 137216, "symmetric": 468, "chiral_proved": 136748, "errors": 0, "sec": 118}
+{"knots": 141312, "symmetric": 476, "chiral_proved": 140836, "errors": 0, "sec": 123}
+{"knots": 157696, "symmetric": 494, "chiral_proved": 157202, "errors": 0, "sec": 130}
+DONE {"knots": 168023, "symmetric": 498, "chiral_proved": 167525, "errors": 0, "sec": 136, "p": 536870909, "x": 450783412}

@@ -1,0 +1,2 @@
+15n-hyp.csv.bz2 first 1000 rows, ms/knot, one core: spherogram DT->PD 1.69 | prepare_fast (2 points) 0.66 | Regina fromDT 0.020 + jones 0.177
+19n-hyp.csv.bz2 first 1000 rows, ms/knot, one core: spherogram DT->PD 2.23 | prepare_fast (2 points) 0.93 | Regina fromDT 0.025 + jones 0.339

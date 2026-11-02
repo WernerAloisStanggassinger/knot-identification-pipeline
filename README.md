@@ -57,6 +57,8 @@ it instead of using an established program, and how it was checked.
 - `research/volume_census/` — SnapPy volume of every knot of a census file, resumable.
 - `research/mutation_search/` — search for a Conway mutation between two given census knots, on their census diagrams and on
   many larger diagrams.
+- `research/jones_gpu/` — an independent second implementation of the Jones polynomial at a point (exact mod p, a tensor network
+  on the PD code, CPU reference and GPU batch); slower than Regina's exact Jones polynomial, meant as a cross-check.
 
 ## Install
 - An NVIDIA GPU with CUDA (scanner and tracker use CuPy).

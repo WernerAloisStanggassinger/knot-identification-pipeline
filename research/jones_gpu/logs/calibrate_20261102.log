@@ -1,0 +1,2 @@
+{"knots": 54, "per_combo_agreeing_knots": {"(True, 1, 't')": 54, "(True, 1, '1/t')": -1, "(True, -1, 't')": -1, "(True, -1, '1/t')": -1, "(False, 1, 't')": -1, "(False, 1, '1/t')": -1, "(False, -1, 't')": -1, "(False, -1, '1/t')": 54}, "consistent": ["(True, 1, 't')", "(False, -1, '1/t')"]}
+CALIBRATION OK: A-smoothing = slots (0,1)(2,3), writhe sign +1, jones_at returns V(t) at t = x^-8 (Sage old convention q = t)

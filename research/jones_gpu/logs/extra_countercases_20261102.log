@@ -1,0 +1,7 @@
+9_42 V(t)==V(1/t) at the point: True | Sage J(q)==J(1/q): True
+10_48 V(t)==V(1/t) at the point: True | Sage J(q)==J(1/q): True
+10_71 V(t)==V(1/t) at the point: True | Sage J(q)==J(1/q): True
+3_1 V(t)==V(1/t) at the point: False | Sage J(q)==J(1/q): False
+8_17 V(t)==V(1/t) at the point: True | Sage J(q)==J(1/q): True
+4_1 V(t)==V(1/t) at the point: True | Sage J(q)==J(1/q): True
+6_3 V(t)==V(1/t) at the point: True | Sage J(q)==J(1/q): True

@@ -120,6 +120,14 @@ bash /path/to/knot-identification-pipeline/pipeline/pipeline_run.sh
 The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summary.md`.
 
 ## How this release relates to the code that produced the results
+- **Two code trees, on purpose.** "The authors' copy" in this README is a living tree, not only a historical state: the authors
+  compute their corpus with their own working copy of the same programs, whose module, file and field names are still German
+  (`pflicht_invarianten.py`, `pflichtliste`, `<knot>_pflicht_invarianten_complete.json`). It keeps those names so that the 843
+  records already computed — and the data published from them (corpus files, website downloads, Zenodo deposits) — stay readable
+  without conversion; those published data are an archive and stay as they are. This repository is the English, public form of
+  the same programs. The working copy is not published separately because this code is proven to be the same program up to a
+  consistent renaming (22.10. and 27.10.2026, below) plus the changes listed below; every program change since is either made in
+  both trees or described below as a change of this release only. The corpus layer here reads records of both kinds (`record_names.py`).
 - **Limits found by outside reviews and fixed or stated on 3 November 2026.**
   - *Locations.* Several modules built paths from `ROOT` and the authors' folder layout instead of the names in `site_config.py`;
     with `KNOT_PIPELINE_PROFILE=authors` that coincides, with the default profile `portable` it did not (the corpus database, the

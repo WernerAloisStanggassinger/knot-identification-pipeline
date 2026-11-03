@@ -67,6 +67,13 @@ def pd_to_cs_phi(pd_list: Sequence[Sequence[int]]) -> Tuple[List[Tuple[int, int,
     knots.sage entries).
     """
     pd_list = [tuple(c) for c in pd_list]
+    # Guard (3 November 2026): on diagrams with a Reidemeister-I kink (a crossing whose 4-tuple repeats a label) this
+    # conversion + the θ kernel can give a wrong θ_raw (6_2 and K8n1 under SnapPy backtrack(): 39 of 60 kinked diagrams wrong,
+    # all 20 kink-free ones right; crossing signs agree with SnapPy, not the cause). Cause not found, so such diagrams are
+    # refused. Census diagrams are minimal and have no kinks; none of the 834 PD diagrams of the 843 corpus records
+    # (9 unknots have none) had a kink on 3 November 2026.
+    if any(len(set(c)) < 4 for c in pd_list):
+        raise ValueError('PD with a Reidemeister-I kink is not supported; simplify the diagram first')
     n = len(pd_list)
     two_n = 2 * n
     if two_n == 0:
@@ -183,12 +190,14 @@ def _selftest() -> int:
     ok_phi = phi == expected_phi
     print("Cs  match knots.sage?", ok_cs)
     print("phi match knots.sage?", ok_phi)
-    overall = ok_cs and ok_phi
-
-    # Unknot with a single twist (Reidemeister I) -- a constructive
-    # test: the PD of a twisted unknot over two crossings (R1 + R1^-1) is
-    # not trivial, so we leave it out here and rely on an
-    # additional end-to-end test against knots.sage in a Sage script.
+    # A PD with a Reidemeister-I kink must be refused (since 3 November 2026, see pd_to_cs_phi).
+    try:
+        pd_to_cs_phi([(1, 1, 2, 2)])
+        ok_kink = False
+    except ValueError:
+        ok_kink = True
+    print("kinked PD refused?", ok_kink)
+    overall = ok_cs and ok_phi and ok_kink
 
     return 0 if overall else 1
 
@@ -197,7 +206,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--selftest":
         sys.exit(_selftest())
     if len(sys.argv) > 1:
-        # Accept the PD as JSON on stdin or as a path to a JSON file.
+        # Accept the PD as a path to a JSON file.
         with open(sys.argv[1], "r") as fh:
             pd = json.load(fh)
         cs, phi = pd_to_cs_phi(pd)

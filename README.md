@@ -62,6 +62,9 @@ it instead of using an established program, and how it was checked.
   hyperbolic knots, each with counter-cases.
 - `research/jones_gpu/` — an independent second implementation of the Jones polynomial at a point (exact mod p, a tensor network
   on the PD code, CPU reference and GPU batch); slower than Regina's exact Jones polynomial, meant as a cross-check.
+- `research/theta_collision/` — which census knots with hyperbolic volumes equal within a tolerance (for example mutants) θ
+  tells apart: groups by volume, θ values from `theta_census_gpu/theta_gpu_census.py --values`; a pair counts as separated when
+  the values modulo p prove A ≠ B and A ≠ mirror B as oriented knots (given a correct kernel and diagram conversion).
 
 ## Install
 - An NVIDIA GPU with CUDA (scanner and tracker use CuPy).
@@ -94,6 +97,13 @@ The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summ
   curves CC-BY-NC-4.0). Tag `proven-equivalent-20261027` = `proven-equivalent` plus exactly that change. The gate was
   counter-tested with 25 deliberate changes it must catch or pass; the built-in self-tests of six modules give the same
   results before and after (45 of 45 checks).
+- **3 November 2026, one program change in the pipeline:** `pipeline/pd_to_theta_input.py` now refuses a PD code with a
+  Reidemeister-I kink (a crossing whose 4-tuple repeats a label) with `ValueError`, because on many such diagrams (39 of 60 in tests) the conversion gave
+  wrong θ values (details in `research/theta_census_gpu/README.md`). Its self-test also checks the refusal. Otherwise the module is unchanged: it is EQUIVALENT
+  (`tools/strict_equivalence.py`) to the authors' copy, which carries the same guard. `theta_crosscheck.py` and
+  `theta_numeric_crosscheck.py` call it without catching the error, so on a kinked diagram they now stop with that message
+  instead of possibly writing a wrong θ. The pipeline's diagrams are simplified first: none of the 834 PD diagrams of the 843 records of
+  the authors' corpus has a kink (checked 3 November 2026; the other 9 records are unknots without a diagram).
 - **Results the authors published before this release (knot corpus, website downloads, Zenodo deposits) use the German
   names.** `tools/translation_table.json` maps every name this code reads or writes, for example `pflichtliste` → `mandatory_list`,
   `pflicht_invarianten_complete.json` → `mandatory_invariants_complete.json`, `beweis` → `proof`, `grund` → `cause`. In

@@ -32,7 +32,7 @@ Workflow (stage 8a):
 Usage:
   python theta_crosscheck.py <knot>_pflicht_invarianten_complete.json [--output X.json]
 
-ENV gating (in pipeline_run.sh): run only if RUN_THETA=1.
+Called by pipeline_run.sh in stage 8a when THETA_SYMBOLIC=1 (otherwise theta_numeric_crosscheck.py runs; SKIP_THETA=1 skips the stage).
 """
 from __future__ import annotations
 import argparse
@@ -126,7 +126,7 @@ try:
 except TimeoutError:
     signal.alarm(0)
     theta_full_str = "<timeout_theta_main>"
-    theta_note = "Theta() sub-timeout: pathologische Cs-Reihenfolge"
+    theta_note = "Theta() sub-timeout: pathological Cs order"
     print(json.dumps({
         "theta_full_str": theta_full_str,
         "delta1_str":     "<skipped>",

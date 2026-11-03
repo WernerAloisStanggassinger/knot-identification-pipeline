@@ -30,8 +30,8 @@ Veen's program (not included, see `THIRD_PARTY.md`).
 | File | What it does |
 |---|---|
 | `theta_modp.py` | θ_raw at a point over GF(p): `ref()` pure Python (one knot, reference), `gpu_batch()` CuPy (a batch of knots with the same number of crossings) |
-| `pd_to_theta_input.py` | PD code → the input `[Cs, phi]` of Bar-Natan and van der Veen's program; self-test on the trefoil |
-| `theta_gpu_census.py` | the census driver: DT code → SnapPy link → PD → `[Cs, phi]` for K and its mirror on a CPU pool, then the GPU kernel in batches of 20,000 knots per crossing number; writes `<prefix>_candidates.tsv` and `<prefix>_stats.json` |
+| `pd_to_theta_input.py` | PD code → the input `[Cs, phi]` of Bar-Natan and van der Veen's program; self-test on the trefoil and on a kinked PD, which must be refused |
+| `theta_gpu_census.py` | the census driver: DT code → SnapPy link → PD → `[Cs, phi]` for K and its mirror on a CPU pool, then the GPU kernel in batches of 20,000 knots per crossing number; writes `<prefix>_candidates.tsv` and `<prefix>_stats.json`; with `--values` (since 3 November 2026) also `<prefix>_values.tsv.bz2` with θ_raw(K) and θ_raw(mirror K) mod p (or `None`) of every knot whose diagram could be converted (conversion errors appear only in the candidates file), the input of `research/theta_collision` |
 | `certify_zeros.py` | for θ-zeros of **hyperbolic** knots, an attempt to certify (it can end in `NOT CERTIFIED`): verified oriented isometry signatures (SnapPy, `verified=True`, needs SageMath) of the exterior and of its mirror. Equal ⟹ amphichiral (an orientation-reversing isometry; Gordon–Luecke). Different ⟹ chiral (Mostow–Prasad: every self-homeomorphism of a hyperbolic exterior is homotopic to an isometry). Counter-cases 4_1 and 5_2 run first |
 | `calibrate_theta_modp.py` + `ref_sage_22_7_21_13.json` | calibration: 400 knots with θ_raw over ℚ from Sage; reference and GPU must agree mod p |
 
@@ -39,6 +39,7 @@ Veen's program (not included, see `THIRD_PARTY.md`).
 ```
 python -I calibrate_theta_modp.py                                          # gnottheorie_env (CuPy)
 python -I theta_gpu_census.py 8 out_c15 /path/to/burton/raw/15*.csv.bz2     # gnottheorie_env; env THETA_GPU_MEM_GB (default 6)
+python -I theta_gpu_census.py --values 8 out_c15 /path/to/burton/raw/15*.csv.bz2   # same, plus out_c15_values.tsv.bz2
 python -I certify_zeros.py zeros.tsv /path/to/burton/raw cert.jsonl 3 '15n-hyp.csv.bz2'   # sage_stable
 ```
 Burton's census files (`<c>{a,n}-{hyp,torus,satellite}.csv.bz2`, columns `name`, …, `dt_code`) are not included; see
@@ -46,7 +47,7 @@ Benjamin A. Burton, *The next 350 million knots* (SoCG 2020). `zeros.tsv` is wri
 knots: one row `name<TAB>crossings<TAB>θ` per knot, and `certify_zeros.py` takes the rows whose third column is exactly `0`
 (the candidates file itself has the word `zero` there and cannot be passed directly).
 
-## Checked on 2 November 2026, with the files in this folder
+## Checked on 2 November 2026, with the files of that release
 - `calibrate_theta_modp.py`: reference vs Sage over ℚ 400/400 equal, GPU vs Sage 400/400 equal. Counter-case (T1 + 1 instead
   of T1): of the 380 knots with θ_raw ≠ 0 at the point, 0 agree; the other 20 have θ_raw = 0 at the point.
 - `theta_gpu_census.py` on all five 15-crossing census files: 253,293 knots, 3 flagged (15nh_008268, 15nh_048139,
@@ -56,11 +57,27 @@ knots: one row `name<TAB>crossings<TAB>θ` per knot, and `certify_zeros.py` take
   first fails at 15*, Zenodo, DOI 10.5281/zenodo.23856098.
 - `certify_zeros.py` on these three: 15nh_008268 amphichiral, 15nh_048139 and 15nh_048140 chiral, as in that deposit.
 
+## Diagrams with a Reidemeister-I kink are refused (3 November 2026)
+While preparing the next release we found that on diagrams with a Reidemeister-I kink (a PD crossing whose 4-tuple repeats a
+label) `pd_to_theta_input.py` + the θ kernel can give a wrong θ_raw. Test: 6_2 and K8n1, 40 random enlargements each by SnapPy's
+`backtrack()` (2 to 10 steps). Of the 80 diagrams, 60 had a kink, and 39 of those 60 gave a θ_raw different from the minimal diagram; the 20
+kink-free ones were all right. A kink is therefore not by itself the trigger, but every wrong value came from a diagram with one.
+The exact route (our conversion fed to the Sage program of Bar-Natan and van der Veen) also gives a wrong value on a kinked
+diagram, so the fault lies before the mod-p kernel. The crossing signs computed from the PD code agree with SnapPy's at all
+1,928 crossings checked (160 random enlargements of K8n1, 6_2, 4_1 and 7_4, the 40 of K8n1 being the diagrams of the θ test
+above; 288 crossings at kinks), so they are not the cause. On the kinked diagrams that give a wrong θ_raw, the Alexander polynomial computed
+from the converted crossing list is already wrong (Δ(1) = 0, where a knot has Δ(1) = ±1), so the fault lies in the crossing list
+`Cs` the conversion produces; we have not found it. Since then `pd_to_cs_phi` raises `ValueError` on a diagram with a kink, and
+`theta_gpu_census.py` reports the knot as a conversion error, which puts it among the flagged knots. The guard does not fire on
+Burton's census diagrams: they are minimal (at 15 crossings all 253,293 converted diagrams have 15 crossings), so the census
+results above stay as they were; they rest on the checks listed there. The test scripts for this paragraph are not part of the
+repository. Simplify a diagram before passing it.
+
 ## How these files relate to the authors' originals
 All five scripts got the licence header of this repository (in `pd_to_theta_input.py` it replaces the deposit's header, which
-pointed to `LICENSE-CODE.txt`). `theta_modp.py` and `pd_to_theta_input.py` are then proven EQUIVALENT to the originals by
-`tools/strict_equivalence.py` (only comments, docstrings and message texts changed). The other three changed as follows, and
-in nothing else:
+pointed to `LICENSE-CODE.txt`). In the release of 2 November 2026, `theta_modp.py` and `pd_to_theta_input.py` were proven
+EQUIVALENT to the originals by `tools/strict_equivalence.py` (only comments, docstrings and message texts changed). The other
+three changed as follows in that release, and in nothing else:
 - `theta_gpu_census.py`: imports its two modules from this folder instead of from two absolute paths; one docstring line names
   the calibration script instead of the authors' folder.
 - `certify_zeros.py`: made from the c = 19 copy of the authors' script (the c = 17, 18 and 19 copies differ only in a first
@@ -68,3 +85,8 @@ in nothing else:
   first comment line was dropped and the header comment and usage line were rewritten for this release.
 - `calibrate_theta_modp.py`: finds its own folder (`import os`, path of the reference file) instead of the parent folder; its
   messages and two variable names were translated; its counter-case line now also counts the knots with θ_raw ≠ 0 separately.
+
+Since 3 November 2026 two files differ in code as well: `pd_to_theta_input.py` has the kink guard described above (a check and a
+`raise` at the start of `pd_to_cs_phi`, and a check in its self-test that a kinked PD is refused; the same in
+`pipeline/pd_to_theta_input.py`), and `theta_gpu_census.py` has the
+`--values` option (argument parsing and the writer of the values file). `theta_modp.py` is unchanged.

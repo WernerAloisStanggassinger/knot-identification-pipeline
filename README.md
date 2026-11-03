@@ -65,6 +65,8 @@ it instead of using an established program, and how it was checked.
 - `research/theta_collision/` — which census knots with hyperbolic volumes equal within a tolerance (for example mutants) θ
   tells apart: groups by volume, θ values from `theta_census_gpu/theta_gpu_census.py --values`; a pair counts as separated when
   the values modulo p prove A ≠ B and A ≠ mirror B as oriented knots (given a correct kernel and diagram conversion).
+- `research/whitehead_double/` — HOMFLY polynomial of the untwisted Whitehead doubles of a knot (both clasps) and a comparison of
+  two knots by it that ignores mirror images; different values prove different knots up to mirror image, equal values prove nothing.
 
 ## Install
 - An NVIDIA GPU with CUDA (scanner and tracker use CuPy).

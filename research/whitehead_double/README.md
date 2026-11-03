@@ -11,8 +11,14 @@ scripted. We needed it for pairs of census knots with equal volume, Alexander an
 
 ## What a result means
 - **Different** values for a clasp, against B and against mirror(B), prove that A and B are different knots up to mirror image.
-- **Equal** values prove nothing. The Conway mutant pair among the counter-cases below gives equal values. Whether equal values hold
-  for every mutant pair is not claimed here, and no theorem saying so is cited; the pair is a regression check (see below).
+- **Equal** values prove nothing. In particular this invariant **cannot separate Conway mutants**: the untwisted Whitehead double is a
+  2-string satellite, and 2-string satellites of mutants have the same HOMFLY polynomial — proved by Lickorish and Lipson
+  (Polynomials of 2-cable-like links, Proc. Amer. Math. Soc. 100 (1987) 355–361) for equally twisted 2-cables and for reverse-string
+  2-cables, independently by Przytycki (Equivalence of cables of mutants of knots, Canad. J. Math. 41 (1989) 250–273), as reported in
+  Morton–Cromwell, Distinguishing mutants by knot polynomials, J. Knot Theory Ramifications 5 (1996) 225–238 (introduction; author
+  copy read); stated for 2-string satellites in general in the abstract of Morton, Mutant knots with symmetry, arXiv:0705.1321v1
+  (Math. Proc. Cambridge Philos. Soc. 146 (2009) 95–107). We have not read the papers of Lickorish–Lipson and Przytycki themselves.
+  So a pair that this tool separates is not a mutant pair.
 
 ## Files
 | File | What it does |
@@ -34,9 +40,9 @@ in our runs (1 to 3 November 2026, each double in its own worker process) from a
 | Pair | Expected | Why |
 |---|---|---|
 | K14n22185 / K14n22589 | different, both clasps | Stoimenow's pair (14_41721, 14_42125) in his numbering of all 14-crossing knots (= KnotScape 14n 22185 / 22589, after the 19,536 alternating ones): equal volume, Alexander and Jones polynomial; his page lists it as separated by the Whitehead-double skein polynomial |
-| 15ah_27440 / 15ah_27441 | equal, both clasps | Regression check, not a consequence of a cited theorem: these Conway mutants (explicit mutation; = KnotScape 15a_13571 / 15a_13629) gave equal values for both clasps on 3 November 2026, so a difference means the computation has changed; their census DT codes are written into the script |
+| 15ah_27440 / 15ah_27441 | equal, both clasps | Conway mutants by an explicit mutation (= KnotScape 15a_13571 / 15a_13629); their Whitehead doubles are 2-string satellites, which agree for mutants (Lickorish–Lipson, Przytycki; see above); their census DT codes are written into the script |
 
-The script stops with exit code 1 if either expectation fails. The first rests on Stoimenow's published separation, the second only on our own earlier result.
+The script stops with exit code 1 if either expectation fails. The first rests on Stoimenow's published separation, the second on the published result on 2-string satellites of mutants.
 
 ## Checked on 3 November 2026
 `python -I wd_homfly.py counter 4` (SageMath 10.9, Regina 7.4, SnapPy 3.3.2): K14n22185 / K14n22589 different for both clasps,

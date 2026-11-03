@@ -70,8 +70,8 @@ and on the GPU, and `calibrate_theta_modp.py` still gives 400/400 on both. The c
 along. (An earlier version of this paragraph blamed it: the Alexander polynomial we had computed from the crossing list as a check
 used the same assigning matrix.)
 **Published results are not affected:** a crossing with i = j + 1 needs a kink, and a minimal diagram has none. Checked directly:
-none of the 313,230 converted census diagrams up to 15 crossings and none of the 839 PD codes of the authors' corpus records has such
-a crossing (3 November 2026). `pd_to_cs_phi` still refuses a diagram with a kink (`ValueError`; `theta_gpu_census.py` reports it as
+none of the 313,230 converted census diagrams up to 15 crossings and none of the 839 PD codes of the authors' corpus (834 of its 843 records — the other
+9 are unknots without a diagram — and its 5 validation knots) has such a crossing (3 November 2026). `pd_to_cs_phi` still refuses a diagram with a kink (`ValueError`; `theta_gpu_census.py` reports it as
 a conversion error); the refusal is now a safety net for any kernel that still assigns. The test scripts for this paragraph are not
 part of the repository.
 

@@ -1,5 +1,7 @@
 {
   "title": "knot-identification-pipeline: knot type of closed space curves from their geometry",
+  "version": "1.8.1",
+  "publication_date": "2026-11-03",
   "upload_type": "software",
   "creators": [
     {

@@ -23,7 +23,8 @@ Counter-cases (no census files needed):
                           Alexander and Jones polynomial; his tables list it as separated by the Whitehead-double skein polynomial:
                           the doubles must DIFFER for both clasps;
   15ah_27440 / 15ah_27441 — Conway mutants (explicit mutation; = KnotScape 15a_13571 / 15a_13629, listed by Stoimenow): the doubles
-                          must be EQUAL for both clasps. Their two census DT codes are written into this file, so no census file is read.
+                          must be EQUAL for both clasps — a regression check (equal on 3 November 2026), not a consequence of a
+                          cited theorem. Their two census DT codes are written into this file, so no census file is read.
 Run with SageMath's Python; needs regina, snappy. Running times: see README.md.
 """
 import bz2, csv, json, os, sys, time

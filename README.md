@@ -161,12 +161,13 @@ The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summ
   structurally. **On today's tree the gate is red against that tag**, and it is meant to be read with the changes since:
   `python3 -I tools/map_equivalence.py proven-equivalent-20261027 --rename pipeline/pflicht_invarianten.py=pipeline/mandatory_invariants.py …`
   (the seven renames listed under `files` in `tools/translation_table.json`; without them it also reports those seven files as
-  missing) reports 34 problems on the tree of this release (3 November 2026): 25 are the German keys that the corpus layer keeps on
+  missing) reports 36 problems on the tree of this release (3 November 2026): 25 are the German keys that the corpus layer keeps on
   purpose (`pflichtliste`, `DIAGRAMM`, `HYPERBOLISCH`, file-name patterns, and `pflicht_json` / `source_pflicht_json` in the output of
   `identify_torus_knot.py`), two of them in `record_names.py`, which maps English records onto exactly these names; 3 more German
   keys inside the corpus layer (`quelle` in `label_distinct_knots.py`, `fehler` twice in `regina_bridge.py`, which only the corpus
   layer reads); and 6 are the two program changes after the tag (`pd_to_theta_input.py`, kink guard, 3.11.; `site_config.py`, the
-  name `SIXD_DIR`, 29.10.). The gate has been red against this tag since the corpus layer came in (release v1.1.0). The files added
+  name `SIXD_DIR`, 29.10.); 2 more are fixes of 3.11. after outside reviews (`pipeline_crosscheck.py`, the no-match verdict;
+  `summary_writer.py`, `chern_simons`), described above. The gate has been red against this tag since the corpus layer came in (release v1.1.0). The files added
   on 29.10. have their own proofs, described below. The deliberate counter-cases the gates were tested with (25 and 22,
   named in the commit messages) are not in this repository. Since 3 November 2026 the gate refuses an unknown or empty revision instead of reporting it as
   equivalent and writing an empty translation table.
@@ -177,16 +178,20 @@ The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summ
   counter-tested with 25 deliberate changes it must catch or pass; the built-in self-tests of six modules give the same
   results before and after (45 of 45 checks).
 - **3 November 2026, one program change in the pipeline:** `pipeline/pd_to_theta_input.py` now refuses a PD code with a
-  Reidemeister-I kink (a crossing whose 4-tuple repeats a label) with `ValueError`, because on many such diagrams (39 of 60 in tests) the conversion gave
-  wrong θ values (details in `research/theta_census_gpu/README.md`). Its self-test also checks the refusal. Otherwise the module is unchanged: it is EQUIVALENT
+  Reidemeister-I kink (a crossing whose 4-tuple repeats a label) with `ValueError`, because θ came out wrong on such diagrams (99 of 160 enlarged test diagrams, all of them with a kink of the
+  kind described below; details in `research/theta_census_gpu/README.md`). Its self-test also checks the refusal. Otherwise the module is unchanged: it is EQUIVALENT
   (`tools/strict_equivalence.py`) to the authors' copy, which carries the same guard. `theta_crosscheck.py` and
   `theta_numeric_crosscheck.py` call it without catching the error, so on a kinked diagram they now stop with that message
   instead of possibly writing a wrong θ. The cause was found the same day by an outside reviewer: the θ kernels set the matrix entries
   of a crossing with `=` instead of adding them (`+=`, as `Theta.m` does), which goes wrong exactly at a crossing with i = j + 1, i.e.
   at a kink; the conversion itself is right (details and tests in `research/theta_census_gpu/README.md`, where `theta_modp.py` is
-  fixed). The authors' numerical Sage kernel for stage 8a (`Theta_numeric.sage`, not in this repository) assigns in the same way,
-  so the guard stays. The pipeline's diagrams are simplified first: none of the 834 PD diagrams of the 843 records of
-  the authors' corpus has a kink (checked 3 November 2026; the other 9 records are unknots without a diagram). The research tools
+  fixed). Both Sage kernels that stage 8a can call set the entries the same way: `Theta.sage`, the Sage code of
+  Bar-Natan and van der Veen (`THETA_SYMBOLIC=1`; tested on enlarged diagrams of 4_1: the 3 with a crossing i = j + 1 wrong, the 3
+  without right), and `Theta_numeric.sage` (default; our modification of `Theta.sage`, not in this repository), which took over its
+  matrix set-up (30 enlarged diagrams: the 15 with i = j + 1 wrong; after changing it to `+=` on 3.11.2026, none). So the guard stays,
+  and it protects both routes. The pipeline's diagrams are simplified first: none of the 834 PD diagrams of the 843 records of
+  the authors' corpus has a kink, nor do the 5 diagrams of its validation knots (checked 3 November 2026; the other 9 records
+  are unknots without a diagram; 834 + 5 = the 839 PD codes named in `research/theta_census_gpu/README.md`). The research tools
   that use the same conversion on Burton's census diagrams are covered in `research/theta_census_gpu/README.md`: census diagrams are
   minimal, so they carry no kink.
 - **Results the authors published before this release (knot corpus, website downloads, Zenodo deposits) use the German
@@ -202,12 +207,16 @@ The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summ
   program as the authors' copy at the time of the proof (abstract syntax trees compared after the allowed changes; both gates
   counter-tested with deliberate changes that they must detect). The originals themselves are not public; the proof was run by the
   authors on 22.10.2026 for all 43 modules. Later program changes, each made in the authors' copy as well:
-  `build_curve_json.py` (27.10.2026, licence label of each curve) and `pd_to_theta_input.py` (3.11.2026, kink guard), both described
-  above; the stage driver `pipeline_run.sh` (23.10.2026; a shell script, outside the Python proof): under `set -e` the stage-2 tracker
+  `build_curve_json.py` (27.10.2026, licence label of each curve), `pd_to_theta_input.py` (3.11.2026, kink guard) and
+  `pipeline_crosscheck.py` (3.11.2026, no-match verdict), all described above; the stage driver `pipeline_run.sh` (23.10.2026; a shell script, outside the Python proof): under `set -e` the stage-2 tracker
   ladder (minimum cell count 2000, 1000, …, 100) stopped at the first failing step instead of trying the next, so from 24.08. to
-  23.10.2026 a run whose tracker failed at 2000 ended there; it changes which runs finish, not the values of a run that finishes.
+  23.10.2026 a run whose tracker failed at 2000 ended there; it changes which runs finish, not the values of a run that finishes;
+  and again on 3.11.2026, stages 8a/8b report success only when they succeeded.
   Only in this release, not in the authors' copy: the corpus layer reads English records since 3.11.2026 (`record_names.py`, above),
-  and `theta_crosscheck.py` writes its note "pathological Cs order" in English (e5218b0). Results the authors computed before such
+  `theta_crosscheck.py` writes its note "pathological Cs order" in English (e5218b0); and, from 3.11.2026, `summary_writer.py`
+  leaves `chern_simons` empty for a non-hyperbolic knot, `pipeline_run.sh` names a missing `Theta_numeric.sage`, three messages are
+  English (`build_corpus_db.py`, `mandatory_invariants_extra.py`, `enrich_unknotting_signed_gauss.py`) and `build_corpus_db.py`
+  answers `--help`. Results the authors computed before such
   a change came from the code before it. The kink guard only adds a refusal: on a diagram it accepts, the conversion is unchanged.
   `pipeline_run.sh`, `mem_watchdog.sh` and `proof_register.json` were translated in the same steps as the 43 modules; they are not
   Python, so the equivalence gates do not cover them.

@@ -22,7 +22,7 @@
 #       - log: /tmp/mem_watchdog_<target_pid>.log
 #
 # (B) Library (in sweep_wave*.sh):
-#     source /media/squeezy/kauffman_storage/freeze_manifest/pipeline_scripts/mem_watchdog.sh
+#     source /path/to/knot-identification-pipeline/pipeline/mem_watchdog.sh
 #     start_watchdog 3   # threshold 3 GiB
 #     # ... do work ...
 #     stop_watchdog

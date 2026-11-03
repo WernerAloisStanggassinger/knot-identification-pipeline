@@ -50,7 +50,7 @@ def det_from_homfly(homfly_str):
     from math import isqrt
     q = re_ * re_ + im_ * im_
     w = isqrt(q)
-    return float(w) if w * w == q else (q ** 0.5)
+    return w if w * w == q else None    # not a square -> no knot determinant; never a float
 
 
 def _alex_terms(s):
@@ -134,11 +134,16 @@ def check_single(rec_file, homfly_str, tolerance=1e-6):
     alex = record_alexander(d)
     da = det_from_alexander(alex) if alex else None
     if dh is None:
+        _p = parse_homfly(homfly_str)
+        if _p is not None:
+            if any(j < 0 for (_i, j) in _p):
+                return {'ok': False, 'cause': 'homfly_negative_z_power'}
+            return {'ok': False, 'cause': 'homfly_det_not_a_square'}
         return {'ok': False, 'cause': 'homfly_unparsbar'}
     if det_rec is None:
         return {'ok': False, 'cause': 'no_det_in_record', 'det_homfly': dh}
     ab = abs(dh - det_rec) / max(det_rec, 1)
-    ok = ab < tolerance
+    ok = (dh == det_rec)               # exact: both are integers (tolerance kept for the signature)
     r = {'ok': ok, 'det_record': det_rec, 'det_homfly': dh, 'rel': ab,
          'witnesses': 2}
     if da is not None:

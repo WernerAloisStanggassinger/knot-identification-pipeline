@@ -9,7 +9,7 @@
 #
 # Call from the project folder that contains the single .fseries:
 #     cd /path/to/myknot_project
-#     bash /media/squeezy/kauffman_storage/freeze_manifest/pipeline_run.sh
+#     bash /path/to/knot-identification-pipeline/pipeline/pipeline_run.sh
 #
 # Optional arguments:
 #     bash pipeline_run.sh [<fseries-file>] [--skip-scanner] [--skip-tracker]

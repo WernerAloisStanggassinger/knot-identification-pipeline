@@ -782,7 +782,7 @@ def main(apply=False):
     if apply:
         # Backup centrally in _backups/ (Werner 2026-05-30: „ein ordner für die backups" (EN: one folder for the backups)),
         # rolling (no timestamp pile-up).
-        bak = ROOT / "_backups/files/freeze_manifest/pipeline_scripts/corpus_db.json.bak-pre-label"
+        bak = Path(site_config.BACKUP_DIR) / "files/freeze_manifest/pipeline_scripts/corpus_db.json.bak-pre-label"
         bak.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(DB, bak)
         # Pull the base bookkeeping along (in case records were removed directly, without a rebuild)

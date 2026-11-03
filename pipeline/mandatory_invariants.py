@@ -832,7 +832,7 @@ def jones_at_i(jones_str):
         t = t.replace('x^N', 'x^-')  # restore
         m = re.match(r'^(\d+)?(?:x(?:\^(-?\d+))?)?$', t)
         if not m:
-            continue
+            return None                # unreadable term: no value rather than a wrong one
         c, xe = m.groups()
         c = int(c) if c else 1
         xe_n = int(xe) if xe else (1 if 'x' in t else 0)
@@ -846,7 +846,9 @@ def jones_at_i(jones_str):
             re_part -= sign * c
         else:
             im_part -= sign * c
-    return math.isqrt(re_part * re_part + im_part * im_part)
+    q = re_part * re_part + im_part * im_part
+    w = math.isqrt(q)
+    return w if w * w == q else None   # |V(i)| of a knot is an integer; a non-square means a bad input
 
 
 # ──────────────────────────────────────────────

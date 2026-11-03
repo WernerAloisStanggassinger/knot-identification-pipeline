@@ -7,7 +7,8 @@
 # Dunfield–Friedl–Jackson Conjecture 1.7: the comparison of the hyperbolic torsion polynomial T_K with genus and fiberedness.
 # Conjecture (DFJ arXiv:1108.3045v3 p.5; precise form Agol-Dunfield 1501.02136v3 Conj 1.1):
 #   deg T_K = 4 g(K) - 2   (deg = span of the symmetric Laurent polynomial = 2 x(K), x = 2g-1)
-#   K fibered  <=>  T_K monic, i.e. leading coefficient == 1 in C (DFJ Thm 1.5; Kitayama 2108.08645v2 Conj 9.3).
+#   K fibered  <=>  T_K monic, i.e. leading coefficient == 1 in C (Kitayama 2108.08645v2 Conj 9.3). Proven is only
+#   fibered ==> monic (and deg T_K = 4g - 2), DFJ Thm 1.5 (1108.3045v3 p.4); the converse is part of Conjecture 1.7.
 # T_K from SnapPy Manifold.hyperbolic_torsion (nsagetools.compute_torsion, DFJ conventions, wada_conventions=False).
 # SnapPy cleans coefficients with |c| < 2^(-bits/3) to zero; returned polynomial starts at exponent 0.
 import time, resource

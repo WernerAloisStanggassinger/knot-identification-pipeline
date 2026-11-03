@@ -791,7 +791,8 @@ def _no_match_verdict(inv, ki, sc, prefix):
 
     A missing input never turns into "possibly new": if the KnotInfo lookup was
     skipped (e.g. signature missing) or the volume is unknown, the verdict is
-    "undecided". A non-hyperbolic knot (vol <= 0.5) is a torus knot, satellite or
+    "undecided"; so is a skipped or failed SnapPy census check, a SnapPy candidate whose volume
+    differs, or census manifolds of equal volume without identification. A non-hyperbolic knot (vol <= 0.5) is a torus knot, satellite or
     connected sum — a known family, never a novelty. Even a hyperbolic knot with
     no match is only "no DB match" here: whether it counts as a novelty candidate
     is decided by label_distinct_knots.py against the enumeration limits
@@ -802,6 +803,16 @@ def _no_match_verdict(inv, ki, sc, prefix):
     if ki_status.startswith("skipped"):
         return (f"{prefix}; KnotInfo lookup did not run ({ki_status}) — UNDECIDED",
                 "undecided (incomplete input: KnotInfo lookup skipped)")
+    sc_status = sc.get("status", "")
+    if "vol-mismatch" in sc_status:
+        return (f"{prefix}; SnapPy identify() names {sc.get('best_match')} but the volume differs — UNDECIDED",
+                "undecided (SnapPy candidate with volume mismatch)")
+    if sc_status.startswith("ht_volume_only"):
+        return (f"{prefix}; census manifolds of equal volume but no identification — UNDECIDED",
+                "undecided (volume-equal census candidates)")
+    if not sc_status.startswith(("no snappy-census match", "matched")):
+        return (f"{prefix}; SnapPy census check did not run ({sc_status}) — UNDECIDED",
+                "undecided (incomplete input: SnapPy census check not run)")
     if not isinstance(v, (int, float)):
         return (f"{prefix}; hyperbolic volume missing — UNDECIDED",
                 "undecided (incomplete input: volume missing)")
@@ -839,7 +850,8 @@ def main():
 
     # Consolidated status (Discovery #134: snappy census for c>13 as an
     # additional match path)
-    sc_best = sc.get("best_match") if sc.get("status", "").startswith("matched") else None
+    sc_best = (sc.get("best_match") if sc.get("status", "").startswith("matched")
+               and "vol-mismatch" not in sc.get("status", "") else None)   # a volume mismatch is no confirmed match
 
     if ki.get("best_match"):
         mirror_tag = " (mirror)" if "mirror" in ki.get("status", "") else ""

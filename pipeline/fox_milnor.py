@@ -47,7 +47,11 @@ def parse_alexander(s):
     num, den = sp.fraction(sp.cancel(e))
     try:
         P = sp.Poly(sp.expand(num), t)
+        D = sp.Poly(sp.expand(den), t)
     except Exception:
+        return None
+    # A Laurent polynomial has denominator +-t^k; any other denominator means it is not a polynomial at all.
+    if len(D.terms()) != 1 or abs(D.LC()) != 1:
         return None
     if P.total_degree() == 0 and P.LC() == 0:
         return None

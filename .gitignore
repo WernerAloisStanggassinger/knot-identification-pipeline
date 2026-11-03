@@ -10,3 +10,7 @@ data/knotinfo_index/
 data/fremlin_cache/
 data/fremlin_pages/
 data/fremlin_index.htm
+
+# written by the pipeline and the corpus layer in the portable profile
+output/
+_backups/

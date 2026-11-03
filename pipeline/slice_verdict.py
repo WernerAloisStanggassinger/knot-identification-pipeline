@@ -116,14 +116,17 @@ def slice_verdict(a):
     # FULL Fox-Milnor: Delta = f(t)*f(1/t) as a factorisation condition. Strictly stronger than
     # the determinant test, which only looks at Delta(-1) (2026-07-23, Disc #558).
     alex = a.get('alexander_polynomial') or a.get('alexander')
+    fm_unchecked = None if alex else 'no Alexander polynomial'
     if alex:
         try:
             from fox_milnor import fox_milnor as _fm
             passes, reason, _d = _fm(alex)
             if passes is False:
                 obstr.append('Fox-Milnor violated: %s' % reason)
-        except Exception:
-            pass
+            elif passes is None:
+                fm_unchecked = reason
+        except Exception as e:
+            fm_unchecked = '%s: %s' % (type(e).__name__, str(e)[:80])
 
     warn = (' | ⚠ ' + arf_conflict) if arf_conflict else ''
     if obstr:
@@ -137,6 +140,8 @@ def slice_verdict(a):
             'the pipeline cannot prove slice')
     if missing:
         note += ' | not checked (field missing): ' + ', '.join(missing)
+    if fm_unchecked:
+        note += ' | full Fox-Milnor not checked (%s)' % fm_unchecked
     return None, note + warn, []
 
 

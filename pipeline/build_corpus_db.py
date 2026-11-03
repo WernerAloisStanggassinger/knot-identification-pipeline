@@ -280,7 +280,7 @@ def load_pflicht(pfl: Path):
                 record["knotinfo_id"] = None
                 record["identity_corrected"] = ki["correction"].get("date")
             sn = cc.get("snappy_census_match", {})
-            if sn.get("status", "").startswith("matched") and sn.get("best_match"):
+            if sn.get("status", "").startswith("matched") and "vol-mismatch" not in sn.get("status", "") and sn.get("best_match"):
                 record["crosscheck_snappy"] = sn.get("best_match")
             fr = cc.get("fremlin_match", {})
             if fr.get("status", "").startswith("matched"):
@@ -341,7 +341,7 @@ def main():
     # gets a _sculpture_<stem> symlink back. In corpus_db the own_knots
     # record is to carry the cluster membership.
     sculpture_cluster_map: dict[str, str] = {}
-    nfk_root = ROOT / "erzeugte_knoten" / "new_found_knots"
+    nfk_root = Path(site_config.GENERATED_KNOTS_DIR) / "new_found_knots"
     if nfk_root.exists():
         for s in nfk_root.glob("S_*/_sculpture_*"):
             if s.is_symlink():
@@ -491,7 +491,9 @@ def main():
     # External theta DB (knots.sage c<=14, 59,937 knots) — Dror's QR phase 2 (Discovery #173).
     # Match every corpus knot against the external DB via theta_at_22_7__21_13;
     # direct + mirror (-theta) search.
-    ext_db_path = ROOT / "external_tools" / "theta_db" / "knots_sage_theta_db.json"
+    ext_db_path = Path(site_config.THETA_DB)
+    if not ext_db_path.exists():
+        print(f"[corpus_db] external theta DB not found ({ext_db_path}): theta-DB match skipped")
     if ext_db_path.exists():
         from fractions import Fraction
         try:

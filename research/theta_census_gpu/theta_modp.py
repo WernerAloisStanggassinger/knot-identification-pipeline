@@ -13,7 +13,7 @@ by p ⟹ GF(p) value = (ℚ value mod p). Unequal mod p ⟹ the ℚ values are p
 
 Two routes, same output:
   ref(Cs, phi, t1, t2, p)          — pure Python, Python int, one knot (reference)
-  gpu_batch(liste, t1, t2, p)      — cupy, all knots of equal crossing number n at once
+  gpu_batch(items, t1, t2, p)      — cupy, all knots of equal crossing number n at once
 Output per knot: dict(det1, det2, det3, theta_roh, e2) with e2 = 2e = -Σphi - Σs (an integer); theta_roh = θ_raw (key name kept);
   None fields if A(t_k) mod p is singular (then take another p — never silently continue computing).
 Env: gnottheorie_env (CuPy). Memory latch: cupy pool limit THETA_GPU_MEM_GB (default 3.5).

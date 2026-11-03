@@ -19,7 +19,7 @@ Background (Discovery #133, roadmap step 4 "Dror's QR-code method"):
   step 4b/web) match against a small Theta DB.
 
 Workflow (stage 8a):
-  1. Load the pflicht JSON, extract the PD code from mandatory_list.DIAGRAM.pd_code
+  1. Load the mandatory-invariants JSON, extract the PD code from mandatory_list.DIAGRAM.pd_code
      (or the top-level pd_list_str).
   2. Convert PD -> (Cs, phi) via pd_to_theta_input.pd_to_cs_phi.
   3. Call sage in a sage_stable subprocess, which loads Theta.sage and computes
@@ -55,7 +55,7 @@ THETA_DIR = site_config.THETA_DIR
 
 
 def _parse_pd(mandatory: dict) -> list:
-    """Extract the PD list as a list of 4-tuples (int) from a pflicht JSON.
+    """Extract the PD list as a list of 4-tuples (int) from a mandatory-invariants JSON.
 
     Searches in this order:
       1. pd_list_str (top level, e.g. '[(1, 5, 2, 4), (3, 1, 4, 6), ...]')
@@ -81,7 +81,7 @@ def _parse_pd(mandatory: dict) -> list:
                     out.append(parts)
             if out:
                 return out
-    raise ValueError("No PD code found in pflicht JSON (neither pd_list_str nor pd_code).")
+    raise ValueError("No PD code found in the mandatory-invariants JSON (neither pd_list_str nor pd_code).")
 
 
 SAGE_TEMPLATE = r"""

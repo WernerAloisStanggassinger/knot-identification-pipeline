@@ -48,6 +48,8 @@ AUTHORS = {
     'CONDA_BIN': _CONDA + '/bin/conda',
     'BLENDER': '/home/squeezy/.local/bin/blender',
     'SIXD_DIR': _K + '/sixd_machine',
+    'BACKUP_DIR': _K + '/_backups',
+    'THETA_DB': _K + '/external_tools/theta_db/knots_sage_theta_db.json',
 }
 
 def _which(prog):
@@ -78,6 +80,8 @@ PORTABLE = {
     'CONDA_BIN': _which('conda'),
     'BLENDER': _which('blender'),
     'SIXD_DIR': HERE,
+    'BACKUP_DIR': os.path.join(REPO, '_backups'),
+    'THETA_DB': os.path.join(REPO, 'data', 'theta_db', 'knots_sage_theta_db.json'),
 }
 assert set(AUTHORS) == set(PORTABLE)
 

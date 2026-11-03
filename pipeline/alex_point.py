@@ -103,6 +103,46 @@ def lagrange_mod_p(xs, ys, p: int):
     return coeff
 
 
+def _is_prime_u32(n):
+    """Deterministic Miller-Rabin for n < 3,215,031,751 (bases 2, 3, 5, 7)."""
+    if n < 2:
+        return False
+    for q in (2, 3, 5, 7):
+        if n % q == 0:
+            return n == q
+    d, s = n - 1, 0
+    while d % 2 == 0:
+        d //= 2; s += 1
+    for a in (2, 3, 5, 7):
+        x = pow(a, d, n)
+        if x in (1, n - 1):
+            continue
+        for _ in range(s - 1):
+            x = x * x % n
+            if x == n - 1:
+                break
+        else:
+            return False
+    return True
+
+
+def primes_for(n_crossings):
+    """Enough primes < 2^31 that the symmetric CRT lift is unique for every coefficient.
+    Bound: each row of the Alexander matrix holds entries whose coefficients have absolute sum <= 4
+    (1 - t, t, -1 and their variants), so the sum of |coefficients| of det A(t) is at most the
+    permanent of the row-sum matrix <= 4^n. The lift is unique when the product of primes exceeds 2 * 4^n."""
+    need = 2 * 4 ** max(n_crossings, 1)
+    ps, M = [], 1
+    for p in PRIMES:
+        ps.append(p); M *= p
+    q = min(PRIMES) - 2
+    while M <= need:
+        if _is_prime_u32(q):
+            ps.append(q); M *= q
+        q -= 2
+    return ps
+
+
 def crt_lift(residues, primes):
     """CRT + symmetric lift -> integer coefficient."""
     M = 1
@@ -213,11 +253,12 @@ def alexander_poly(pd, variant: int):
     deg = n + 2                      # safe bound for the degree
     xs = list(range(1, deg + 2))     # sample points
     per_prime = []
-    for p in PRIMES:
+    primes = primes_for(n)           # 4 primes up to n = 61 crossings, more beyond (bound 4^n, see primes_for)
+    for p in primes:
         ys = [alexander_at(pd, x, variant, p) for x in xs]
         per_prime.append(lagrange_mod_p([x % p for x in xs], ys, p))
     L = len(per_prime[0])
-    return [crt_lift([per_prime[i][k] for i in range(len(PRIMES))], PRIMES) for k in range(L)]
+    return [crt_lift([per_prime[i][k] for i in range(len(primes))], primes) for k in range(L)]
 
 
 # ------------------------------------------------------------ comparison

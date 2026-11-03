@@ -71,7 +71,7 @@ bzcat out15_jones.tsv.bz2 | awk -F'\t' '$4==$5{print $1}' | sort      # the knot
   (1,200 checks, frontier width up to 14), 0 mismatches (`logs/test_gpu_vs_ref_20261102.log`, `logs/test_gpu_vs_ref_19n_20261102.log`).
   Inside a census run there is no reference check.
 - **15-crossing census.** `jones_census.py` with 4 workers on `15n-hyp.csv.bz2` (the final code of this folder), 168,023 knots,
-  136 s, frontier width up to 14 (`logs/nh15final.log`, `logs/nh15final_stats.json`).
+  136 s (`logs/nh15final.log`, `logs/nh15final_stats.json`; the census run does not log frontier widths).
   - 167,525 knots have V(t) ≠ V(1/t), which makes them chiral if the kernel is correct.
   - 498 knots are symmetric at the point (`logs/15n_hyp_jones_symmetric_at_point.txt`). They include 15nh_008268, the only
     amphichiral prime knot with 15 crossings (OEIS A052401(15) = 1; certified amphichiral in our θ deposit, DOI 10.5281/zenodo.23856098).

@@ -38,7 +38,7 @@ Veen's program (not included, see `THIRD_PARTY.md`).
 ## Run
 ```
 python -I calibrate_theta_modp.py                                          # gnottheorie_env (CuPy)
-python -I theta_gpu_census.py 8 out_c15 /path/to/burton/raw/15*.csv.bz2     # gnottheorie_env; env THETA_GPU_MEM_GB (default 6)
+python -I theta_gpu_census.py 8 out_c15 /path/to/burton/raw/15*.csv.bz2     # gnottheorie_env; env THETA_GPU_MEM_GB (default 6 here; `theta_modp.py` used on its own defaults to 3.5)
 python -I theta_gpu_census.py --values 8 out_c15 /path/to/burton/raw/15*.csv.bz2   # same, plus out_c15_values.tsv.bz2
 python -I certify_zeros.py zeros.tsv /path/to/burton/raw cert.jsonl 3 '15n-hyp.csv.bz2'   # sage_stable
 ```

@@ -251,19 +251,20 @@ def tier0_flags(complete: dict) -> list[str]:
 
 
 def tier0_check_file(path) -> list[str]:
-    """Wrapper for build_corpus_db: path -> flags ([] = clean, also on
-    read error — structure duty is the schema validator's business)."""
+    """Wrapper for build_corpus_db: path -> flags ([] = clean). A record that cannot be read is
+    NOT clean: it gets one flag starting with "UNVERIFIED", so the caller rejects it (fail closed)."""
     try:
         return tier0_flags(record_names.load_record(path))
-    except (OSError, json.JSONDecodeError, ValueError):
-        return []
+    except (OSError, json.JSONDecodeError, ValueError) as e:
+        return [f"UNVERIFIED: record not readable ({type(e).__name__}: {e})"]
 
 
 # ───────────────────────── TIER 1 — stored PD vs algebra (regina) ────────────
 
 def tier1_flag(complete: dict):
     """det(stored PD after simplify) == ALGEBRA.det (Disc #252-Detektor).
-    Needs regina; None = clean or not checkable."""
+    Needs regina. None = clean, or nothing to compare (no stored PD or no determinant);
+    a string = flag; a string starting with "UNVERIFIED" = the check could not run (never counted as passed)."""
     # Regina runs in a process of its own (Werner 2026-08-29 „stell um" (EN: "switch it over")): Regina is
     # GPL v2+, a call is undisputedly free, an import in the same process is not.
     # Tier 0 thereby stays stdlib-pure — now even stricter than before.
@@ -279,6 +280,16 @@ def tier1_flag(complete: dict):
         r"[\[(]\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*[\])]", str(pd_s))]
     if not pd:
         return None
+    # The text must be a complete PD code: every number consumed by the 4-tuples, labels 1..2n, each exactly twice.
+    _ints = re.findall(r"-?\d+", str(pd_s))
+    _cnt = {}
+    for _t in pd:
+        for _x in _t:
+            _cnt[_x] = _cnt.get(_x, 0) + 1
+    if len(_ints) != 4 * len(pd) or sorted(_cnt) != list(range(1, 2 * len(pd) + 1)) \
+            or any(_v != 2 for _v in _cnt.values()):
+        return (f"UNVERIFIED: stored PD text is not a complete PD code ({len(pd)} 4-tuples parsed from "
+                f"{len(_ints)} numbers; labels must be 1..{2 * len(pd)}, each twice)")
     _r = _regina_einer({"pd": pd}, """
 L = regina.Link.fromPD([list(map(int, t)) for t in auf['pd']])
 L.simplify()
@@ -286,8 +297,8 @@ ax = L.alexander()
 deg = ax.degree()
 return {'det': abs(sum(int(str(ax[i])) * ((-1) ** i) for i in range(deg + 1)))}
 """)
-    if 'det' not in _r:
-        return None                      # bridge failed -> as "not checkable"
+    if 'det' not in _r:                  # bridge failed: not checkable is NOT passed
+        return f"UNVERIFIED: Tier 1 not checkable (regina bridge: {str(_r)[:200]})"
     pd_det = _r['det']
     if pd_det != det:
         return (f"det(stored PD) = {pd_det} != ALGEBRA.det {det} "
@@ -713,9 +724,15 @@ def cmd_scan(with_pd=False):
     for r in db["knots"] + db.get("validation_knots", []):
         p = Path(r["pflicht_path"])
         if not p.exists():
-            print(f"  ! {r.get('stem')}: pflicht_path missing: {p}")
+            print(f"UNVERIFIED  {r.get('stem')}  record file missing: {p}")
+            n_checked += 1; n_flagged += 1
             continue
-        d = record_names.load_record(p)
+        try:
+            d = record_names.load_record(p)
+        except (OSError, json.JSONDecodeError, ValueError) as e:
+            print(f"UNVERIFIED  {r.get('stem')}  record not readable ({type(e).__name__}: {e})")
+            n_checked += 1; n_flagged += 1
+            continue
         flags = tier0_flags(d)
         if with_pd:
             try:
@@ -723,15 +740,16 @@ def cmd_scan(with_pd=False):
                 if f1:
                     flags.append(f1)
             except Exception as e:
-                flags.append(f"Tier-1 not checkable: {type(e).__name__}: {e}")
+                flags.append(f"UNVERIFIED: Tier 1 not checkable: {type(e).__name__}: {e}")
         n_checked += 1
         if flags:
             n_flagged += 1
-            print(f"FLAG  {r.get('stem')}  [{r.get('cluster_folder')}]")
+            tag = "UNVERIFIED" if all(f.startswith("UNVERIFIED") for f in flags) else "FLAG"
+            print(f"{tag}  {r.get('stem')}  [{r.get('cluster_folder')}]")
             for f in flags:
                 print(f"      🚩 {f}")
     print(f"\nTier-0{'+ Tier-1' if with_pd else ''}: {n_checked} records checked, "
-          f"{n_flagged} flagged")
+          f"{n_flagged} flagged or unverified (exit 1 if any)")
     return 1 if n_flagged else 0
 
 

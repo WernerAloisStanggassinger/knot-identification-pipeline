@@ -122,7 +122,7 @@ def get_knotinfo_match(cdata: dict | None) -> str | None:
         return best
     # Snappy fallback (also classical after the pipeline_crosscheck.py patch)
     sm = cdata.get('snappy_census_match', {}) or {}
-    if sm.get('status', '').startswith('matched') and sm.get('best_match'):
+    if sm.get('status', '').startswith('matched') and 'vol-mismatch' not in sm.get('status', '') and sm.get('best_match'):
         return sm['best_match']
     return None
 

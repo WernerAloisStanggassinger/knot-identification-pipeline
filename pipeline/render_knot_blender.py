@@ -7,9 +7,9 @@
 """render_knot_blender.py — headless Blender render of a knot from a .fseries.
 
 Call (from outside Blender):
-    /home/squeezy/.local/bin/blender -b \\
-        /media/squeezy/kauffman_storage/freeze_manifest/render_template.blend \\
-        --python /media/squeezy/kauffman_storage/freeze_manifest/pipeline_scripts/render_knot_blender.py \\
+    <BLENDER from site_config.py> -b \\
+        <RENDER_TEMPLATE from site_config.py> \\
+        --python <this folder>/render_knot_blender.py \\
         -- --fseries /path/to/knot.fseries \\
            [--png /path/out.png] [--jpg /path/out.jpg] [--glb /path/out.glb] [--blend /path/out.blend] \\
            [--n-samples 1024] [--bevel-depth 0.003] [--padding 1.1] \\

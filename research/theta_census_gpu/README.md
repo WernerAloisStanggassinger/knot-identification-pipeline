@@ -57,21 +57,23 @@ knots: one row `name<TAB>crossings<TAB>θ` per knot, and `certify_zeros.py` take
   first fails at 15*, Zenodo, DOI 10.5281/zenodo.23856098.
 - `certify_zeros.py` on these three: 15nh_008268 amphichiral, 15nh_048139 and 15nh_048140 chiral, as in that deposit.
 
-## Diagrams with a Reidemeister-I kink are refused (3 November 2026)
-While preparing the next release we found that on diagrams with a Reidemeister-I kink (a PD crossing whose 4-tuple repeats a
-label) `pd_to_theta_input.py` + the θ kernel can give a wrong θ_raw. Test: 6_2 and K8n1, 40 random enlargements each by SnapPy's
-`backtrack()` (2 to 10 steps). Of the 80 diagrams, 60 had a kink, and 39 of those 60 gave a θ_raw different from the minimal diagram; the 20
-kink-free ones were all right. A kink is therefore not by itself the trigger, but every wrong value came from a diagram with one.
-The exact route (our conversion fed to the Sage program of Bar-Natan and van der Veen) also gives a wrong value on a kinked
-diagram, so the fault lies before the mod-p kernel. The crossing signs computed from the PD code agree with SnapPy's at all
-1,928 crossings checked (160 random enlargements of K8n1, 6_2, 4_1 and 7_4, the 40 of K8n1 being the diagrams of the θ test
-above; 288 crossings at kinks), so they are not the cause. On the kinked diagrams that give a wrong θ_raw, the Alexander polynomial computed
-from the converted crossing list is already wrong (Δ(1) = 0, where a knot has Δ(1) = ±1), so the fault lies in the crossing list
-`Cs` the conversion produces; we have not found it. Since then `pd_to_cs_phi` raises `ValueError` on a diagram with a kink, and
-`theta_gpu_census.py` reports the knot as a conversion error, which puts it among the flagged knots. The guard does not fire on
-Burton's census diagrams: they are minimal (at 15 crossings all 253,293 converted diagrams have 15 crossings), so the census
-results above stay as they were; they rest on the checks listed there. The test scripts for this paragraph are not part of the
-repository. Simplify a diagram before passing it.
+## Diagrams with a Reidemeister-I kink: a fault in our kernel, found and fixed (3 November 2026)
+On diagrams with a Reidemeister-I kink (a PD crossing whose 4-tuple repeats a label), `theta_modp.py` gave a wrong θ_raw: of 160
+enlargements of 6_2, K8n1, 4_1 and 7_4 by SnapPy's `backtrack()` (2 to 10 steps, seed 7), 99 were wrong. **Cause** (found by an
+outside reviewer on 3 November 2026 and reproduced by us the same day): `_A()` and the GPU `build()` *set* the three matrix entries
+of a crossing, `A[i][i+1]`, `A[i][j+1]`, `A[j][j+1]`, with `=` instead of *adding* them to the identity matrix as Bar-Natan and van
+der Veen's `Theta.m` does (`A[[{i,j},{i+1,j+1}]] += …`). Every half-strand is the incoming strand of exactly one crossing, so the
+only entry two terms can share is a diagonal one, and that happens exactly when i = j + 1 at a crossing, which only a kink produces;
+there the 1 of the identity was overwritten. All 99 wrong diagrams have such a crossing, none of the 61 others is wrong. Since
+3 November 2026 both functions add (`+=`); with that, all 160 diagrams give the θ_raw of the minimal diagram, on the CPU reference
+and on the GPU, and `calibrate_theta_modp.py` still gives 400/400 on both. The conversion `pd_to_theta_input.py` was right all
+along. (An earlier version of this paragraph blamed it: the Alexander polynomial we had computed from the crossing list as a check
+used the same assigning matrix.)
+**Published results are not affected:** a crossing with i = j + 1 needs a kink, and a minimal diagram has none. Checked directly:
+none of the 313,230 converted census diagrams up to 15 crossings and none of the 839 PD codes of the authors' corpus records has such
+a crossing (3 November 2026). `pd_to_cs_phi` still refuses a diagram with a kink (`ValueError`; `theta_gpu_census.py` reports it as
+a conversion error); the refusal is now a safety net for any kernel that still assigns. The test scripts for this paragraph are not
+part of the repository.
 
 ## How these files relate to the authors' originals
 All five scripts got the licence header of this repository (in `pd_to_theta_input.py` it replaces the deposit's header, which
@@ -86,7 +88,7 @@ three changed as follows in that release, and in nothing else:
 - `calibrate_theta_modp.py`: finds its own folder (`import os`, path of the reference file) instead of the parent folder; its
   messages and two variable names were translated; its counter-case line now also counts the knots with θ_raw ≠ 0 separately.
 
-Since 3 November 2026 two files differ in code as well: `pd_to_theta_input.py` has the kink guard described above (a check and a
+Since 3 November 2026 three files differ in code as well: `pd_to_theta_input.py` has the kink guard described above (a check and a
 `raise` at the start of `pd_to_cs_phi`, and a check in its self-test that a kinked PD is refused; the same in
-`pipeline/pd_to_theta_input.py`), and `theta_gpu_census.py` has the
-`--values` option (argument parsing and the writer of the values file). `theta_modp.py` is unchanged.
+`pipeline/pd_to_theta_input.py`), `theta_gpu_census.py` has the `--values` option (argument parsing and the writer of the values
+file), and `theta_modp.py` adds the matrix entries instead of setting them (`_A()` and the GPU `build()`, described above).

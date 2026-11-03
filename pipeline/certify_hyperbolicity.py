@@ -6,8 +6,8 @@ Certifies hyperbolicity of a corpus record with snappy verify_hyperbolicity()
 (interval arithmetic = proof, not numerics).
 
 MUST run in sage_stable — only there do snappy AND sage live together:
-  PATH=/home/squeezy/miniforge3/envs/sage_stable/bin:$PATH \
-  /home/squeezy/miniforge3/envs/sage_stable/bin/python certify_hyperbolicity.py <stem> [...]
+  PATH=<conda base>/envs/sage_stable/bin:$PATH \
+  <conda base>/envs/sage_stable/bin/python certify_hyperbolicity.py <stem> [...]
 
 Builds the manifold from the PD code OF THE RECORD (not from a table) —
 blind-test doctrine. The stored isosig serves only as counter-check.
@@ -22,6 +22,7 @@ MANDATORY ESCALATION (HOT_FOOTGUNS footgun 14 / Disc #538):
 """
 import json, sys, os, argparse
 import site_config
+import record_names  # reads records with German or English names
 
 CORPUS = '@PIPELINE_DIR@/corpus_db.json'.replace('@PIPELINE_DIR@', site_config.PIPELINE_DIR)
 
@@ -38,7 +39,7 @@ def hole_record(stem):
 def pd_from_record(rec):
     """Pull the PD list from the record file. Several fields, because the records
        grew historically — the first usable one wins, the origin is reported."""
-    d = json.load(open(rec['pflicht_path']))
+    d = record_names.load_record(rec['pflicht_path'])
     candidates = [
         ('pd_list_str', d.get('pd_list_str')),
         ('raw_subprocess_outputs.snappy.pd_input',
@@ -167,7 +168,7 @@ def one(stem, log=print):
 def self_check():
     """Does the checker bite? Known cases in BOTH directions."""
     import snappy
-    print("=== SELFTEST (without corpus, snappy only) ===")
+    print("=== SELFTEST (without corpus; SnapPy, run inside SageMath) ===")
     all_good = True
     for name, expected_ in [('4_1', True), ('m004', True), ('6_2', True),
                        ('3_1', False), ('5_1', False), ('8_19', False)]:

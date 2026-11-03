@@ -40,8 +40,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import numpy as np
 
 ROOT = site_config.ROOT
-CORPUS_DB = ROOT + "/freeze_manifest/pipeline_scripts/corpus_db.json"
-OUT_DIR = ROOT + "/sixd_machine/out"
+CORPUS_DB = site_config.PIPELINE_DIR + "/corpus_db.json"   # where build_corpus_db.py writes it, in both profiles
+OUT_DIR = site_config.SIXD_DIR + "/out"
 
 NGEO_MIN = 8192          # geometry grid lower bound
 NGEO_PER_H = 64          # points per harmonic (>> Nyquist 2H)

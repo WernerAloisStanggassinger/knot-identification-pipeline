@@ -28,6 +28,8 @@ Output: short balance per knot + optionally one JSON per CS hit.
 from __future__ import annotations
 import argparse
 import json
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import record_names  # reads records with German or English names
 import sys
 from pathlib import Path
 
@@ -216,8 +218,8 @@ def _knot_c_lookup(name):
 
 
 def parse_pflicht(pflicht_json: Path):
-    """Load Pflicht data relevant for the CS test."""
-    d = json.load(open(pflicht_json))['pflichtliste']
+    """Load mandatory-invariant data relevant for the CS test."""
+    d = record_names.load_record(pflicht_json)['pflichtliste']
     diag = d.get('DIAGRAMM', {}) or {}
     alg = d.get('ALGEBRA', {}) or {}
     hyp = d.get('HYPERBOLISCH', {}) or {}
@@ -237,7 +239,7 @@ def parse_pflicht(pflicht_json: Path):
 
 
 def parse_poly(s: str, var: sp.Symbol):
-    """Parse a polynomial string (Pflicht format) into a sympy expression.
+    """Parse a polynomial string (mandatory-list format) into a sympy expression.
 
     Pflicht format examples:
       Conway:  "1 + 6z^2 + 21z^4 + ..."  (no space between coeff and z)
@@ -550,7 +552,7 @@ def analyze(pflicht_json: Path, output_dir: Path | None = None,
     homfly_str = parse_pflicht(pflicht_json).get("homfly_str") if False else None
     # Hack: re-load HOMFLY directly
     try:
-        _d = json.load(open(pflicht_json))
+        _d = record_names.load_record(pflicht_json)
         homfly_str = _d.get('pflichtliste',{}).get('ALGEBRA',{}).get('homfly_polynomial')
     except Exception:
         pass

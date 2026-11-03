@@ -21,12 +21,12 @@
    "Identity (Disc #142/#557, anchor 1): knots-of-love = 3_1 # 3_1 # 3_1 # m3_1 # m3_1 # m3_1 (three right- and three left-handed trefoils = square knot three times; handedness corrected 2026-07-26, before that this said six times 3_1 -- det=3^6 and Alexander (t^2-t+1)^6 are chirality-blind, the proof stands three lines further down),",
    "Alexander (t^2-t+1)^6 bit-exact, det 729 = 3^6, genus 6, not hyperbolic (vol ~ 1.5e-5).",
    "HANDEDNESS (2026-07-23, Disc #557): Jones is multiplicative under connected sum AND",
-   "distinguishes mirror images. Factorisation against the trefoil from our own corpus",
+   "tells the trefoil from its mirror image (V(3_1) != V(m3_1); not every knot's Jones polynomial does). Factorisation against the trefoil from our own corpus",
    "(celtic-trefoil) gives V = V_R^3 * V_L^3 -- of all seven splittings a+b=6 EXACTLY",
    "THIS ONE fits. HOMFLY (stronger) independently gives the same 3+3. Additively confirmed:",
    "sigma = 0, tau = 0, s = 0; a sum of six +- contributions is zero only for 3+3.",
-   "CONSEQUENCE: with K = 3_1#3_1#3_1 the knot is K # m(K). The trefoil is invertible,",
-   "so m(K) is the concordance inverse of K, and K # m(K) is always a RIBBON KNOT.",
+   "CONSEQUENCE: with K = 3_1#3_1#3_1 the knot is K # m(K). The trefoil is invertible, hence so is K (a connected sum of invertible knots);",
+   "for invertible K, m(K) is the concordance inverse of K, and K # m(K) is a RIBBON KNOT (in general it is K # -m(K), mirror and reverse, that is ribbon).",
    "  => ribbon => slice => g_4 = 0 (smooth and topological).",
    "  => amphichiral, because m(K # m(K)) = m(K) # K = K # m(K) (connected sum is commutative).",
    "The stored is_amphicheiral=False came from snappy on a NON-hyperbolic knot",
@@ -36,7 +36,7 @@
   ],
   "receipted_on": "2026-07-23",
   "receipted_by": "Werner Alois Stanggassinger + Claude Code",
-  "source_public": "Own result: the knot is K # m(K) with K = 3₁#3₁#3₁ (handedness fixed by Jones/HOMFLY factorisation against our own trefoil). K # m(K) is always a ribbon knot ⇒ slice ⇒ g₄ = 0."
+  "source_public": "Own result: the knot is K # m(K) with K = 3₁#3₁#3₁ (handedness fixed by Jones/HOMFLY factorisation against our own trefoil). The trefoil is invertible, hence so is K, and for invertible K the knot K # m(K) is ribbon ⇒ slice ⇒ g₄ = 0."
  },
  "12a_1019": {
   "slice": true,
@@ -83,6 +83,7 @@
   "ribbon": true,
   "smooth_4_genus": 0,
   "topological_4_genus": 0,
+  "is_amphicheiral": true,
   "proof": [
    "IDENTITY COMPUTED BLIND: the record 'mirror' was determined from our own .fseries as 5_2 # m5_2 (crosscheck_knotinfo, distinct_knot_id), independently of everything here.",
    "STRUCTURAL ARGUMENT (no literature receipt needed): for INVERTIBLE K, K # m(K) is always a ribbon knot -- one folds the knotted band back onto itself at a plane, the fold IS the ribbon disc. For invertible K, m(K) is the concordance inverse of K, so K # m(K) represents the zero element.",
@@ -90,7 +91,8 @@
    "HANDEDNESS VIA THE CHIRALITY-SENSITIVE QUANTITY (lesson from Disc #557 / knots-of-love: det and Alexander are chirality-blind and must NOT carry the handedness): sigma is additive under connected sum. Computed (snappy+sage, Singular on PATH): sigma(5_2) = -2, sigma(m5_2) = +2. Hence sigma(5_2 # m5_2) = 0 = our record, whereas same-handed sigma(5_2 # 5_2) = -4 -- EXCLUDED. The mirror checker was calibrated beforehand on the trefoil (sigma(3_1)=+2, sigma(m3_1)=-2, in the naming of snappy/Rolfsen, where 3_1 is the left-handed trefoil; KnotInfo names the right-handed trefoil 3_1 (braid [1,1,1], sigma -2), so both values are true in their own table, measured 23.10.2026); a first attempt had silently measured WRONG because snappy .mirror() returns a NEW object instead of mirroring in place -- the calibration caught exactly that.",
    "NUMBER CROSS-CHECKS, all computed independently and all passed: det(5_2)^2 = 7^2 = 49 = our record. Alexander(5_2)^2 = (2t^2-3t+2)^2 = 4t^4-12t^3+17t^2-12t+4 -- BIT-EXACTLY our stored '4 x^4 - 12 x^3 + 17 x^2 - 12 x + 4' (only regina's x instead of t notation, footgun 15). Genus 2 = 2 * genus(5_2) = 2*1, consistent.",
    "CONSEQUENCE: ribbon => slice => g_4 = 0, smooth AND topological. All necessary conditions were satisfied anyway (tau=s=sigma=Arf=0, det=49=7^2) -- the argument explains WHY.",
-   "LIMIT: this is a STRUCTURAL argument from the construction, not a band presentation we built and checked explicitly. It is therefore better receipted than the Lamm cases (no outside receipt needed), but it does not replace the constructive branch."
+   "LIMIT: this is a STRUCTURAL argument from the construction, not a band presentation we built and checked explicitly. It is therefore better receipted than the Lamm cases (no outside receipt needed), but it does not replace the constructive branch.",
+   "AMPHICHIRAL, because m(K # m(K)) = m(K) # K = K # m(K) (connected sum is commutative) -- the same argument as for knots-of-love."
   ],
   "source_public": "Own result: the knot is K # m(K) with K = 5₂. We computed that 5₂ is invertible (SnapPy symmetry group Z/2+Z/2, full group), so m(5₂) is its concordance inverse and K # m(K) is a ribbon knot ⇒ slice ⇒ g₄ = 0. Handedness is fixed by the signature, which is chirality-sensitive: σ(5₂) = −2 and σ(m5₂) = +2 sum to 0, matching the record, whereas two same-handed summands would give −4.",
   "receipted_on": "2026-08-19",

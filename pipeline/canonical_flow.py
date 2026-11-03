@@ -137,9 +137,9 @@ import numpy as np
 from sixd_scan import parse_fseries, detect_period_pi, eval_derivatives
 
 ROOT = site_config.ROOT
-CORPUS_DB = ROOT + "/freeze_manifest/pipeline_scripts/corpus_db.json"
-OUT_DIR = ROOT + "/sixd_machine/out2"
-CURVE_DIR = ROOT + "/sixd_machine/canonical_curves"
+CORPUS_DB = site_config.PIPELINE_DIR + "/corpus_db.json"   # where build_corpus_db.py writes it, in both profiles
+OUT_DIR = site_config.SIXD_DIR + "/out2"
+CURVE_DIR = site_config.SIXD_DIR + "/canonical_curves"
 
 N_BEADS = 512
 N_BEADS_DENSE = 1024      # H > 100

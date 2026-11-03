@@ -29,6 +29,7 @@ Output: pipeline_scripts/corpus_db.json
 from __future__ import annotations
 import json
 import site_config
+import record_names  # reads records with German or English names
 import re
 import sys
 from pathlib import Path
@@ -41,6 +42,11 @@ CORPUS_ROOTS = [
     "entwicklung_automation",
     "Claude_piplineentwicklung_und_validierung",
 ]
+# The released pipeline writes its knot folders to GENERATED_KNOTS_DIR; scan it too when it is not one of the folders above
+# (with KNOT_PIPELINE_PROFILE=authors it is ROOT/erzeugte_knoten, so nothing is added).
+_gen = Path(site_config.GENERATED_KNOTS_DIR).resolve()
+if not any(_gen == (ROOT / _r).resolve() or (ROOT / _r).resolve() in _gen.parents for _r in CORPUS_ROOTS):
+    CORPUS_ROOTS.append(str(_gen))
 OUT_PATH = Path(__file__).resolve().parent / "corpus_db.json"
 
 
@@ -50,6 +56,7 @@ def _category(path: Path) -> str:
     if "erzeugte_knoten" in s: return "machine"
     if "entwicklung_automation" in s: return "validation"
     if "piplineentwicklung_und_validierung" in s: return "validation-legacy"
+    if s.startswith(str(_gen) + "/"): return "machine"   # the released pipeline's output folder (GENERATED_KNOTS_DIR)
     return "?"
 
 
@@ -129,7 +136,7 @@ def _audit_isosig(d):
 def load_pflicht(pfl: Path):
     """Load mandatory-complete + associated theta/crosscheck files."""
     try:
-        d = json.load(open(pfl))
+        d = record_names.load_record(pfl)
     except Exception as e:
         return None
     pflichtliste = d.get("pflichtliste", {})
@@ -139,7 +146,7 @@ def load_pflicht(pfl: Path):
 
     folder = pfl.parent
     folder_name = folder.name
-    stem = re.sub(r"_pflicht_invarianten.*_complete\.json$", "", pfl.name)
+    stem = re.sub(r"_(?:pflicht_invarianten|mandatory_invariants).*_complete\.json$", "", pfl.name)
 
     # Theta data alongside
     theta_sym = folder / f"{stem}_theta.json"
@@ -348,15 +355,15 @@ def main():
     # wins, the short-name sibling is discarded.
     def _knot_stem(name: str) -> str:
         # "<knot>_pflicht_invarianten_complete.json" -> "<knot>"
-        s = name.replace("_pflicht_invarianten_complete.json", "")
-        return s.replace("_pflicht_invarianten", "")
+        s = name.replace("_pflicht_invarianten_complete.json", "").replace("_mandatory_invariants_complete.json", "")
+        return s.replace("_pflicht_invarianten", "").replace("_mandatory_invariants", "")
 
     for root in CORPUS_ROOTS:
         root_path = ROOT / root
         if not root_path.exists(): continue
         # Collect per folder
         by_folder: dict[Path, list[Path]] = {}
-        for pfl in root_path.rglob("*_pflicht_invarianten*_complete.json"):
+        for pfl in record_names.iter_records(root_path):
             if any(p.startswith("_sculpture_") for p in pfl.parts):
                 continue  # sculpture symlink reference, original lies in own_knots/ and is indexed there
             # Every "_"-prefixed DIRECTORY part -> skip: trash/backup/
@@ -576,7 +583,7 @@ def main():
             r["vol_valid"] = vol_valid; n_vv += 1
             if proof:
                 r["hyperbolicity_proof"] = proof
-    print("[corpus_db] Zertifikate: c_exact=%d, vol_valid=%d" % (n_cx, n_vv))
+    print("[corpus_db] Certificates: c_exact=%d, vol_valid=%d" % (n_cx, n_vv))
 
     # Stats — meta ONLY from the genuine corpus
     from collections import Counter
@@ -637,4 +644,9 @@ def main():
 
 
 if __name__ == "__main__":
+    if any(a in ("-h", "--help") for a in sys.argv[1:]):
+        print(__doc__)
+        sys.exit(0)
+    if len(sys.argv) > 1:
+        sys.exit("build_corpus_db.py takes no arguments (got: %s); see --help" % " ".join(sys.argv[1:]))
     main()

@@ -5,9 +5,22 @@ geometry, given as a Fourier series (`.fseries`). It was built for the stainless
 **Werner Alois Stanggassinger** (sculptor, Wasserburg am Inn, Bavaria) and grew into the tool behind the knot corpus on
 https://knot-structures.stainlesssteel4u.de/ (rotatable 3D views, photos and the invariants of every piece).
 
-Stated as a fact: the code was written by Claude Code (Anthropic), which orchestrates the computations; the sculptures, the
-geometries and the questions are Werner Alois Stanggassinger's, and so is the machine it runs on. The mathematics comes from the
-programs it calls (SnapPy, spherogram, SageMath, Regina, KnotJob, Theta), not from a language model.
+Werner Alois Stanggassinger in collaboration with Claude Code (Anthropic): the choice of problem, the direction of the work and the
+computing hardware are due to the author; the code was written by Claude Code, which orchestrates the computations, working with the
+author. The collaboration is stated as a fact, not a disclaimer.
+Every invariant is computed by a program, never by a language model: by established programs (among them SnapPy, spherogram,
+SageMath, Regina, KnotJob, knot_floer_homology, knotpy, pyknotid and Bar-Natan–van der Veen's Theta) or by code of ours in this
+repository. Our own code that computes something itself, rather than passing the work to one of those programs, includes: the
+diagram from the curve (stages 1–3, and `polygon_resolve.py`); fallback routes for invariants (`alex_point.py`, the HOMFLY route
+`hecke_homfly_fast.py` / `homfly_modular.py` / `homfly_interpolation.py`, checked by `homfly_calibration.py` and
+`homfly_crosscheck.py`); the conversion of a PD code into the input of the Theta program (`pd_to_theta_input.py`); the bounds of
+stage 7 (braid index from the HOMFLY polynomial by Morton–Franks–Williams, bridge number); the verdict modules `fox_milnor.py`,
+`slice_verdict.py`, `four_genus_verdict.py`; the table-free crossing-number bounds `span_lower_bound.py`, `yamada_c_bound.py`,
+`turaev_bound.py` (from invariants that the established programs computed); the corpus checks (`frankenstein_gate.py`,
+`corpus_consistency_gate.py`, `alexander_normal_form.py`, `theta_mirror.py`, `identify_torus_knot.py`, `composite_knot_check.py`);
+the 6D geometry (`sixd_*.py`, `canonical_flow.py`, `clearance_*.py`); and the tools in `research/` (each folder's README says which
+parts are ours, why we built them, and how they were checked). `certify_hyperbolicity.py` is not on this list: the certificate is
+SnapPy's `verify_hyperbolicity()`; our part is the order in which it is tried on different triangulations.
 
 ## What it does
 `pipeline/pipeline_run.sh`, run inside a folder that holds one `.fseries`, goes through these stages:
@@ -35,13 +48,30 @@ validity filter and `sixd_crosscheck.py` compares fingerprints with the algebrai
 separates most distinct knots but is blind to mutants, so the invariants decide. The flow takes minutes per knot on a GPU.
 
 **Corpus layer** (what turns many identified knots into the knot corpus). `build_corpus_db.py` collects every record into
-`corpus_db.json`, refusing records that fail `validate_complete_json.py` (schema) or `frankenstein_gate.py` (diagram, curve and
-algebra must belong to the same knot); `corpus_consistency_gate.py` checks the corpus against unconditional theorems.
+`corpus_db.json`, refusing records that fail `validate_complete_json.py` (schema) or tier 0 of `frankenstein_gate.py`
+(consistency of the stored diagram data, the algebra and the knot Floer data with each other, for example |Δ(−1)| = det and
+deg Δ ≤ 2g; a check whose fields are missing abstains). The gate's tier 1 (the
+determinant of the stored PD code, recomputed by Regina, against the stored determinant) and tier 2 (same knot from the curve) run
+only when called separately; tier 1 counts a record as passed when its Regina subprocess fails; `corpus_consistency_gate.py` checks the corpus against unconditional theorems.
 `label_distinct_knots.py` decides which records are the same knot and labels each distinct knot (known, novel hyperbolic,
 non-hyperbolic, unresolved), using the table-free lower bounds for the crossing number in `span_lower_bound.py`,
 `yamada_c_bound.py` and `turaev_bound.py`; `certify_hyperbolicity.py` proves hyperbolicity with interval arithmetic.
-The JSON field names these modules read and write stay German (for example `pflicht_path`, `n_realisierungen`), because they
-are the field names of the published corpus files.
+The JSON field names these modules write stay German (for example `pflicht_path`, `n_realisierungen`), because they are the field
+names of the published corpus files. The records they read come in two forms: the authors' records carry German file and field
+names (`<knot>_pflicht_invarianten_complete.json`, `pflichtliste`, `DIAGRAMM`, `HYPERBOLISCH`, …), the pipeline in this release
+writes English ones (`<knot>_mandatory_invariants_complete.json`, `mandatory_list`, `DIAGRAM`, `HYPERBOLIC`, …). Since 3 November
+2026 `pipeline/record_names.py` lets the corpus layer read both: it finds both file names, and it maps the keys of an English record
+back to the German names with `tools/translation_table.json` in reverse (string values stay as written); a German record is passed on
+unchanged. (Until then the released
+corpus layer could not read the released pipeline's output.) Checked on 3 November 2026: on the authors' 843 records the corpus
+layer with this change writes the same `corpus_db.json` as without it (only the build timestamp differs); the same 843 records
+translated into the English names with `tools/translation_table.json` give the same `corpus_db.json` again (same records, paths and
+file names aside; the order of the records follows the file system); and on the record the released pipeline wrote for
+`examples/trefoil.fseries`, `build_corpus_db.py` finds and reads it (c = 3, det = 3, KnotInfo match 3_1), `validate_complete_json.py`
+passes it, tiers 0 and 1 of `frankenstein_gate.py` raise no flag (tier 1 recomputed det = 3), `identify_torus_knot.py` gives T(2,3)
+and `composite_knot_check.py` runs through.
+Three English names also occur untranslated in the authors' records (`proof`, `route`, `exact`) and are not mapped back.
+`frankenstein_gate.py --guard-new` (tier 2) needs a module of the authors' that is not in this repository; tiers 0 and 1 run as released.
 
 **Blind test.** During identification no knot table is consulted: `pipeline_seal.py` blocks the table lookups of SnapPy,
 spherogram and Sage. Tables are read only in stage 8, to compare.
@@ -67,6 +97,8 @@ it instead of using an established program, and how it was checked.
   the values modulo p prove A ≠ B and A ≠ mirror B as oriented knots (given a correct kernel and diagram conversion).
 - `research/whitehead_double/` — HOMFLY polynomial of the untwisted Whitehead doubles of a knot (both clasps) and a comparison of
   two knots by it that ignores mirror images; different values prove different knots up to mirror image, equal values prove nothing.
+- `research/torsion_polynomial/` — Dunfield–Friedl–Jackson Conjecture 1.7: the hyperbolic torsion polynomial (SnapPy) against genus
+  and fiberedness (knot Floer homology) for every hyperbolic knot of a census file, with precision escalation and calibration.
 
 ## Install
 - An NVIDIA GPU with CUDA (scanner and tracker use CuPy).
@@ -88,11 +120,56 @@ bash /path/to/knot-identification-pipeline/pipeline/pipeline_run.sh
 The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summary.md`.
 
 ## How this release relates to the code that produced the results
-- Every file in `pipeline/` was translated from German in two steps. 22.10.2026: comments, docstrings and messages. 23.10.2026:
-  also identifiers, module and file names, command-line options, environment variables, JSON field names, category labels and
-  the remaining texts. `tools/map_equivalence.py` proves for every file that the translated version is the program proven
-  equivalent to the originals (git tag `proven-equivalent-20261027`, see the next points) up to one consistent renaming,
-  and writes that renaming to `tools/translation_table.json` (identifiers, keys, file renames, free texts).
+- **Limits found by outside reviews and fixed or stated on 3 November 2026.**
+  - *Locations.* Several modules built paths from `ROOT` and the authors' folder layout instead of the names in `site_config.py`;
+    with `KNOT_PIPELINE_PROFILE=authors` that coincides, with the default profile `portable` it did not (the corpus database, the
+    files next to it that `label_distinct_knots.py` reads, the 6D output folders, and the folder the pipeline writes its knots to).
+    Now `sixd_scan.py`, `canonical_flow.py` and `label_distinct_knots.py` use `PIPELINE_DIR` and `SIXD_DIR`, and
+    `build_corpus_db.py` and `validate_complete_json.py` also scan `GENERATED_KNOTS_DIR` and count its records as machine records.
+    Under `authors` every path is the same as before. Checked: with `portable`, the trefoil record written by the released pipeline
+    into `output/` goes through `build_corpus_db.py` (c = 3, det = 3, torus knot T(2,3), KnotInfo match 3_1) and
+    `label_distinct_knots.py` (1 record, 1 distinct knot). `tools/path_equivalence.py` checks that `ROOT` was replaced cleanly; it does
+    not check that both profiles point to the same place.
+  - *Certificates in the corpus.* `build_corpus_db.py` takes `c_exact`, `vol_valid` and `hyperbolicity_proof` from blocks
+    `_CROSSING_EXACTNESS_*` and `_HYPERBOLICITY_CERT_*` inside a record. The authors write these blocks with a tool of theirs that is
+    **not** in this repository. `certify_hyperbolicity.py` writes its results to a list of its own (`--out`), which no module reads.
+    On records made only with this repository these three fields stay empty.
+  - *No-match verdict and stage reports* (found in a trefoil run of v1.7.0 without SageMath). When the signature was missing,
+    `pipeline_crosscheck.py` skipped the KnotInfo lookup and still ended with "novelty candidate", for the trefoil as well; for
+    c ≤ 13 there was no hyperbolicity check on that path either. Now a skipped lookup or a missing volume gives "undecided", a
+    non-hyperbolic knot (volume ≤ 0.5) "known (non-hyperbolic family)", and a hyperbolic knot without a match only "no DB match
+    (hyperbolic)": whether it is a novelty candidate is decided by `label_distinct_knots.py` against the enumeration limits, as
+    before. No corpus label comes from this field. `pipeline_run.sh` printed "done" for stages 8a and 8b even after they had failed;
+    now it does so only when the script succeeded and its JSON file exists, counts the failed stages and names their number in
+    the final line (the exit code stays 0: stages 8a and 8b are not fatal). Both fixes were made in the authors' copy as well.
+    Only in this release: stage 8a says plainly that `Theta_numeric.sage` is missing (it is not distributed; `THETA_SYMBOLIC=1`
+    uses `Theta.sage`); the summary leaves `chern_simons` empty for a non-hyperbolic knot (the record keeps SnapPy's raw number);
+    three remaining German messages are English ("Consistency", "Certificates", and "determined" in
+    `unknotting_number_assignment_basis`); `build_corpus_db.py` answers `--help` instead of running; knotpy, which is not on PyPI,
+    is pinned to its GitHub commit in `environments/base.txt`.
+  - *Names left German.* The options `--stand` and `--datum` of `unknot_label.py` and `--datum` of `homfly_interpolation.py` were not
+    translated. `tools/map_equivalence.py` checks that a renaming is the same everywhere; it does not check that no German name is left.
+  - *Self-tests.* `label_distinct_knots.py --self-check` needs a full corpus and fails without one; `certify_hyperbolicity.py
+    --self-check` needs SnapPy inside SageMath; `scan_triage.py` needs pyarrow, `unknot_second_opinion.py` pyknotid.
+- The 43 original modules of `pipeline/` (the stages above; the 6D modules, the corpus layer and `worldline_tracker.py` came later,
+  see below) were translated from German in two steps. 22.10.2026: comments, docstrings and messages. 23.10.2026:
+  also identifiers, module and file names, command-line options (three were missed, see above), environment variables, JSON field names, category labels and
+  the remaining texts. `tools/map_equivalence.py` proved, on 23.10. and again on 27.10.2026, for every Python file of the 43 that the
+  translated version is the program proven equivalent to the originals (git tag `proven-equivalent-20261027`, see the next points)
+  up to one consistent renaming, and wrote that renaming to `tools/translation_table.json` (identifiers, keys, file renames, free
+  texts). For `.sh` and `.json` files it only checks that no renamed name survives in them; `pipeline_run.sh` is not compared
+  structurally. **On today's tree the gate is red against that tag**, and it is meant to be read with the changes since:
+  `python3 -I tools/map_equivalence.py proven-equivalent-20261027 --rename pipeline/pflicht_invarianten.py=pipeline/mandatory_invariants.py …`
+  (the seven renames listed under `files` in `tools/translation_table.json`; without them it also reports those seven files as
+  missing) reports 34 problems on the tree of this release (3 November 2026): 25 are the German keys that the corpus layer keeps on
+  purpose (`pflichtliste`, `DIAGRAMM`, `HYPERBOLISCH`, file-name patterns, and `pflicht_json` / `source_pflicht_json` in the output of
+  `identify_torus_knot.py`), two of them in `record_names.py`, which maps English records onto exactly these names; 3 more German
+  keys inside the corpus layer (`quelle` in `label_distinct_knots.py`, `fehler` twice in `regina_bridge.py`, which only the corpus
+  layer reads); and 6 are the two program changes after the tag (`pd_to_theta_input.py`, kink guard, 3.11.; `site_config.py`, the
+  name `SIXD_DIR`, 29.10.). The gate has been red against this tag since the corpus layer came in (release v1.1.0). The files added
+  on 29.10. have their own proofs, described below. The deliberate counter-cases the gates were tested with (25 and 22,
+  named in the commit messages) are not in this repository. Since 3 November 2026 the gate refuses an unknown or empty revision instead of reporting it as
+  equivalent and writing an empty translation table.
   The originals were proven equivalent on 22.10.2026 (tag `proven-equivalent`). On 27.10.2026 every one of the 43 originals was
   compared again with that state: 42 differ only in texts (their comments and messages were translated in place on 25.10.), one
   changed as a program: `build_curve_json.py` labels each curve with its licence (sculpture curves all rights reserved, machine-knot
@@ -104,19 +181,36 @@ The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summ
   wrong θ values (details in `research/theta_census_gpu/README.md`). Its self-test also checks the refusal. Otherwise the module is unchanged: it is EQUIVALENT
   (`tools/strict_equivalence.py`) to the authors' copy, which carries the same guard. `theta_crosscheck.py` and
   `theta_numeric_crosscheck.py` call it without catching the error, so on a kinked diagram they now stop with that message
-  instead of possibly writing a wrong θ. The pipeline's diagrams are simplified first: none of the 834 PD diagrams of the 843 records of
-  the authors' corpus has a kink (checked 3 November 2026; the other 9 records are unknots without a diagram).
+  instead of possibly writing a wrong θ. The cause was found the same day by an outside reviewer: the θ kernels set the matrix entries
+  of a crossing with `=` instead of adding them (`+=`, as `Theta.m` does), which goes wrong exactly at a crossing with i = j + 1, i.e.
+  at a kink; the conversion itself is right (details and tests in `research/theta_census_gpu/README.md`, where `theta_modp.py` is
+  fixed). The authors' numerical Sage kernel for stage 8a (`Theta_numeric.sage`, not in this repository) assigns in the same way,
+  so the guard stays. The pipeline's diagrams are simplified first: none of the 834 PD diagrams of the 843 records of
+  the authors' corpus has a kink (checked 3 November 2026; the other 9 records are unknots without a diagram). The research tools
+  that use the same conversion on Burton's census diagrams are covered in `research/theta_census_gpu/README.md`: census diagrams are
+  minimal, so they carry no kink.
 - **Results the authors published before this release (knot corpus, website downloads, Zenodo deposits) use the German
   names.** `tools/translation_table.json` maps every name this code reads or writes, for example `pflichtliste` → `mandatory_list`,
   `pflicht_invarianten_complete.json` → `mandatory_invariants_complete.json`, `beweis` → `proof`, `grund` → `cause`. In
   `pipeline/proof_register.json` additionally `belegt_von` → `receipted_by` and `_doku` → `_doc`.
+- Comments refer to the authors' internal notes (for example "Discovery #N", the authors' error log, notes and correspondence
+  folders); these notes are not public. Where a comment states a result, the code or a test in this repository is what supports it.
 - A few names stay German on purpose because they name things outside the code: the authors' folder names
   (`erzeugte_knoten/`, `bekannt/`), the material `Edelstahl` in the Blender template, and historical file names.
 - All absolute paths moved into `pipeline/site_config.py`. With `KNOT_PIPELINE_PROFILE=authors` every location is the authors' own.
-- `tools/strict_equivalence.py` and `tools/path_equivalence.py` prove, file by file, that each released pipeline module is the same program
-  as the one used in the authors' runs (abstract syntax trees compared after the allowed changes; both gates counter-tested with
-  deliberate changes that they must detect). The originals themselves are not public; the proof was run by the authors on
-  22.10.2026 for all 43 modules.
+- `tools/strict_equivalence.py` and `tools/path_equivalence.py` prove, file by file, that each of the 43 released modules is the same
+  program as the authors' copy at the time of the proof (abstract syntax trees compared after the allowed changes; both gates
+  counter-tested with deliberate changes that they must detect). The originals themselves are not public; the proof was run by the
+  authors on 22.10.2026 for all 43 modules. Later program changes, each made in the authors' copy as well:
+  `build_curve_json.py` (27.10.2026, licence label of each curve) and `pd_to_theta_input.py` (3.11.2026, kink guard), both described
+  above; the stage driver `pipeline_run.sh` (23.10.2026; a shell script, outside the Python proof): under `set -e` the stage-2 tracker
+  ladder (minimum cell count 2000, 1000, …, 100) stopped at the first failing step instead of trying the next, so from 24.08. to
+  23.10.2026 a run whose tracker failed at 2000 ended there; it changes which runs finish, not the values of a run that finishes.
+  Only in this release, not in the authors' copy: the corpus layer reads English records since 3.11.2026 (`record_names.py`, above),
+  and `theta_crosscheck.py` writes its note "pathological Cs order" in English (e5218b0). Results the authors computed before such
+  a change came from the code before it. The kink guard only adds a refusal: on a diagram it accepts, the conversion is unchanged.
+  `pipeline_run.sh`, `mem_watchdog.sh` and `proof_register.json` were translated in the same steps as the 43 modules; they are not
+  Python, so the equivalence gates do not cover them.
 - The eight 6D modules were added on 29.10.2026 the same way: comments, docstrings and messages translated and paths moved into
   `site_config.py` (`SIXD_DIR`), proven EQUIVALENT to the originals by `strict_equivalence.py` and `path_equivalence.py` (tag
   `proven-equivalent-sixd-20261029`); then identifiers, one command-line option and the remaining texts translated, proven by

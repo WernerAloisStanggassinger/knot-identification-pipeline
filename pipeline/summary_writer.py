@@ -104,7 +104,11 @@ def main():
                                    f"{alg.get('khovanov_homology', {}).get('thin')}"
                                    if isinstance(alg.get('khovanov_homology'), dict) else None),
         ('hyperbolic_volume',      hyp.get('hyperbolic_volume')),
-        ('chern_simons',           hyp.get('chern_simons')),
+        # Chern-Simons is a hyperbolic invariant; for vol <= 0.5 (torus / satellite /
+        # connected sum) SnapPy's number comes from a degenerate solution and means nothing.
+        ('chern_simons',           hyp.get('chern_simons')
+                                   if isinstance(hyp.get('hyperbolic_volume'), (int, float))
+                                   and hyp.get('hyperbolic_volume') > 0.5 else None),
         ('symmetry_group',         f"{hyp.get('symmetry_group')} (order {hyp.get('symmetry_group_order')})"),
         ('amphichiral / invertible', f"{hyp.get('is_amphicheiral')} / {hyp.get('is_invertible_knot')}"),
         ('homology',               hyp.get('homology')),

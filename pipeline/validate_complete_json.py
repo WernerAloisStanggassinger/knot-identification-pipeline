@@ -30,6 +30,7 @@ existence + type, NOT completeness.
 from __future__ import annotations
 import argparse
 import site_config
+import record_names  # reads records with German or English names
 import json
 import sys
 from pathlib import Path
@@ -42,6 +43,11 @@ CORPUS_ROOTS = [
     "entwicklung_automation",
     "Claude_piplineentwicklung_und_validierung",
 ]
+# The released pipeline writes its knot folders to GENERATED_KNOTS_DIR; scan it too when it is not one of the folders above
+# (with KNOT_PIPELINE_PROFILE=authors it is ROOT/erzeugte_knoten, so nothing is added).
+_gen = Path(site_config.GENERATED_KNOTS_DIR).resolve()
+if not any(_gen == (ROOT / _r).resolve() or (ROOT / _r).resolve() in _gen.parents for _r in CORPUS_ROOTS):
+    CORPUS_ROOTS.append(str(_gen))
 
 # type spec: (field_path_tuple, allowed_types, optional)
 # allowed_types: tuple of python types; None means "may be null"
@@ -99,7 +105,7 @@ def validate_file(path: Path) -> dict:
     """
     result = {"ok": True, "errors": [], "warnings": [], "path": str(path)}
     try:
-        d = json.load(open(path))
+        d = record_names.load_record(path)
     except Exception as e:
         result["ok"] = False
         result["errors"].append(f"JSON parse error: {type(e).__name__}: {e}")
@@ -133,7 +139,7 @@ def scan_corpus() -> list[Path]:
         rp = ROOT / root
         if not rp.exists():
             continue
-        for p in rp.rglob("*_pflicht_invarianten*_complete.json"):
+        for p in record_names.iter_records(rp):
             if any(part.startswith("_sculpture_") for part in p.parts):
                 continue  # sculpture symlink
             paths.append(p)

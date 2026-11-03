@@ -8,4 +8,4 @@ authors:
     affiliation: "Independent (sculptor), Wasserburg am Inn, Germany"
 license: "GPL-3.0-or-later"
 url: "https://knot-structures.stainlesssteel4u.de/"
-notes: "Code written by Claude Code (Anthropic), which orchestrates the computations, in collaboration with Werner Alois Stanggassinger."
+notes: "Werner Alois Stanggassinger in collaboration with Claude Code (Anthropic): the choice of problem, the direction of the work and the computing hardware are due to the author; the code was written by Claude Code, which orchestrates the computations, working with the author."

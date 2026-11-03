@@ -18,7 +18,7 @@ an 8_11 test must give the same result as later K=18 tests.
 Activation at the start of every pipeline script:
 
     import sys
-    sys.path.insert(0, '/media/squeezy/kauffman_storage/freeze_manifest')
+    sys.path.insert(0, '<folder of pipeline_seal.py>')
     from pipeline_seal import seal_all
     seal_all()
 

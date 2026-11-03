@@ -57,6 +57,7 @@ CLI:
 from __future__ import annotations
 import argparse
 import site_config
+import record_names  # reads records with German or English names
 import hashlib
 import json
 import re
@@ -253,7 +254,7 @@ def tier0_check_file(path) -> list[str]:
     """Wrapper for build_corpus_db: path -> flags ([] = clean, also on
     read error — structure duty is the schema validator's business)."""
     try:
-        return tier0_flags(json.load(open(path)))
+        return tier0_flags(record_names.load_record(path))
     except (OSError, json.JSONDecodeError, ValueError):
         return []
 
@@ -714,7 +715,7 @@ def cmd_scan(with_pd=False):
         if not p.exists():
             print(f"  ! {r.get('stem')}: pflicht_path missing: {p}")
             continue
-        d = json.load(open(p))
+        d = record_names.load_record(p)
         flags = tier0_flags(d)
         if with_pd:
             try:

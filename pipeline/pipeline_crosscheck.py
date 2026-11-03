@@ -785,6 +785,34 @@ def snappy_census_match(inv: dict, env_name: str = "snappy_env", tol: float = 1e
     return out
 
 
+
+def _no_match_verdict(inv, ki, sc, prefix):
+    """Verdict when no database matched.
+
+    A missing input never turns into "possibly new": if the KnotInfo lookup was
+    skipped (e.g. signature missing) or the volume is unknown, the verdict is
+    "undecided". A non-hyperbolic knot (vol <= 0.5) is a torus knot, satellite or
+    connected sum — a known family, never a novelty. Even a hyperbolic knot with
+    no match is only "no DB match" here: whether it counts as a novelty candidate
+    is decided by label_distinct_knots.py against the enumeration limits
+    (all prime knots to c = 20, alternating ones to c = 24), not by this script.
+    """
+    ki_status = ki.get("status", "")
+    v = inv.get("vol")
+    if ki_status.startswith("skipped"):
+        return (f"{prefix}; KnotInfo lookup did not run ({ki_status}) — UNDECIDED",
+                "undecided (incomplete input: KnotInfo lookup skipped)")
+    if not isinstance(v, (int, float)):
+        return (f"{prefix}; hyperbolic volume missing — UNDECIDED",
+                "undecided (incomplete input: volume missing)")
+    if v <= 0.5:
+        return (f"{prefix}; non-hyperbolic (vol≈0) — torus / satellite / connected sum: "
+                f"a KNOWN family, NOT a novelty",
+                "known (non-hyperbolic family: torus / satellite / connected sum)")
+    return (f"{prefix}; hyperbolic — novelty is decided by label_distinct_knots.py "
+            f"against the enumeration limits, not here",
+            "no DB match (hyperbolic)")
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("mandatory_json", type=Path)
@@ -842,14 +870,8 @@ def main():
             # a novelty (doctrine: novelty = hyperbolic prime + no match). The census
             # (snappy/Fremlin) is hyperbolic-focused, which is why classical
             # torus knots (T(3,7), T(6,7)) and connected sums miss it — they are NOT new.
-            _v = inv.get("vol")
-            if not (isinstance(_v, (int, float)) and _v > 0.5):
-                summary = (f"Out of KnotInfo range (c={inv['c']}); non-hyperbolic (vol≈0) — "
-                           f"torus / satellite / connected sum: a KNOWN family, NOT a novelty")
-                nov = "known (non-hyperbolic family: torus / satellite / connected sum)"
-            else:
-                summary = f"Out of KnotInfo range (c={inv['c']}); no Fremlin/snappy match — NOVELTY CANDIDATE"
-                nov = "novelty candidate (c > 13, no Fremlin, no snappy-Census, hyperbolic)"
+            summary, nov = _no_match_verdict(inv, ki, sc,
+                                             f"Out of KnotInfo range (c={inv['c']}); no Fremlin/snappy match")
     elif ki.get("status", "").startswith("ambiguous"):
         if sc_best:
             summary = f"KnotInfo ambiguous ({len(ki.get('candidates_by_c_det_sig', []))} cands); snappy identifies {sc_best}"
@@ -869,8 +891,7 @@ def main():
             summary = f"No KnotInfo match; Fremlin {fr['knot_id']} match"
             nov = "possibly known (Fremlin only)"
         else:
-            summary = "No DB match"
-            nov = "novelty candidate"
+            summary, nov = _no_match_verdict(inv, ki, sc, "No DB match")
 
     result = {
         "name": inv["name"],

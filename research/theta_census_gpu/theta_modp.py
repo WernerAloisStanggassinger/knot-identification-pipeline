@@ -40,9 +40,11 @@ def _A(Cs, n, t, p):
     A = [[1 if r == c else 0 for c in range(N)] for r in range(N)]
     for s, i, j in Cs:
         ts = t if s == 1 else _inv(t, p)
-        A[i][i + 1] = (-ts) % p
-        A[i][j + 1] = (ts - 1) % p
-        A[j][j + 1] = p - 1
+        # += as in Bar-Natan and van der Veen's Theta.m (A[[{i,j},{i+1,j+1}]] += ...): when i == j + 1 (a Reidemeister-I kink),
+        # A[i][j+1] is the diagonal entry, and setting it with = would overwrite its 1 (fixed 3 November 2026).
+        A[i][i + 1] = (A[i][i + 1] - ts) % p
+        A[i][j + 1] = (A[i][j + 1] + ts - 1) % p
+        A[j][j + 1] = (A[j][j + 1] - 1) % p
     return A
 
 
@@ -147,12 +149,13 @@ def gpu_batch(items, t1, t2, p=P_DEFAULT):
         A = cp.zeros((B, N, N), dtype=cp.int64)
         A[:, cp.arange(N), cp.arange(N)] = 1
         ts = tpow(t, S)
-        # Order as in the reference: crossing by crossing, later ones overwrite earlier ones
+        # Crossing by crossing, adding to the entries as the reference does (+=; see _A)
         for k in range(n):
             i, j, tk = I[:, k], J[:, k], ts[:, k]
-            A[cp.arange(B), i, i + 1] = (-tk) % P
-            A[cp.arange(B), i, j + 1] = (tk - 1) % P
-            A[cp.arange(B), j, j + 1] = P - 1
+            ar = cp.arange(B)
+            A[ar, i, i + 1] = (A[ar, i, i + 1] - tk) % P
+            A[ar, i, j + 1] = (A[ar, i, j + 1] + tk - 1) % P
+            A[ar, j, j + 1] = (A[ar, j, j + 1] - 1) % P
         return A
 
     def modpow(a, e):

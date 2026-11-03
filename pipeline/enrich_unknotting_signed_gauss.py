@@ -102,7 +102,7 @@ def main():
                 a['unknotting_number_strict_lower'] = u_lower
                 a['unknotting_number_strict_upper'] = u_upper
                 a['unknotting_number_assignment_basis'] = (
-                    f'lower == upper == {u_upper}: eindeutig.')
+                    f'lower == upper == {u_upper}: determined.')
             elif exhaustive_below_upper and unk.get('witness_subset'):
                 a['unknotting_number']              = u_upper
                 a['unknotting_number_strict_lower'] = u_lower

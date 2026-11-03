@@ -29,7 +29,7 @@ idna==3.11
 jsonpatch==1.33
 jsonpointer==3.0.0
 kiwisolver==1.5.1
-knotpy==0.0.1
+knotpy @ git+https://github.com/bgabrovsek/knotpy@8ce3ad29c1bca64dda32a32346a8a761b0f37737
 libmambapy==2.5.0
 menuinst==2.4.2
 mpmath==1.3.0

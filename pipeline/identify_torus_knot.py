@@ -31,6 +31,8 @@ Discovery #171.
 from __future__ import annotations
 import argparse
 import json
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import record_names  # reads records with German or English names
 import math
 import re
 import sys
@@ -229,7 +231,7 @@ def main():
     ap.add_argument("--max-pq", type=int, default=40)
     args = ap.parse_args()
 
-    d = json.loads(args.pflicht_json.read_text())
+    d = record_names.load_record(args.pflicht_json)
     pl = d["pflichtliste"]
     A, H = pl.get("ALGEBRA", {}), pl.get("HYPERBOLISCH", {})
     D = pl.get("DIAGRAMM", {})
@@ -255,7 +257,7 @@ def main():
         out.update(res)
 
     out_path = args.output or args.pflicht_json.with_name(
-        args.pflicht_json.stem.replace("_pflicht_invarianten_complete", "") + "_torus_check.json"
+        args.pflicht_json.stem.replace("_pflicht_invarianten_complete", "").replace("_mandatory_invariants_complete", "") + "_torus_check.json"
     )
     out_path.write_text(json.dumps(out, indent=2, ensure_ascii=False))
     name = out.get("name") or args.pflicht_json.stem

@@ -67,11 +67,13 @@ def pd_to_cs_phi(pd_list: Sequence[Sequence[int]]) -> Tuple[List[Tuple[int, int,
     knots.sage entries).
     """
     pd_list = [tuple(c) for c in pd_list]
-    # Guard (3 November 2026): on diagrams with a Reidemeister-I kink (a crossing whose 4-tuple repeats a label) this
-    # conversion + the θ kernel can give a wrong θ_raw (6_2 and K8n1 under SnapPy backtrack(): 39 of 60 kinked diagrams wrong,
-    # all 20 kink-free ones right; crossing signs agree with SnapPy, not the cause). Cause not found, so such diagrams are
-    # refused. Census diagrams are minimal and have no kinks; none of the 834 PD diagrams of the 843 corpus records
-    # (9 unknots have none) had a kink on 3 November 2026.
+    # Guard (3 November 2026): on diagrams with a Reidemeister-I kink (a crossing whose 4-tuple repeats a label) the θ value
+    # came out wrong. Cause (found by an outside reviewer the same day, reproduced by us): the θ kernels SET the matrix
+    # entries A[i][i+1], A[i][j+1], A[j][j+1] with '=' instead of adding them ('+=' as in Theta.m); on a crossing with
+    # i == j+1, which only a kink produces, A[i][j+1] is a diagonal entry and its 1 was overwritten. This conversion is
+    # right. research/theta_census_gpu/theta_modp.py adds since 3 November 2026; the refusal stays as a safety net for any
+    # kernel that still assigns. Census diagrams are minimal and have no kinks; none of the 834 PD diagrams of the 843
+    # corpus records (9 unknots have none) had a kink on 3 November 2026.
     if any(len(set(c)) < 4 for c in pd_list):
         raise ValueError('PD with a Reidemeister-I kink is not supported; simplify the diagram first')
     n = len(pd_list)

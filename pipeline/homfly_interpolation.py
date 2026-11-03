@@ -511,7 +511,7 @@ def self_test():
               f'{"✅" if good else "🔴"} · {false_neg} of {rot} red ones caught '
               f'in advance (= saved compute time)')
     else:
-        print('  LATCH against real runs        : ⚠️  measurement log missing, case not run')
+        print('  LATCH against real runs        : ⚠️  measurement log missing: case NOT run, not part of the result below')
 
     # (6) COUNTER-CASE for the double-computation guard: it may only fire when
     #     the field is REALLY filled — otherwise it chokes every run.

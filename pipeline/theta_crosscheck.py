@@ -19,7 +19,7 @@ Background (Discovery #133, roadmap step 4 "Dror's QR-code method"):
   step 4b/web) match against a small Theta DB.
 
 Workflow (stage 8a):
-  1. Load the pflicht JSON, extract the PD code from mandatory_list.DIAGRAMM.pd_code
+  1. Load the pflicht JSON, extract the PD code from mandatory_list.DIAGRAM.pd_code
      (or the top-level pd_list_str).
   2. Convert PD -> (Cs, phi) via pd_to_theta_input.pd_to_cs_phi.
   3. Call sage in a sage_stable subprocess, which loads Theta.sage and computes
@@ -59,7 +59,7 @@ def _parse_pd(mandatory: dict) -> list:
 
     Searches in this order:
       1. pd_list_str (top level, e.g. '[(1, 5, 2, 4), (3, 1, 4, 6), ...]')
-      2. mandatory_list.DIAGRAMM.pd_code as a string 'PD[X[1, 5, 2, 4], X[3,...], ...]'
+      2. mandatory_list.DIAGRAM.pd_code as a string 'PD[X[1, 5, 2, 4], X[3,...], ...]'
     """
     pd_list_str = mandatory.get("pd_list_str", "")
     if pd_list_str:

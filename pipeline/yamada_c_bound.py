@@ -38,6 +38,8 @@ Contradiction => the cluster is skipped and reported loudly, never smoothed over
 --calibrate-census runs four counter-cases. Without a green calibration every number here is worthless.
 """
 import json, os, re, sys, argparse
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import record_names  # reads records with German or English names
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor
 
@@ -143,7 +145,7 @@ def ingredients_of(r):
     pf = r.get('pflicht_path')
     if pf and os.path.exists(pf):
         try:
-            d = json.load(open(pf))
+            d = record_names.load_record(pf)
             diag_block = d.get('pflichtliste', {}).get('DIAGRAMM', {})
             bl = diag_block.get('braid_index_lower_bound')
             # A field counts only if its OWN note covers it. su_4_4_tm1 carried

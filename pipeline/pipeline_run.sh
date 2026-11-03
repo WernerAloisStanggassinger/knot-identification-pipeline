@@ -54,7 +54,8 @@ CAMERA=$(python3 -I "$SC_PY" --get CAMERA)
 PROJ_DIR="$(pwd)"
 
 log()   { echo -e "\033[1;34m[PIPELINE]\033[0m $*"; }
-err()   { echo -e "\033[1;31m[PIPELINE ERROR]\033[0m $*" >&2; }
+N_ERR=0
+err()   { echo -e "\033[1;31m[PIPELINE ERROR]\033[0m $*" >&2; N_ERR=$((N_ERR+1)); }
 ok()    { echo -e "\033[1;32m[PIPELINE OK]\033[0m $*"; }
 stage() { echo -e "\n\033[1;33m=== STAGE $1: $2 ===\033[0m"; }
 
@@ -602,10 +603,15 @@ if [ "${SKIP_THETA:-0}" != "1" ]; then
     else
         THETA_SCRIPT="theta_numeric_crosscheck.py"
     fi
-    conda run -n gnottheorie_env python "$PIPE/$THETA_SCRIPT" "$PFLC" \
-        --output "$THETA_JSON" \
-        || { err "Stage 8a (Theta) failed — mandatory data saved"; }
-    ok "Theta crosscheck done in $(($(date +%s)-T8A))s   →  $THETA_JSON   ($THETA_SCRIPT)"
+    THETA_DIR_PY=$(cd "$PIPE" && python3 -c "import site_config; print(site_config.THETA_DIR)" 2>/dev/null)
+    if [ "$THETA_SCRIPT" = "theta_numeric_crosscheck.py" ] && [ ! -f "$THETA_DIR_PY/Theta_numeric.sage" ]; then
+        err "Stage 8a (Theta) not run — Theta_numeric.sage not found in THETA_DIR ($THETA_DIR_PY); it is not distributed (see THIRD_PARTY.md). THETA_SYMBOLIC=1 uses Theta.sage instead (small diagrams only)."
+    elif conda run -n gnottheorie_env python "$PIPE/$THETA_SCRIPT" "$PFLC" \
+            --output "$THETA_JSON" && [ -s "$THETA_JSON" ]; then
+        ok "Theta crosscheck done in $(($(date +%s)-T8A))s   →  $THETA_JSON   ($THETA_SCRIPT)"
+    else
+        err "Stage 8a (Theta) failed — no $THETA_JSON written; mandatory data saved"
+    fi
 else
     log "Stage 8a (Theta) skipped — SKIP_THETA=1"
 fi
@@ -623,10 +629,12 @@ if [ "${SKIP_CROSSCHECK:-0}" != "1" ]; then
     T8B=$(date +%s)
     CC_ARGS=()
     [ "${CROSSCHECK_SKIP_SNAPPY:-0}" = "1" ] && CC_ARGS+=(--skip-snappy)
-    conda run -n gnottheorie_env python "$PIPE/pipeline_crosscheck.py" "$PFLC" \
-        --output "$CC_JSON" "${CC_ARGS[@]}" \
-        || { err "Stage 8b (Crosscheck) failed — mandatory data saved"; }
-    ok "Crosscheck done in $(($(date +%s)-T8B))s   →  $CC_JSON"
+    if conda run -n gnottheorie_env python "$PIPE/pipeline_crosscheck.py" "$PFLC" \
+            --output "$CC_JSON" "${CC_ARGS[@]}" && [ -s "$CC_JSON" ]; then
+        ok "Crosscheck done in $(($(date +%s)-T8B))s   →  $CC_JSON"
+    else
+        err "Stage 8b (Crosscheck) failed — no $CC_JSON written; mandatory data saved"
+    fi
 else
     log "Stage 8b (Crosscheck) skipped — SKIP_CROSSCHECK=1"
 fi
@@ -650,7 +658,11 @@ run_stage9
 TOTAL=$(($(date +%s)-T0))
 echo
 echo -e "\033[1;32m============================================\033[0m"
-echo -e "\033[1;32m  PIPELINE DONE  (Total: ${TOTAL}s)\033[0m"
+if [ "$N_ERR" -gt 0 ]; then
+    echo -e "\033[1;33m  PIPELINE DONE WITH $N_ERR STAGE ERROR(S) — see [PIPELINE ERROR] lines above  (Total: ${TOTAL}s)\033[0m"
+else
+    echo -e "\033[1;32m  PIPELINE DONE  (Total: ${TOTAL}s)\033[0m"
+fi
 echo -e "\033[1;32m============================================\033[0m"
 log "Knot: $KNOT"
 log "Outputs:"
@@ -674,7 +686,7 @@ pp,pn = cl(d['mandatory_list'])
 op,on = cl(d['optional_invariants'])
 print(f'  Mandatory list:      {pp}/{pn} populated  ({pp/pn*100:.1f}%)')
 print(f'  Optional:            {op}/{on} populated  ({op/on*100:.1f}%)')
-print(f'  Konsistenz:          {\"OK\" if d.get(\"consistency_ok\") else \"FAIL\"}')
+print(f'  Consistency:         {\"OK\" if d.get(\"consistency_ok\") else \"FAIL\"}')
 print()
 alg = d['mandatory_list']['ALGEBRA']; diag = d['mandatory_list']['DIAGRAM']; hyp = d['mandatory_list']['HYPERBOLIC']
 print(f'  c={diag.get(\"crossing_number_min\")}, det={alg.get(\"determinant\")}, '

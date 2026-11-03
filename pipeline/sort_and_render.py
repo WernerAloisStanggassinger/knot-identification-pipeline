@@ -70,7 +70,7 @@ def is_knotinfo_folder(name: str) -> bool:
 
 
 def find_mandatory_complete(d: Path) -> Path | None:
-    """Find <stem>_pflicht_invarianten*_complete.json in folder."""
+    """Find <stem>_mandatory_invariants*_complete.json in folder."""
     candidates = sorted(d.glob('*_mandatory_invariants*_complete.json'))
     return candidates[0] if candidates else None
 

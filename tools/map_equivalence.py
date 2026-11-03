@@ -212,7 +212,14 @@ def main():
         a = args.pop(0)
         if a == '--rename': o, n = args.pop(0).split('=', 1); renames[o] = n
         elif a == '--out': out = args.pop(0)
-    old_files = subprocess.run(['git', 'ls-tree', '-r', '--name-only', rev], capture_output=True, text=True).stdout.split()
+    if rev.startswith('-'):
+        sys.exit(f'usage: python3 -I tools/map_equivalence.py REV [--rename old=new ...] [--out FILE]   (got {rev!r} as REV)')
+    lt = subprocess.run(['git', 'ls-tree', '-r', '--name-only', rev], capture_output=True, text=True)
+    old_files = lt.stdout.split()
+    if lt.returncode != 0 or not old_files:
+        # fail closed (3 November 2026): an unknown revision used to give "EQUIVALENT ... 0 files", exit 0, and an empty table
+        # written over tools/translation_table.json, which pipeline/record_names.py reads
+        sys.exit(f'revision {rev!r} not found or empty; nothing compared, nothing written')
     py_old = [p for p in old_files if p.endswith('.py') and p != 'tools/map_equivalence.py']
     errors, idents, strings = [], [], []
     old_trees, new_trees = {}, {}

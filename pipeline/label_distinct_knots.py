@@ -22,6 +22,7 @@ Without --apply only a dry-run report.
 """
 import sys, json, shutil, re
 import site_config
+import record_names  # reads records with German or English names
 from pathlib import Path
 from collections import defaultdict, Counter
 
@@ -46,19 +47,19 @@ from yamada_c_bound import (genus_lower_from_alexander as _g_alex,
                                mfw_from_homfly as _mfw)
 
 ROOT = Path(site_config.ROOT)
-DB = ROOT / "freeze_manifest/pipeline_scripts/corpus_db.json"
+DB = Path(site_config.PIPELINE_DIR) / "corpus_db.json"
 # Maguire-Extended-Retractions (c14-17, Disc #512/#516): distinct_knot_ids whose
 # novelty is refuted against Maguire's c<=17 hyp-Jones census (volume-confirmed,
 # is_isometric_to). SEPARATE from crosscheck_knotinfo (KnotInfo c<=13). Field:
 # realizes_tabulated_extended. Durable + reproducible (no hand fix that rots).
-RETRACT_FILE = ROOT / "freeze_manifest/pipeline_scripts/maguire_retractions.json"
+RETRACT_FILE = Path(site_config.PIPELINE_DIR) / "maguire_retractions.json"
 # SECOND source (2026-09-04): Burton's complete census. Own file and own
 # record field, so that the provenance of a retraction stays readable — whoever asks later
 # WHY a knot is no longer novel must see the source, not only the result.
 # Occasion: the Burton run of 10.07.2026 found 17 hits, 14 of them were still standing seven weeks
 # later as novel_hyperbolic in corpus_db — among them `sundown`(=trainstation,
 # built in steel) with c=18 and a NOVELTY label on the public site.
-BURTON_FILE = ROOT / "freeze_manifest/pipeline_scripts/burton_retractions.json"
+BURTON_FILE = Path(site_config.PIPELINE_DIR) / "burton_retractions.json"
 # FREEZE REGISTRY (2026-09-05, Werner: "isosig-registry bauen" (EN: build the isosig registry) — Disc #755/#758):
 # distinct_knot_id hung on the cluster FOLDER and broke at every re-sorting
 # (S_18_d27_D3_chiral_sig6 -> _m, 04.09.). The stored isosig field is NOT suitable as a
@@ -66,12 +67,12 @@ BURTON_FILE = ROOT / "freeze_manifest/pipeline_scripts/burton_retractions.json"
 # not canonical signature; 68 records without; a canonical signature would be mirror-blind).
 # Hence: the FIRST assignment is frozen here, key = ident() tuple (the
 # true identity). canon_id() now only coins a name for NEW identities.
-REGISTRY_FILE = ROOT / "freeze_manifest/pipeline_scripts/distinct_id_registry.json"
+REGISTRY_FILE = Path(site_config.PIPELINE_DIR) / "distinct_id_registry.json"
 # PROVEN identities (2026-08-09): for non-hyperbolic knots the key has no
 # geometric discriminator, and canon_id() falls back to the alphabetically first STEM —
 # i.e. to a machine parameter name instead of an identity. This file carries per group
 # the POSITIVE proof (braid conjugation), never an inference from equality of invariants.
-IDENT_FILE = ROOT / "freeze_manifest/pipeline_scripts/proven_identities.json"
+IDENT_FILE = Path(site_config.PIPELINE_DIR) / "proven_identities.json"
 
 
 def load_burton_retractions():
@@ -84,7 +85,7 @@ def load_burton_retractions():
 # no volume hit => knot NOT in the census => c>=20 PROVEN (census complete,
 # knot hyperbolic prime). Raises ONLY the lower bound to 20 — the novelty bar
 # stays 21 (c=20 gap, Disc #753), classes NEVER change through this.
-ABSENCE_FILE = ROOT / "freeze_manifest/pipeline_scripts/burton_absence_c19.json"
+ABSENCE_FILE = Path(site_config.PIPELINE_DIR) / "burton_absence_c19.json"
 
 
 def load_burton_absence():
@@ -112,7 +113,7 @@ def load_retractions():
         return {}
 
 
-DISTINCT_FILE = ROOT / "freeze_manifest/pipeline_scripts/proven_distinctions.json"
+DISTINCT_FILE = Path(site_config.PIPELINE_DIR) / "proven_distinctions.json"
 
 
 def load_distinctions():
@@ -255,7 +256,7 @@ def hfk_exact_genus(m):
     if not pf or not Path(pf).exists():
         return None
     try:
-        d = json.load(open(pf))
+        d = record_names.load_record(pf)
         sg = (d.get('pflichtliste', {}).get('ALGEBRA', {})
               .get('knot_floer_homology') or {}).get('seifert_genus')
     except Exception:
@@ -276,7 +277,7 @@ def _nontrivial_receipted(m):
     return m.get('is_hyperbolic') is True or bool(m.get('hyperbolicity_proof'))
 
 
-TURAEV_FILE = ROOT / "freeze_manifest/pipeline_scripts/turaev_bounds.json"
+TURAEV_FILE = Path(site_config.PIPELINE_DIR) / "turaev_bounds.json"
 _TURAEV_APPLIED = set()
 
 

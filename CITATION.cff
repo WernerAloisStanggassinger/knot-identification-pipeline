@@ -7,8 +7,8 @@ authors:
     orcid: "https://orcid.org/0009-0005-8569-8317"
     affiliation: "Independent (sculptor), Wasserburg am Inn, Germany"
 license: "GPL-3.0-or-later"
-version: "1.9.0"
-date-released: 2026-11-03
+version: "1.9.1"
+date-released: 2026-11-04
 doi: "10.5281/zenodo.23766950"
 repository-code: "https://github.com/WernerAloisStanggassinger/knot-identification-pipeline"
 url: "https://knot-structures.stainlesssteel4u.de/"

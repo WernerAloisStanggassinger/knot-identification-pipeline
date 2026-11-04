@@ -76,6 +76,14 @@ def pd_to_cs_phi(pd_list: Sequence[Sequence[int]]) -> Tuple[List[Tuple[int, int,
     # corpus records (9 unknots have none) had a kink on 3 November 2026.
     if any(len(set(c)) < 4 for c in pd_list):
         raise ValueError('PD with a Reidemeister-I kink is not supported; simplify the diagram first')
+    # Latch (4 November 2026): the labels must be 1-based (1..2n), as the Rot[] port assumes. A 0-based PD (SnapPy's
+    # PD_code() is 0-based) is silently mis-converted: the crossing holding label 0 gets index -1, the rotation vector
+    # is off by two and Delta comes out asymmetric by a unit (seen on K12n55/K12n223 on 4 November 2026; the
+    # theta_mutant_pattern run of 28 June 2026 fed 0-based PDs). Refuse instead of guessing.
+    labels = {v for c in pd_list for v in c}
+    if pd_list and (min(labels) < 1 or max(labels) != 2 * len(pd_list) or len(labels) != 2 * len(pd_list)):
+        raise ValueError(f'PD labels must be exactly 1..{2 * len(pd_list)} (1-based, as KnotTheory/KnotInfo); got '
+                         f'{min(labels)}..{max(labels)} with {len(labels)} distinct labels. SnapPy PD_code() is 0-based: add 1.')
     n = len(pd_list)
     two_n = 2 * n
     if two_n == 0:
@@ -199,6 +207,14 @@ def _selftest() -> int:
     except ValueError:
         ok_kink = True
     print("kinked PD refused?", ok_kink)
+    # A 0-based PD must be refused too (latch of 4 November 2026).
+    try:
+        pd_to_cs_phi([[v - 1 for v in c] for c in trefoil_pd])
+        ok_zero = False
+    except ValueError:
+        ok_zero = True
+    print("0-based PD refused?", ok_zero)
+    ok_kink = ok_kink and ok_zero
     overall = ok_cs and ok_phi and ok_kink
 
     return 0 if overall else 1

@@ -1,0 +1,644 @@
+{
+ "_meta": {
+  "date": "2026-09-06",
+  "source": "work_c19_20260904 Stage B v4 (EXIT=0)",
+  "bedeutung": "beyond_rigorous: Ziel-det im kompletten c<=19-Census (350.449.955, alle Kategorien exakt, detfails=0), ALLE Census-Volumina der det geometrisch gerechnet, KEINES im 1e-3-Fenster => Knoten NICHT im c<=19-Census => c>=20 BEWIESEN (Census vollstaendig, Knoten hyperbolisch prim). ACHTUNG: c>=20 ist NICHT c>=21 — die c=20-Luecke (Hard-Rule/Disc #753) bleibt; Klassen aendern sich dadurch NICHT. skips_nicht_bewiesen: mindestens ein Census-Volumen der det scheiterte => Absenz NICHT bewiesen, offen.",
+  "gegenprobe": "0 von 25 span>=21-Zielen im Census gefunden (haelt)",
+  "korrektur_im_selben_zug": "Erstfassung warf Gegenproben und unresolved in einen Topf; getrennt, weil nur die UNRESOLVED-Sektion neue Information ueber offene Klassen ist.",
+  "update_20260906_tighten": "tighten_65: alle Kandidaten der 54 offenen dets mit Retriangulierung (8 Versuche) neu gerechnet — 35.445/35.477 Fails gerettet, nur 32 Kandidaten endgueltig nicht-geometrisch; 32 weitere Ziele RIGOROS absent (=> c>=20 bewiesen), 30 bleiben offen, 3 wurden Census-Treffer (in burton_retractions.json). Die Sektion skips_nicht_bewiesen_UNRESOLVED ist damit UEBERHOLT und bleibt nur als Vorher-Stand stehen.",
+  "update_20260906_low16": "c<=16-Schicht rigoros geschlossen (low_stage_a/b: 3-16 hyp komplett, detfails=0, vol-fails=0, 3 Treffer -> retractions, darunter S_15_d507 aus der tighten-Liste ENTFERNT). Damit gilt fuer alle verbliebenen Absenz-IDs: absent im GESAMTEN c<=19-Census (3-16 + 17-19), c>=20 BEWIESEN — jetzt ohne die fruehere ≤16-Luecke. Gegenprobe auch in der ≤16-Schicht 0 Treffer.",
+  "update_20260906_crusher": "stubborn_crusher (PID 1131823, 16:40): die 32 endgueltig nicht-geometrischen Census-Kandidaten aus tighten_65 mit ManifoldHP + 40 Retriangulierungen + canonize neu gerechnet — Pass 1 fand nur noch 11 stoerrische (Randomisierungs-Glueck, beide Zahlen ehrlich), ALLE 11 gerettet (rigoros geometrisch, Namen+Volumina in work_c19_20260904/stubborn_result.json). Damit sind in den Ziel-Dets der 28 blockierten Absenz-Ziele ALLE Census-Volumina rigoros, keines matcht => 28 weitere Ziele RIGOROS absent, c>=20 BEWIESEN (25 unresolved + 3 inzwischen Genus-novel, fuer die sich cl nicht aendert). now_downgrade=0 (keine neuen Retractions), still_blocked=0, Gegenprobe leer. ID-Mapping (det_to_targets.json stammt vom 04.09., vor dem Registry-Freeze): S_24_d49_Z3_chiral_sig0 -> S_24_d49_Z3_chiral_v22 (vol 21.95888855331926 bitgenau) · S_24_d49_Z3_chiral_sig0#2 -> S_24_d49_Z3_chiral (vol 31.32405536236577 bitgenau). skips_nicht_bewiesen_UNRESOLVED_nach_tighten ist damit KOMPLETT aufgeloest: 28 der 30 via Crusher-Absenz, die uebrigen 2 (S_15_d625_D3_chiral, S_16_d1377_D8_amphi) wurden im low16-Lauf Census-TREFFER (burton_retractions) — 0 offene Absenz-Blocker.",
+  "update_20260908_detjagd": "det-Jagd-Lauf 07.-08.09.2026 (work_detjagd_20260907, Log jetzt/det_jagd_census_20260907.log): drei Ziel-dets {953524026999049021263 (UEBER_k3_s1p5), 737985549438538371243 (UEBER_k3_s2), 112903 (kf320_polyc07_sh+0.5_tw+0.25)} gegen den KOMPLETTEN Census gestreamt — low 3-16 hyp (1.701.903, fails=0) + Stage A 17a-19n (350.449.955, alle 6 Kategorien EXAKT auf Soll, 19n=253.510.828, detfails=0, EXIT=0 Di 08.09. 23:02). Methode STAERKER als der vol-Weg: Census-det exakt via regina |Alexander(-1)| (Kalibrier-Tor 4_1=5), Ziel-det kommt im GESAMTEN Census NICHT vor (matches=0) => det-Ungleichheit trennt ohne Volumen-Fenster. Ziel-dets je ZWEI unabhaengige Zeugen bitgenau (Disc #762). Beide gelisteten Knoten HYPERBOLISCH BEWIESEN (s1p5: _HYPERBOLICITY_CERT_20260828 · kf320: _HYPERBOLICITY_CERT_20260907, Intervallarithmetik) => prim => waeren im c<=19-Census => c>=20 BEWIESEN. Gegenfall-Probe des Werkzeugs: det=17 => 1 Treffer in 10a (die Maschine FINDET Treffer; die span>=21-vol-Gegenproben des 04.09. liefen in diesem det-Lauf nicht mit — anderes Verfahren, eigener Gegenfall). UEBER_k3_s2 ist ebenfalls det-absent, bleibt aber pipeline_failure (Record-Torso, nicht im Korpus) => NICHT in der angewandten Liste, nur hier protokolliert. kf320 wird im selben Zug von pipeline_failures nach singletons_novelty salvaged (kf354-Muster).",
+  "merge_2026-09-19": "Disc #809: S_24_d25721_D8_amphi_sig0#2 ist in S_24_d25721_D8_amphi_sig0 aufgegangen (alex-Gesamtvorzeichen trennte denselben Knoten; Jones+HOMFLY bitgleich, theta=0 beidseitig, Komplemente isometrisch). Der Absenz-Beleg (c>=20 via Burton c<=19) bleibt gueltig, er gilt jetzt fuer EINEN statt zwei Eintraege. applied sinkt 70 -> 69."
+ },
+ "absent_c_le_19_rigoros_UNRESOLVED": [
+  "S_33_d24843_Z3_chiral",
+  "st_dn6_s23_x4z2d45",
+  "st_dn4_s150_x4z2d50",
+  "mw_sun2nit_s0p100",
+  "UEBER_k3_s4",
+  "UEBER_k3_s3",
+  "S_24_d25721_D8_amphi_sig0",
+  "S_25_d34347_Z3_chiral"
+ ],
+ "absent_c_le_19_rigoros_GEGENPROBEN_span21": [
+  "fleet_n7_2_7_7_7_7_7_7",
+  "flip_n17_p3_s2",
+  "fleet_n7_3_3_3_7_7_7_7",
+  "fleet_n8_2_3_3_3_3_7_7_7",
+  "fleet_n7_3_5_7_7_7_7_7",
+  "fleet_n8_2_3_5_5_5_7_7_7",
+  "flip_n13_p3_s4",
+  "fleet_n6_2_5_5_7_7_7",
+  "fleet_n8_2_3_5_5_5_5_5_7",
+  "fleet_n7_2_3_5_5_5_7_7",
+  "ac_k2",
+  "fleet_n8_2_5_5_5_5_5_5_7",
+  "fleet_n7_2_3_7_7_7_7_7",
+  "st_dn5_s117_x4z2d55"
+ ],
+ "skips_nicht_bewiesen_UNRESOLVED": [
+  {
+   "id": "S_23_d817_Z2_chiral",
+   "det": 817,
+   "vol_fails_in_det": 609
+  },
+  {
+   "id": "S_20_d2523_D5_chiral",
+   "det": 2523,
+   "vol_fails_in_det": 413
+  },
+  {
+   "id": "S_15_d625_D3_chiral",
+   "det": 625,
+   "vol_fails_in_det": 743
+  },
+  {
+   "id": "S_24_d49_Z3_chiral_sig0",
+   "det": 49,
+   "vol_fails_in_det": 754
+  },
+  {
+   "id": "S_24_d81_D6_amphi",
+   "det": 81,
+   "vol_fails_in_det": 1079
+  },
+  {
+   "id": "S_30_d931_Z3_chiral",
+   "det": 931,
+   "vol_fails_in_det": 683
+  },
+  {
+   "id": "S_24_d961_D6_amphi",
+   "det": 961,
+   "vol_fails_in_det": 548
+  },
+  {
+   "id": "S_21_d1369_Z3_chiral",
+   "det": 1369,
+   "vol_fails_in_det": 541
+  },
+  {
+   "id": "S_21_d6075_D3_chiral",
+   "det": 6075,
+   "vol_fails_in_det": 428
+  },
+  {
+   "id": "lj_3_8_11_ph0p785_1p571_0p000",
+   "det": 697,
+   "vol_fails_in_det": 593
+  },
+  {
+   "id": "fleet_n4_2_3_7_7",
+   "det": 329,
+   "vol_fails_in_det": 650
+  },
+  {
+   "id": "kf348_spiral_amp0.3_freq2",
+   "det": 147,
+   "vol_fails_in_det": 826
+  },
+  {
+   "id": "kf349_spiral_amp0.3_freq3",
+   "det": 507,
+   "vol_fails_in_det": 684
+  },
+  {
+   "id": "fleet_n5_2_3_3_5_7",
+   "det": 951,
+   "vol_fails_in_det": 594
+  },
+  {
+   "id": "fleet_n5_3_3_3_5_5",
+   "det": 945,
+   "vol_fails_in_det": 857
+  },
+  {
+   "id": "bl_4_7_11_ph1p047_1p571_0p000",
+   "det": 5049,
+   "vol_fails_in_det": 348
+  },
+  {
+   "id": "fleet_n7_2_3_3_3_3_3_3",
+   "det": 3645,
+   "vol_fails_in_det": 481
+  },
+  {
+   "id": "wz_sqrt31",
+   "det": 33,
+   "vol_fails_in_det": 704
+  },
+  {
+   "id": "fleet_n4_2_5_5_7",
+   "det": 365,
+   "vol_fails_in_det": 633
+  },
+  {
+   "id": "kf353_spiral_amp0.4_freq3",
+   "det": 147,
+   "vol_fails_in_det": 826
+  },
+  {
+   "id": "kf352_spiral_amp0.4_freq2",
+   "det": 1,
+   "vol_fails_in_det": 704
+  },
+  {
+   "id": "flip_n5_p3_s2",
+   "det": 3721,
+   "vol_fails_in_det": 328
+  },
+  {
+   "id": "lj_4_5_9_ph0p785_0p785_0p000",
+   "det": 169,
+   "vol_fails_in_det": 632
+  },
+  {
+   "id": "widmark_hex24_11_000_tw19_hl5",
+   "det": 7439,
+   "vol_fails_in_det": 193
+  },
+  {
+   "id": "widmark_hex24_11_001_tw19_hl5",
+   "det": 3129,
+   "vol_fails_in_det": 353
+  },
+  {
+   "id": "st_dn7_s19_x3z2d55",
+   "det": 169,
+   "vol_fails_in_det": 632
+  },
+  {
+   "id": "lj_4_7_11_ph0p785_1p571_0p000",
+   "det": 2079,
+   "vol_fails_in_det": 638
+  },
+  {
+   "id": "kf340_spiral_amp0.1_freq1",
+   "det": 45,
+   "vol_fails_in_det": 993
+  },
+  {
+   "id": "lj_4_7_9_ph0p785_2p356_0p000",
+   "det": 639,
+   "vol_fails_in_det": 910
+  },
+  {
+   "id": "S_24_d25_Z3_chiral",
+   "det": 25,
+   "vol_fails_in_det": 831
+  },
+  {
+   "id": "st_dn4_s11_x3z2d55",
+   "det": 27,
+   "vol_fails_in_det": 1007
+  },
+  {
+   "id": "fleet_n5_2_3_5_5_5",
+   "det": 1075,
+   "vol_fails_in_det": 661
+  },
+  {
+   "id": "kf370_gtw_2_5pi",
+   "det": 325,
+   "vol_fails_in_det": 746
+  },
+  {
+   "id": "st_dn8_s19_x3z2d55",
+   "det": 63,
+   "vol_fails_in_det": 989
+  },
+  {
+   "id": "kf329_polys08_sh0_tw-1",
+   "det": 25,
+   "vol_fails_in_det": 831
+  },
+  {
+   "id": "lj_3_8_11_ph0p785_0p785_0p000",
+   "det": 1521,
+   "vol_fails_in_det": 786
+  },
+  {
+   "id": "gl_k4m2",
+   "det": 985,
+   "vol_fails_in_det": 580
+  },
+  {
+   "id": "st_dn5_s102_x4z3d55",
+   "det": 4205,
+   "vol_fails_in_det": 281
+  },
+  {
+   "id": "kf365_gtw_2pi",
+   "det": 1323,
+   "vol_fails_in_det": 905
+  },
+  {
+   "id": "S_21_d169_D7_chiral",
+   "det": 169,
+   "vol_fails_in_det": 632
+  },
+  {
+   "id": "S_30_d2187_Z3_chiral",
+   "det": 2187,
+   "vol_fails_in_det": 698
+  },
+  {
+   "id": "S_24_d2197_Z3_chiral",
+   "det": 2197,
+   "vol_fails_in_det": 473
+  },
+  {
+   "id": "S_24_d49_Z3_chiral_sig0#2",
+   "det": 49,
+   "vol_fails_in_det": 754
+  },
+  {
+   "id": "S_30_d13_Z3_chiral",
+   "det": 13,
+   "vol_fails_in_det": 719
+  },
+  {
+   "id": "S_21_d243_D3_chiral_v25",
+   "det": 243,
+   "vol_fails_in_det": 941
+  },
+  {
+   "id": "S_24_d1215_D3_chiral",
+   "det": 1215,
+   "vol_fails_in_det": 877
+  },
+  {
+   "id": "S_32_d81_Z3_chiral",
+   "det": 81,
+   "vol_fails_in_det": 1079
+  },
+  {
+   "id": "S_24_d175_C1_chiral",
+   "det": 175,
+   "vol_fails_in_det": 750
+  },
+  {
+   "id": "S_35_d7_D7_chiral",
+   "det": 7,
+   "vol_fails_in_det": 746
+  },
+  {
+   "id": "S_24_d1183_Z3_chiral",
+   "det": 1183,
+   "vol_fails_in_det": 592
+  },
+  {
+   "id": "S_24_d343_Z3_chiral",
+   "det": 343,
+   "vol_fails_in_det": 710
+  },
+  {
+   "id": "S_24_d125_D3_chiral",
+   "det": 125,
+   "vol_fails_in_det": 758
+  },
+  {
+   "id": "S_32_d7203_Z3_chiral",
+   "det": 7203,
+   "vol_fails_in_det": 231
+  },
+  {
+   "id": "S_20_d585_Z2_chiral",
+   "det": 585,
+   "vol_fails_in_det": 879
+  },
+  {
+   "id": "S_24_d2401_D3_amphi",
+   "det": 2401,
+   "vol_fails_in_det": 543
+  },
+  {
+   "id": "S_30_d4725_Z3_chiral",
+   "det": 4725,
+   "vol_fails_in_det": 426
+  },
+  {
+   "id": "S_23_d9025_D3_chiral",
+   "det": 9025,
+   "vol_fails_in_det": 95
+  },
+  {
+   "id": "S_32_d1369_D6_amphi",
+   "det": 1369,
+   "vol_fails_in_det": 541
+  },
+  {
+   "id": "S_28_d1215_D3_chiral",
+   "det": 1215,
+   "vol_fails_in_det": 877
+  },
+  {
+   "id": "S_21_d243_D3_chiral",
+   "det": 243,
+   "vol_fails_in_det": 941
+  },
+  {
+   "id": "S_15_d507_D3_chiral",
+   "det": 507,
+   "vol_fails_in_det": 684
+  },
+  {
+   "id": "S_26_d1849_Z2_amphi",
+   "det": 1849,
+   "vol_fails_in_det": 473
+  },
+  {
+   "id": "S_16_d1377_D8_amphi",
+   "det": 1377,
+   "vol_fails_in_det": 795
+  },
+  {
+   "id": "S_38_d1_Z2_amphi",
+   "det": 1,
+   "vol_fails_in_det": 704
+  },
+  {
+   "id": "cosmic-love",
+   "det": 441,
+   "vol_fails_in_det": 981
+  }
+ ],
+ "skips_nicht_bewiesen_GEGENPROBEN_span21": [
+  {
+   "id": "T_11_3_2_10",
+   "det": 19,
+   "vol_fails_in_det": 752
+  },
+  {
+   "id": "fleet_n6_2_3_3_5_5_5",
+   "det": 3975,
+   "vol_fails_in_det": 327
+  },
+  {
+   "id": "S_38_d2601_D4_chiral",
+   "det": 2601,
+   "vol_fails_in_det": 555
+  },
+  {
+   "id": "fleet_n5_2_3_5_7_7",
+   "det": 1939,
+   "vol_fails_in_det": 463
+  },
+  {
+   "id": "T_13_7_2_10",
+   "det": 19,
+   "vol_fails_in_det": 752
+  },
+  {
+   "id": "fleet_n5_2_3_5_5_7",
+   "det": 1445,
+   "vol_fails_in_det": 580
+  },
+  {
+   "id": "fleet_n6_2_3_3_5_5_7",
+   "det": 5385,
+   "vol_fails_in_det": 239
+  },
+  {
+   "id": "T_13_8_2_4",
+   "det": 11,
+   "vol_fails_in_det": 738
+  },
+  {
+   "id": "T_13_5_2_9",
+   "det": 17,
+   "vol_fails_in_det": 704
+  },
+  {
+   "id": "fleet_n5_3_3_5_7_7",
+   "det": 2541,
+   "vol_fails_in_det": 429
+  },
+  {
+   "id": "T_11_5_2_8",
+   "det": 17,
+   "vol_fails_in_det": 704
+  }
+ ],
+ "absent_c_le_19_rigoros_TIGHTEN_20260906": [
+  "S_23_d817_Z2_chiral",
+  "S_20_d2523_D5_chiral",
+  "S_24_d81_D6_amphi",
+  "S_30_d931_Z3_chiral",
+  "S_24_d961_D6_amphi",
+  "S_21_d1369_Z3_chiral",
+  "S_21_d6075_D3_chiral",
+  "lj_3_8_11_ph0p785_1p571_0p000",
+  "kf349_spiral_amp0.3_freq3",
+  "fleet_n5_2_3_3_5_7",
+  "bl_4_7_11_ph1p047_1p571_0p000",
+  "fleet_n7_2_3_3_3_3_3_3",
+  "flip_n5_p3_s2",
+  "widmark_hex24_11_001_tw19_hl5",
+  "kf340_spiral_amp0.1_freq1",
+  "lj_4_7_9_ph0p785_2p356_0p000",
+  "st_dn4_s11_x3z2d55",
+  "gl_k4m2",
+  "st_dn5_s102_x4z3d55",
+  "S_30_d2187_Z3_chiral",
+  "S_24_d2197_Z3_chiral",
+  "S_32_d81_Z3_chiral",
+  "S_24_d175_C1_chiral",
+  "S_35_d7_D7_chiral",
+  "S_24_d1183_Z3_chiral",
+  "S_24_d125_D3_chiral",
+  "S_32_d7203_Z3_chiral",
+  "S_20_d585_Z2_chiral",
+  "S_23_d9025_D3_chiral",
+  "S_32_d1369_D6_amphi",
+  "cosmic-love"
+ ],
+ "skips_nicht_bewiesen_UNRESOLVED_nach_tighten": [
+  {
+   "id": "S_15_d625_D3_chiral",
+   "det": 625,
+   "still_nongeom": 1
+  },
+  {
+   "id": "S_24_d49_Z3_chiral_sig0",
+   "det": 49,
+   "still_nongeom": 1
+  },
+  {
+   "id": "kf348_spiral_amp0.3_freq2",
+   "det": 147,
+   "still_nongeom": 1
+  },
+  {
+   "id": "wz_sqrt31",
+   "det": 33,
+   "still_nongeom": 1
+  },
+  {
+   "id": "kf353_spiral_amp0.4_freq3",
+   "det": 147,
+   "still_nongeom": 1
+  },
+  {
+   "id": "kf352_spiral_amp0.4_freq2",
+   "det": 1,
+   "still_nongeom": 1
+  },
+  {
+   "id": "lj_4_5_9_ph0p785_0p785_0p000",
+   "det": 169,
+   "still_nongeom": 2
+  },
+  {
+   "id": "widmark_hex24_11_000_tw19_hl5",
+   "det": 7439,
+   "still_nongeom": 1
+  },
+  {
+   "id": "st_dn7_s19_x3z2d55",
+   "det": 169,
+   "still_nongeom": 2
+  },
+  {
+   "id": "lj_4_7_11_ph0p785_1p571_0p000",
+   "det": 2079,
+   "still_nongeom": 1
+  },
+  {
+   "id": "S_24_d25_Z3_chiral",
+   "det": 25,
+   "still_nongeom": 1
+  },
+  {
+   "id": "fleet_n5_2_3_5_5_5",
+   "det": 1075,
+   "still_nongeom": 1
+  },
+  {
+   "id": "kf370_gtw_2_5pi",
+   "det": 325,
+   "still_nongeom": 3
+  },
+  {
+   "id": "st_dn8_s19_x3z2d55",
+   "det": 63,
+   "still_nongeom": 1
+  },
+  {
+   "id": "kf329_polys08_sh0_tw-1",
+   "det": 25,
+   "still_nongeom": 1
+  },
+  {
+   "id": "lj_3_8_11_ph0p785_0p785_0p000",
+   "det": 1521,
+   "still_nongeom": 1
+  },
+  {
+   "id": "kf365_gtw_2pi",
+   "det": 1323,
+   "still_nongeom": 3
+  },
+  {
+   "id": "S_21_d169_D7_chiral",
+   "det": 169,
+   "still_nongeom": 2
+  },
+  {
+   "id": "S_24_d49_Z3_chiral_sig0#2",
+   "det": 49,
+   "still_nongeom": 1
+  },
+  {
+   "id": "S_30_d13_Z3_chiral",
+   "det": 13,
+   "still_nongeom": 1
+  },
+  {
+   "id": "S_21_d243_D3_chiral_v25",
+   "det": 243,
+   "still_nongeom": 1
+  },
+  {
+   "id": "S_24_d1215_D3_chiral",
+   "det": 1215,
+   "still_nongeom": 1
+  },
+  {
+   "id": "S_24_d343_Z3_chiral",
+   "det": 343,
+   "still_nongeom": 2
+  },
+  {
+   "id": "S_24_d2401_D3_amphi",
+   "det": 2401,
+   "still_nongeom": 2
+  },
+  {
+   "id": "S_30_d4725_Z3_chiral",
+   "det": 4725,
+   "still_nongeom": 1
+  },
+  {
+   "id": "S_28_d1215_D3_chiral",
+   "det": 1215,
+   "still_nongeom": 1
+  },
+  {
+   "id": "S_21_d243_D3_chiral",
+   "det": 243,
+   "still_nongeom": 1
+  },
+  {
+   "id": "S_26_d1849_Z2_amphi",
+   "det": 1849,
+   "still_nongeom": 1
+  },
+  {
+   "id": "S_16_d1377_D8_amphi",
+   "det": 1377,
+   "still_nongeom": 1
+  },
+  {
+   "id": "S_38_d1_Z2_amphi",
+   "det": 1,
+   "still_nongeom": 1
+  }
+ ],
+ "skips_nach_low16_note": "S_15_d625 und S_16_d1377 aus den 30 Offenen sind Tabellen-Knoten (retractions); es bleiben 28 offen (17-19-vol-Fails).",
+ "absent_c_le_19_rigoros_CRUSHER_20260906": [
+  "S_21_d169_D7_chiral",
+  "S_21_d243_D3_chiral",
+  "S_21_d243_D3_chiral_v25",
+  "S_24_d1215_D3_chiral",
+  "S_24_d2401_D3_amphi",
+  "S_24_d25_Z3_chiral",
+  "S_24_d343_Z3_chiral",
+  "S_24_d49_Z3_chiral",
+  "S_24_d49_Z3_chiral_v22",
+  "S_26_d1849_Z2_amphi",
+  "S_28_d1215_D3_chiral",
+  "S_30_d13_Z3_chiral",
+  "S_30_d4725_Z3_chiral",
+  "S_38_d1_Z2_amphi",
+  "fleet_n5_2_3_5_5_5",
+  "kf329_polys08_sh0_tw-1",
+  "kf348_spiral_amp0.3_freq2",
+  "kf352_spiral_amp0.4_freq2",
+  "kf353_spiral_amp0.4_freq3",
+  "kf365_gtw_2pi",
+  "kf370_gtw_2_5pi",
+  "lj_3_8_11_ph0p785_0p785_0p000",
+  "lj_4_5_9_ph0p785_0p785_0p000",
+  "lj_4_7_11_ph0p785_1p571_0p000",
+  "st_dn7_s19_x3z2d55",
+  "st_dn8_s19_x3z2d55",
+  "widmark_hex24_11_000_tw19_hl5",
+  "wz_sqrt31"
+ ],
+ "absent_c_le_19_rigoros_DETJAGD_20260908": [
+  "UEBER_k3_s1p5",
+  "kf320_polyc07_sh+0.5_tw+0.25"
+ ]
+}

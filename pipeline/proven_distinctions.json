@@ -1,0 +1,113 @@
+{
+ "_doku": [
+  "BEWIESENE VERSCHIEDENHEIT — das Gegenstueck zu proven_identities.json.",
+  "Der Distinkt-Schluessel ident() = (det, sig, Alexander, theta@22/7;21/13, vol@6) ist KEIN",
+  "Identitaetsbeweis: er ist blind gegen Mutation. Ein Mutantenpaar stimmt in allen fuenf",
+  "Komponenten ueberein und wird deshalb zu EINER distinct_knot_id zusammengelegt, obwohl es",
+  "zwei verschiedene Knoten sind. CLAUDE.md nennt diese Luecke seit Disc #240 theoretisch;",
+  "hier stehen die Faelle, in denen sie GEMESSEN wurde.",
+  "",
+  "Aufnahme-Regel, streng: nur mit positivem geometrischem Nachweis — die Komplemente sind",
+  "NICHT isometrisch (Gordon-Luecke). Nie aus ungleichen Kennzahlen geschlossen, nie aus einem",
+  "Namen, nie aus einer Vermutung. Jeder Eintrag traegt den Beweis, nicht die Behauptung.",
+  "",
+  "⚠️ FALLE, an der die erste Fassung dieses Audits scheiterte (18.09.2026): ein CHIRALER Knoten",
+  "und sein Spiegelbild haben ISOMETRISCHE Komplemente (die Isometrie darf orientierungsumkehrend",
+  "sein). is_isometric_to() trennt Spiegelpaare also NICHT. Wer mit einem Spiegelpaar als",
+  "Gegenfall arbeitet, bekommt 'faelschlich zusammengelegt' gemeldet, wo der Labeler recht hat.",
+  "So kamen 11n_133/inv_11n_133 (sig -4/+4) und 12n_839/12n_839m (sig +4/-4) als Schein-Befunde",
+  "heraus — beide chiral, beide zu Recht getrennt, getrennt durch die Signatur.",
+  "",
+  "Wirkung im Labeler: jeder hier gelistete stem bekommt in ident() ein eigenes Schluessel-Element",
+  "und damit eine eigene distinct_knot_id. Das Gate prueft, dass jeder Eintrag ankommt und dass",
+  "die Partner am Ende verschiedene IDs tragen — eine stille Wirkungslosigkeit waere schlimmer",
+  "als der Fehler, den die Datei behebt.",
+  "",
+  "ZWEITER BEWEISTYP, aufgenommen 19.09.2026: NICHT-HYPERBOLISCHE Paare. Dort ist der",
+  "geometrische Weg (is_isometric_to) gar nicht anwendbar — es gibt keine hyperbolische",
+  "Struktur. Zulaessig ist statt dessen eine INVARIANTE, die die beiden trennt, wenn sie",
+  "nachweislich zum jeweiligen Record gehoert. Das Jones-Polynom ist so eine: verschiedene",
+  "Jones-Polynome ==> verschiedene Knoten, ohne Zusatzannahme. Die Zugehoerigkeit wird mit",
+  "dem Frankenstein-Test belegt (|V(-1)| muss die gespeicherte Determinante sein).",
+  "Die SPANNE des Jones-Polynoms ist dabei das belastbarste Stueck: sie ist invariant",
+  "unter Notationswechsel UND unter Spiegelung, kann also kein Parser- oder",
+  "Konventionsartefakt sein. Ein Vergleich der Polynom-STRINGS waere eins — im Korpus",
+  "liegen zwei Schreibweisen ('29 x^-2' und '29/x^2'), und genau daran hat der erste",
+  "Sweep-Lauf am 19.09. ein identisches Paar faelschlich als verschieden gemeldet."
+ ],
+ "distinctions": {
+  "13a_1231_vs_13a_1237": {
+   "abgespalten": "tb_1237",
+   "verbleibt": "tb_1231",
+   "erwartete_id_abgespalten": "13a_1237",
+   "erwartete_id_verbleibt": "13a_1231",
+   "knoten": "Mutantenpaar 13a_1231 / 13a_1237",
+   "warum_der_schluessel_versagt": [
+    "det 207 = 207, sig +2 = +2, Alexander gleich, theta gleich,",
+    "vol 17.53376301884801 vs 17.533763018848017 (gleich auf 6 Stellen gerundet)",
+    "=> ident()-Tupel bitgleich => eine Gruppe, n_realisierungen 2."
+   ],
+   "beweis": [
+    "SnapPy is_isometric_to ueber die Komplemente, je aus dem pd_code des eigenen Records,",
+    "spherogram simplify(mode='global'), beide auf 13 Kreuzungen reduziert.",
+    "EICHUNG: tb_1231 gegen sich selbst aus einer ZWEITEN Projektion (np.random.seed 1 vs 7)",
+    "  -> True. Ohne diese Eichung waere ein False nicht von Rechenrauschen zu unterscheiden.",
+    "BEFUND: tb_1231 ~ tb_1237 -> False, in BEIDEN Richtungen geprueft.",
+    "Gordon-Luecke: nicht-isometrische Komplemente => verschiedene Knoten."
+   ],
+   "zuordnung_belegt_durch": [
+    "tb_1231: crosscheck_knotinfo = 13a_1231, knotinfo_id = 13a_1231",
+    "tb_1237: crosscheck_knotinfo = 13a_1237, knotinfo_id = 13a_1237",
+    "verschiedene isosigs (tLLLLzLPvQAPQkb... vs vLLLzMvAvMQvQQQbc...)",
+    "external_theta_match_direct nennt bei BEIDEN ['13a_1231','13a_1237'] — theta trennt",
+    "Mutanten nicht; der KnotInfo-Crosscheck tut es."
+   ],
+   "folge": "beide sind tabellierte Knoten (is_known) — die Aufspaltung erhoeht die Zahl der distinkten Knoten und die der bekannten, sie beruehrt keine Novelty-Zahl.",
+   "gemessen_am": "2026-09-18",
+   "quelle": "maschinen_ideen/iso_audit_distinkt_20260917/ (313 Aufgaben, 67 hyperbolische Mehrfach-Gruppen), frisch nachgerechnet 18.09.2026",
+   "disc": [
+    240,
+    795,
+    798
+   ]
+  },
+  "su_4_4_tm1_vs_su_8_2_tm1": {
+   "abgespalten": "su_8_2_tm1",
+   "verbleibt": "su_4_4_tm1",
+   "erwartete_id_abgespalten": "su_8_2_tm1",
+   "erwartete_id_verbleibt": "su_4_4_tm1",
+   "knoten": "zwei verschiedene symmetrische Unionen, beide nicht-hyperbolisch, beide alternierend",
+   "gefunden": "19.09.2026, Sektor Z des Angriffs-Schwarms; unabhaengig nachgeprueft im Voll-Sweep ueber alle 92 Mehrfach-Gruppen (genau dieser eine harte Fall)",
+   "warum_der_schluessel_versagt": [
+    "det 289 = 289, sig 0 = 0, Alexander bitgleich, Conway bitgleich, theta 0 = 0.",
+    "vol faellt bei NICHT-hyperbolischen Records aus dem Schluessel (10.477 vs 7.047 sind",
+    "keine hyperbolischen Volumina und werden nicht gewertet).",
+    "=> ident()-Tupel bitgleich => eine Gruppe, n_realisierungen 2.",
+    "Jones und HOMFLY stehen NICHT im Schluessel — genau sie trennen hier."
+   ],
+   "beweis": [
+    "JONES-SPANNE 32 gegen 40. Die Spanne ist invariant unter Variablenbenennung, unter",
+    "globaler Verschiebung und unter Spiegelung (V(Kquer)(x) = V(K)(1/x) dreht die Exponenten",
+    "nur um) — ein Notations- oder Konventionsartefakt ist ausgeschlossen.",
+    "Verschiedene Jones-Polynome ==> verschiedene Knoten (Jones ist eine Knoteninvariante).",
+    "",
+    "GEGENPROBE 1 (Zugehoerigkeit, Frankenstein): |V(t=-1)| = 289 bei BEIDEN, gleich der",
+    "gespeicherten Determinante 289. Die Polynome gehoeren zu diesen Records.",
+    "",
+    "GEGENPROBE 2 (Konsistenz mit der Kreuzungszahl): beide Records sind alternierend, und",
+    "fuer reduziert-alternierende Knoten gilt span V = c (Kauffman-Murasugi-Thistlethwaite).",
+    "32/2 = 16 = c(su_4_4_tm1) und 40/2 = 20 = c(su_8_2_tm1). Beide Seiten passen exakt.",
+    "",
+    "HOMFLY ist ebenfalls verschieden (zweiter, unabhaengiger Trenner)."
+   ],
+   "warum_kein_geometrischer_beweis": [
+    "Beide Records sind is_hyperbolic=False (nonhyp_decision 'no_match_found'). is_isometric_to",
+    "setzt eine hyperbolische Struktur voraus und ist hier nicht anwendbar. Die Isometrie-Kur",
+    "vom 18.09.2026 (Disc #798) hat nur die 67 HYPERBOLISCHEN Mehrfach-Gruppen geprueft —",
+    "deshalb konnte sie diesen Fall nicht sehen. Das ist die Luecke, die dieser Eintrag schliesst."
+   ],
+   "werkzeug": "claude_setup_v2/tools/pruef_jones_in_distinktgruppen.py (Selbsttest 7/7, inkl. Gegenfall 'gleiche Spanne bei anderen Koeffizienten entscheidet NICHT')",
+   "bilanz_folge": "distinct_knots 503 -> 504, distinct_known_nonhyp 42 -> 43. Novelty-Zahlen UNVERAENDERT (beide nicht-hyperbolisch, also nie Novelty): novel_hyperbolic bleibt 286, outreach_headline_sweep bleibt 219."
+  }
+ }
+}

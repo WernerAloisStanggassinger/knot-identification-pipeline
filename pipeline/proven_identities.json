@@ -1,0 +1,138 @@
+{
+  "_doku": [
+    "BEWIESENE Identitaeten fuer Knoten, bei denen der Distinkt-Schluessel keinen geometrischen",
+    "Diskriminator hat (nicht-hyperbolisch: vol=0, kein Cusp). Ohne diese Datei vergibt canon_id()",
+    "als Rueckfall den alphabetisch ersten STEM — also einen Maschinen-Parameternamen statt einer",
+    "Identitaet. Zwei-Schichten-Doktrin: der distinct_knot_id traegt die Identitaet, und Identitaet",
+    "wird GERECHNET, nicht vergeben. Hier steht deshalb je Eintrag der Beweis, nicht die Behauptung.",
+    "Aufnahme-Regel: nur mit positivem Nachweis (z.B. Zopf-Konjugation), NIE aus Invarianten-Gleichheit",
+    "geschlossen. Durable + reproduzierbar, kein Hand-Fix der verrottet (Vorbild maguire_retractions.json)."
+  ],
+  "identities": {
+    "T_5_6_sig16": {
+      "stems": [
+        "st_dn5_s11_x5z2d55",
+        "st_dn6_s20_x4z2d45"
+      ],
+      "knot": "T(5,6), linkshaendig",
+      "beweis": "Zopfwort jedes Records (5 Straenge, Laenge 24, aus der jeweils EIGENEN PD) ist per Garside/Ultra-Summit (Sage BraidGroup.is_conjugated) konjugiert zu (s1 s2 s3 s4)^-6. Konjugierte Zoepfe haben isotope Abschluesse ==> beide Records realisieren denselben Knoten. NICHT aus Invarianten-Gleichheit geschlossen.",
+      "stuetzend": "Alexander exakt gegen (t^pq-1)(t-1)/((t^p-1)(t^q-1)) ueber p<80,q<200 eindeutig T(5,6); c_min=24=gespeichertes c; g=10; det=5; V(T(5,6)-Spiegel) aus sympy == gespeichertes jones (x=t^(1/2)).",
+      "abgrenzung": "wz_sqrt13 ist der RECHTShaendige T(5,6) (sig -16, theta mit umgekehrtem Vorzeichen) und bleibt ein eigener distinkter Knoten.",
+      "datum": "2026-08-09",
+      "disc": 606
+    },
+    "T_6_7_sig18": {
+      "stems": [
+        "st_dn7_s0_x4z3d50",
+        "st_dn7_s20_x4z2d45"
+      ],
+      "knot": "T(6,7), linkshaendig",
+      "beweis": "Zopf-Konjugation: das braid_word des Records (aus der EIGENEN PD, 6 Straenge, Laenge 35) ist in Sage (BraidGroup.is_conjugated) konjugiert zu (s1..s5)^-7. Konjugierte Zoepfe haben isotope Abschluesse. Weg: direkt (n=p, keine Stabilisierung noetig). NICHT aus Invarianten-Gleichheit geschlossen.",
+      "stuetzend": "Alexander exakt = Delta_T(6,7) (Grad 30 legt (p-1)(q-1) fest, Suche vollstaendig); sig=18 passt zur Haendigkeit (links); c=35; det=7.",
+      "gegenprobe": "Gegenfall geprueft: derselbe Zopf gegen T(3,4)/T(2,3)/T(4,5)/T(5,7) 4x False (gegenfall.py).",
+      "vorher": "st_dn7_s0_x4z3d50",
+      "datum": "2026-08-09",
+      "disc": 607
+    },
+    "T_5_6_sig-16": {
+      "stems": [
+        "st_dn6_s74_x3z2d55",
+        "wz_sqrt13"
+      ],
+      "knot": "T(5,6), rechtshaendig",
+      "beweis": "Zopf-Konjugation: das braid_word des Records (aus der EIGENEN PD, 5 Straenge, Laenge 24) ist in Sage (BraidGroup.is_conjugated) konjugiert zu (s1..s4)^+6. Konjugierte Zoepfe haben isotope Abschluesse. Weg: direkt (n=p, keine Stabilisierung noetig). NICHT aus Invarianten-Gleichheit geschlossen.",
+      "stuetzend": "Alexander exakt = Delta_T(5,6) (Grad 20 legt (p-1)(q-1) fest, Suche vollstaendig); sig=-16 passt zur Haendigkeit (rechts); c=24; det=5.",
+      "gegenprobe": "Gegenfall geprueft: derselbe Zopf gegen T(3,4)/T(2,3)/T(4,5)/T(5,7) 4x False (gegenfall.py).",
+      "vorher": "st_dn6_s74_x3z2d55",
+      "datum": "2026-08-09",
+      "disc": 607
+    },
+    "T_3_8_sig10": {
+      "stems": [
+        "st_dn4_s34_x4z3d50"
+      ],
+      "knot": "T(3,8), linkshaendig",
+      "beweis": "Zopf-Konjugation: das braid_word des Records (aus der EIGENEN PD, 3 Straenge, Laenge 16) ist in Sage (BraidGroup.is_conjugated) konjugiert zu (s1..s2)^-8. Konjugierte Zoepfe haben isotope Abschluesse. Weg: direkt (n=p, keine Stabilisierung noetig). NICHT aus Invarianten-Gleichheit geschlossen.",
+      "stuetzend": "Alexander exakt = Delta_T(3,8) (Grad 14 legt (p-1)(q-1) fest, Suche vollstaendig); sig=10 passt zur Haendigkeit (links); c=16; det=3.",
+      "gegenprobe": "Gegenfall geprueft: derselbe Zopf gegen T(3,4)/T(2,3)/T(4,5)/T(5,7) 4x False (gegenfall.py).",
+      "vorher": "st_dn4_s34_x4z3d50",
+      "datum": "2026-08-09",
+      "disc": 607
+    },
+    "T_6_13_sig36": {
+      "stems": [
+        "precellipse_6_13"
+      ],
+      "knot": "T(6,13), linkshaendig",
+      "beweis": "Zopf-Konjugation: das braid_word des Records (aus der EIGENEN PD, 6 Straenge, Laenge 65) ist in Sage (BraidGroup.is_conjugated) konjugiert zu (s1..s5)^-13. Konjugierte Zoepfe haben isotope Abschluesse. Weg: direkt (n=p, keine Stabilisierung noetig). NICHT aus Invarianten-Gleichheit geschlossen.",
+      "stuetzend": "Alexander exakt = Delta_T(6,13) (Grad 60 legt (p-1)(q-1) fest, Suche vollstaendig); sig=36 passt zur Haendigkeit (links); c=65; det=13.",
+      "gegenprobe": "Gegenfall geprueft: derselbe Zopf gegen T(3,4)/T(2,3)/T(4,5)/T(5,7) 4x False (gegenfall.py).",
+      "vorher": "precellipse_6_13",
+      "datum": "2026-08-09",
+      "disc": 607
+    },
+    "T_7_8_sig30": {
+      "stems": [
+        "ladder_T7_8"
+      ],
+      "knot": "T(7,8), linkshaendig",
+      "beweis": "Zopf-Konjugation: das braid_word des Records (aus der EIGENEN PD, 7 Straenge, Laenge 48) ist in Sage (BraidGroup.is_conjugated) konjugiert zu (s1..s6)^-8. Konjugierte Zoepfe haben isotope Abschluesse. Weg: direkt (n=p, keine Stabilisierung noetig). NICHT aus Invarianten-Gleichheit geschlossen.",
+      "stuetzend": "Alexander exakt = Delta_T(7,8) (Grad 42 legt (p-1)(q-1) fest, Suche vollstaendig); sig=30 passt zur Haendigkeit (links); c=48; det=7.",
+      "gegenprobe": "Gegenfall geprueft: derselbe Zopf gegen T(3,4)/T(2,3)/T(4,5)/T(5,7) 4x False (gegenfall.py).",
+      "vorher": "ladder_T7_8",
+      "datum": "2026-08-09",
+      "disc": 607
+    },
+    "T_4_5_sig8": {
+      "stems": [
+        "st_dn4_s12",
+        "st_dn5_s20_x4z2d45"
+      ],
+      "knot": "T(4,5), linkshaendig",
+      "beweis": "Zopf-Konjugation: das braid_word des Records (aus der EIGENEN PD, 4 Straenge, Laenge 15) ist in Sage (BraidGroup.is_conjugated) konjugiert zu (s1..s3)^-5. Konjugierte Zoepfe haben isotope Abschluesse. Weg: direkt (n=p, keine Stabilisierung noetig). NICHT aus Invarianten-Gleichheit geschlossen.",
+      "stuetzend": "Alexander exakt = Delta_T(4,5) (Grad 12 legt (p-1)(q-1) fest, Suche vollstaendig); sig=8 passt zur Haendigkeit (links); c=15; det=5.",
+      "gegenprobe": "Gegenfall geprueft: derselbe Zopf gegen T(3,4)/T(2,3)/T(4,5)/T(5,7) 4x False (gegenfall.py).",
+      "vorher": "st_dn4_s12",
+      "datum": "2026-08-09",
+      "disc": 607
+    },
+    "T_5_8_sig20": {
+      "stems": [
+        "ph_F5_F8"
+      ],
+      "knot": "T(5,8), linkshaendig",
+      "beweis": "Zopf-Konjugation: das braid_word des Records (aus der EIGENEN PD, 5 Straenge, Laenge 32) ist in Sage (BraidGroup.is_conjugated) konjugiert zu (s1..s4)^-8. Konjugierte Zoepfe haben isotope Abschluesse. Weg: direkt (n=p, keine Stabilisierung noetig). NICHT aus Invarianten-Gleichheit geschlossen.",
+      "stuetzend": "Alexander exakt = Delta_T(5,8) (Grad 28 legt (p-1)(q-1) fest, Suche vollstaendig); sig=20 passt zur Haendigkeit (links); c=32; det=5.",
+      "gegenprobe": "Gegenfall geprueft: derselbe Zopf gegen T(3,4)/T(2,3)/T(4,5)/T(5,7) 4x False (gegenfall.py).",
+      "vorher": "ph_F5_F8",
+      "datum": "2026-08-09",
+      "disc": 607
+    },
+    "T_6_7_sig-18": {
+      "stems": [
+        "kf285_polyc07_sh-0.5_tw0",
+        "kf286_polyc07_sh-0.5_tw+1",
+        "st_dn6_s14_x3z2d55"
+      ],
+      "knot": "T(6,7), rechtshaendig",
+      "beweis": "Zopf-Konjugation: das braid_word des Records (aus der EIGENEN PD, 6 Straenge, Laenge 35) ist in Sage (BraidGroup.is_conjugated) konjugiert zu (s1..s5)^+7. Konjugierte Zoepfe haben isotope Abschluesse. Weg: direkt (n=p, keine Stabilisierung noetig). NICHT aus Invarianten-Gleichheit geschlossen.",
+      "stuetzend": "Alexander exakt = Delta_T(6,7) (Grad 30 legt (p-1)(q-1) fest, Suche vollstaendig); sig=-18 passt zur Haendigkeit (rechts); c=35; det=7.",
+      "gegenprobe": "Gegenfall geprueft: derselbe Zopf gegen T(3,4)/T(2,3)/T(4,5)/T(5,7) 4x False (gegenfall.py).",
+      "vorher": "kf285_polyc07_sh-0.5_tw0",
+      "datum": "2026-08-09",
+      "disc": 607
+    },
+    "T_4_5_sig-8": {
+      "stems": [
+        "st_dn4_s12_x4z2d45"
+      ],
+      "knot": "T(4,5), rechtshaendig",
+      "beweis": "Zopf-Konjugation: das braid_word des Records (aus der EIGENEN PD, 4 Straenge, Laenge 15) ist in Sage (BraidGroup.is_conjugated) konjugiert zu (s1..s3)^+5. Konjugierte Zoepfe haben isotope Abschluesse. Weg: direkt (n=p, keine Stabilisierung noetig). NICHT aus Invarianten-Gleichheit geschlossen.",
+      "stuetzend": "Alexander exakt = Delta_T(4,5) (Grad 12 legt (p-1)(q-1) fest, Suche vollstaendig); sig=-8 passt zur Haendigkeit (rechts); c=15; det=5.",
+      "gegenprobe": "Gegenfall geprueft: derselbe Zopf gegen T(3,4)/T(2,3)/T(4,5)/T(5,7) 4x False (gegenfall.py).",
+      "vorher": "st_dn4_s12_x4z2d45",
+      "datum": "2026-08-09",
+      "disc": 607
+    }
+  }
+}

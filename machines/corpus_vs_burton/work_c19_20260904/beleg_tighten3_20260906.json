@@ -1,0 +1,50 @@
+{
+ "_meta": {
+  "date": "2026-09-06",
+  "lauf": "work_c19_20260904 Stage B v4",
+  "quelle_kandidaten": "candidates_stageA.jsonl (Stage A 04.-06.09., 350.449.955 Knoten, alle 6 Kategorien exakt, detfails=0)",
+  "methode": "det-Filter -> Volumen 1e-3 -> PFLICHT is_isometric_to"
+ },
+ "beleg": {
+  "fleet_n4_2_3_7_7": [
+   {
+    "burton_name": "19ah_00001296",
+    "burton_dt": "qrnopjklmsfghbcdeai",
+    "burton_sig": "tabcdeabcfghijklmnopqrsdemnopqrsfghijklvvvvvvb------d",
+    "det": 329,
+    "ziel_vol": 16.555210103672042,
+    "burton_vol": 16.555210103672042,
+    "vol_diff": 0.0,
+    "crossing": "19a",
+    "confirmed_by": "is_isometric_to"
+   }
+  ],
+  "fleet_n5_3_3_3_5_5": [
+   {
+    "burton_name": "19ah_00087006",
+    "burton_dt": "lkjmonpsrqbadcegfih",
+    "burton_sig": "tabcdefghijklmnoapqrsdcbgfejihonmlksrqpvvvvvvb------d",
+    "det": 945,
+    "ziel_vol": 23.916260730340195,
+    "burton_vol": 23.916260730340216,
+    "vol_diff": 2.1316282072803006e-14,
+    "crossing": "19a",
+    "confirmed_by": "is_isometric_to"
+   }
+  ],
+  "fleet_n4_2_5_5_7": [
+   {
+    "burton_name": "19ah_00002014",
+    "burton_dt": "pqrnojklmsfghcdeabi",
+    "burton_sig": "tabcdefgabcdehijklmnopqrsfgmnopqrshijklvvvvvvb------d",
+    "det": 365,
+    "ziel_vol": 17.33435199395676,
+    "burton_vol": 17.33435199395675,
+    "vol_diff": 7.105427357601002e-15,
+    "crossing": "19a",
+    "confirmed_by": "is_isometric_to"
+   }
+  ]
+ },
+ "unentscheidbar": []
+}

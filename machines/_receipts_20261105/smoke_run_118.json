@@ -1,0 +1,946 @@
+[
+ {
+  "script": "machines/01_knotting_oscillations/generate_oscillation_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 6.4,
+  "last": "[DEMO] 4/4 green \u2014 machine ready to fire (firing only after Monday)."
+ },
+ {
+  "script": "machines/02_plugging_tangles/generate_tangle_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 4.4,
+  "last": "[DEMO] 4/4 green \u2014 machine ready to fire (firing only after Monday)."
+ },
+ {
+  "script": "machines/03_drawing_on_surfaces/generate_billiard_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 4.4,
+  "last": "[DEMO] 5/5 green \u2014 billiard stage ready to fire (firing after Monday)."
+ },
+ {
+  "script": "machines/06_eating_own_output/generate_satellite_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 4.1,
+  "last": "[DEMO] 5/5 green \u2014 recursion machine ready to fire (firing after Monday; depth>2 = high-crossing doctrine)."
+ },
+ {
+  "script": "machines/07_closing_differently/generate_braid_closures.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 4.2,
+  "last": "[DEMO] 6/6 green \u2014 closure axis ready to fire (firing after Monday; the_knotfamily_machine untouched)."
+ },
+ {
+  "script": "machines/08_collection_tray/generate_petal_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 4.4,
+  "last": "[DEMO] 3/3 green \u2014 petal axis ready to fire (firing after Monday)."
+ },
+ {
+  "script": "machines/100_summing_the_knots/generate_connected_sums.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 5.1,
+  "last": "[DEMO] 3/3 green \u2014 sum machine ready to fire (det multiplicative + \u03b8 under # = firing bets; anchor 1 wire)."
+ },
+ {
+  "script": "machines/102_starving_the_resolution/generate_resolution_ladder.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 7.7,
+  "last": "[DEMO] 3/3 green \u2014 resolution ladder ready to fire (the doctrine gets its own measurement curve)."
+ },
+ {
+  "script": "machines/10_climbing_the_torus_ladder/generate_torus_ladder.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 1.8,
+  "last": "[DEMO] 5/5 green \u2014 ladder ready to fire (firing after Monday; neighbourhoods = compute plan/wall doctrine)."
+ },
+ {
+  "script": "machines/110_scaling_the_mutants/generate_scaled_mutants.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 11.2,
+  "last": "[DEMO] 2/2 green \u2014 scaling machine ready to fire (\u03b8 separation power vs size = firing question)."
+ },
+ {
+  "script": "machines/111_reversing_the_arrow/generate_reversal_pairs.py",
+  "env": "base",
+  "arg": "demo",
+  "rc": 1,
+  "sec": 0.2,
+  "last": "[DEMO] Smoke test machine 111 (orientation pairs)"
+ },
+ {
+  "script": "machines/114_cabling_the_ghosts/generate_ghost_cables.py",
+  "env": "sage_stable",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 3.5,
+  "last": "[DEMO] 3/3 green \u2014 ghost cable ready to fire (satellites against Lobb's homology blindness)."
+ },
+ {
+  "script": "machines/115_forging_the_rotoreflection/generate_rotoreflection_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 8.3,
+  "last": "[DEMO] 3/3 green \u2014 rotoreflection forge ready to fire (certified amphichirality in series, double-6 class)."
+ },
+ {
+  "script": "machines/117_stepping_the_delta/generate_delta_ladder.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 8.5,
+  "last": "[DEMO] 3/3 green \u2014 ladder stands. Bets: 117_delta_leiter.txt. Doctrine: do NOT fire."
+ },
+ {
+  "script": "machines/118_stacking_the_commutator/generate_commutator_ladder.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 12.5,
+  "last": "[DEMO] 3/3 green \u2014 staircase stands. Bets: 118_kommutator_treppe.txt. Doctrine: do NOT fire."
+ },
+ {
+  "script": "machines/119_ghosting_the_ladder/generate_ghost_ladder.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 39.5,
+  "last": "[DEMO] 3/3 green \u2014 ghost ladder stands. Bets: 119_geister_leiter.txt. Doctrine: do NOT fire."
+ },
+ {
+  "script": "machines/11_fusing_mirror_twins/generate_symmetric_unions.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 3.5,
+  "last": "[DEMO] 5/5 green \u2014 mirror-twin machine ready to fire (firing after Monday)."
+ },
+ {
+  "script": "machines/120_braiding_the_turks_head/generate_turks_heads.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 10.3,
+  "last": "[DEMO] 3/3 green \u2014 forge stands. Bets: 120_turks_head_schmiede.txt. Doctrine: do NOT fire."
+ },
+ {
+  "script": "machines/121_mirroring_the_staircase/generate_amphi_staircase.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 51.0,
+  "last": "[DEMO] 3/3 green \u2014 double staircase stands. Bets: 121_amphi_doppeltreppe.txt. Doctrine: do NOT fire."
+ },
+ {
+  "script": "machines/122_deepening_the_twins/generate_twin_wells.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 21.6,
+  "last": "[DEMO] 3/3 green \u2014 well stands. Bets: 122_zwillings_brunnen.txt. Doctrine: do NOT fire."
+ },
+ {
+  "script": "machines/123_ratcheting_the_signature/generate_signature_ratchet.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 11.2,
+  "last": "[DEMO] 3/3 green \u2014 ratchet stands. Bets: 123_signatur_ratsche.txt. Doctrine: do NOT fire."
+ },
+ {
+  "script": "machines/124_forging_the_fibers/generate_fiber_forge.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 9.2,
+  "last": "[DEMO] 3/3 green \u2014 forge stands. Bets: 124_faser_schmiede.txt. Doctrine: do NOT fire."
+ },
+ {
+  "script": "machines/125_banding_the_positives/generate_band_forge.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 9.0,
+  "last": "[DEMO] 3/3 green \u2014 forge stands. Bets: 125_band_schmiede.txt. Doctrine: do NOT fire."
+ },
+ {
+  "script": "machines/126_widening_the_loom/generate_loom4.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 9.2,
+  "last": "[DEMO] 3/3 green \u2014 loom stands. Bets: 126_vier_gassen_webstuhl.txt. Doctrine: do NOT fire."
+ },
+ {
+  "script": "machines/126_widening_the_loom/generate_loom6.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": ""
+ },
+ {
+  "script": "machines/127_pairing_the_conway_twins/generate_conway_twins.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 3.4,
+  "last": "[DEMO] 3/3 green \u2014 twins in place. Bets: 127_conway_zwillinge.txt. Doctrine: do NOT fire."
+ },
+ {
+  "script": "machines/129_crossing_the_ladders/generate_grid_lab.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 24.3,
+  "last": "[DEMO] 3/3 green \u2014 grid stands. Bets: 129_gitter_labor.txt. Doctrine: do NOT fire."
+ },
+ {
+  "script": "machines/12_filling_the_symmetry_table/generate_symmetry_columns.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 4.3,
+  "last": "[DEMO] 5/5 green \u2014 TWO new columns ready to fire, ONE impossibility theorem measured (D_nd = last open column)."
+ },
+ {
+  "script": "machines/12_filling_the_symmetry_table/generate_symmetry_table.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 31.7,
+  "last": "[DEMO] 3/3 green \u2014 symmetry table CLOSED: C_n/S_2n/D_nd built (old+115+116), C_nv/D_n/C_1h here, C_nh(n\u22652)/D_nh obstructed (derived + MEASURED)."
+ },
+ {
+  "script": "machines/130_braiding_the_roots/generate_lorenz_braids.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 53.3,
+  "last": "[DEMO] 3/3 green \u2014 root braid complete. Bets: 130_wurzel_zopf.txt. Doctrine: do NOT fire."
+ },
+ {
+  "script": "machines/131_pairing_the_theta_blind/generate_theta_blind_pair.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 4.5,
+  "last": "[DEMO] 3/3 green \u2014 letter pair in place. Bets: 131_theta_blind_paar.txt. Doctrine: do NOT fire."
+ },
+ {
+  "script": "machines/13_shrinking_into_itself/generate_selfsimilar_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 3.4,
+  "last": "[DEMO] 4/4 green \u2014 self-similarity machine ready to fire (firing after Monday; composite honestly labelled)."
+ },
+ {
+  "script": "machines/191_twisted_torus_hybrid/ondemand_e2e_2026-06-29/braid_to_fseries.py",
+  "env": "base",
+  "arg": "",
+  "rc": 1,
+  "sec": 0.2,
+  "last": "ValueError: not enough values to unpack (expected 4, got 0)"
+ },
+ {
+  "script": "machines/191_twisted_torus_hybrid/ondemand_e2e_2026-06-29/ondemand_e2e.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.1,
+  "last": "-> e2e_result.json  (+ e2e_measurements.jsonl)"
+ },
+ {
+  "script": "machines/19_knotting_square_roots/cf_to_lorenz_word.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 0.1,
+  "last": "[DEMO] 3/3 green \u2014 root converter stands. Doctrine: do NOT ignite; stage 2 = template curve."
+ },
+ {
+  "script": "machines/20_drumming_the_crossings/generate_rhythm_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 2.3,
+  "last": "[DEMO] 4/4 green \u2014 rhythm machine ready to fire (firing after Monday)."
+ },
+ {
+  "script": "machines/21_cloning_polynomial_ghosts/generate_kanenobu_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 32.3,
+  "last": "[DEMO] 3/3 green \u2014 Kanenobu machine BUILT (lit gate lifted; ignition: K(0,0)\u21924\u2081#4\u2081 + P=f(p+q))."
+ },
+ {
+  "script": "machines/247_doubling_the_split_prime/generate_split_doubler.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 3.3,
+  "last": "[DEMO] 4/4 smoke checks passed."
+ },
+ {
+  "script": "machines/257_widmark_polystix/hexastix_gen.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.5,
+  "last": "written: 0 .fseries in out_hex/ (after 0 search attempts)"
+ },
+ {
+  "script": "machines/257_widmark_polystix/polystix_gen.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "after neighbour bound None: 3840 of 3840 (0 discarded)"
+ },
+ {
+  "script": "machines/258_double_3_gitter_modul/einbettung.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 2.4,
+  "last": ""
+ },
+ {
+  "script": "machines/258_double_3_gitter_modul/gitter_bauen.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 53.5,
+  "last": "   \u2192 ./gitter_d3_k3_s1p35.fseries"
+ },
+ {
+  "script": "machines/258_double_3_gitter_modul/sweep.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 34.3,
+  "last": "0 built, 20 failed \u2192 sweep.json"
+ },
+ {
+  "script": "machines/259_ueberknoten/bauen.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 46.0,
+  "last": "   \u2192 ./gitter_d3_k3_s1p35.fseries"
+ },
+ {
+  "script": "machines/259_ueberknoten/neubau.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 124,
+  "sec": 180.0,
+  "last": ""
+ },
+ {
+  "script": "machines/26_listening_to_number_noise/generate_number_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 14.9,
+  "last": "[DEMO] 4/4 green \u2014 number noise ready to fire (spectra comparison = ignition program)."
+ },
+ {
+  "script": "machines/27_pumping_the_twist_account/generate_writhe_pumped.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 25.6,
+  "last": "[DEMO] 4/4 green \u2014 twist pump ready to fire (forgetting bet = ignition program, series is ready)."
+ },
+ {
+  "script": "machines/30_encoding_with_knots/generate_code_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 5.8,
+  "last": "[DEMO] 3/3 green \u2014 code machine ready to fire (code\u2194knot-distance = open question in the manifest)."
+ },
+ {
+  "script": "machines/31_crossing_the_fan/generate_hybrid_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 2.8,
+  "last": "[DEMO] 4/4 green \u2014 hybrid machine ready to fire (signed-intersection theorem predicted+measured, 12\u00d710 hybrid built)."
+ },
+ {
+  "script": "machines/34_folding_panels/generate_band_boundary.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 9.0,
+  "last": "[DEMO] 4/4 green \u2014 band edge machine ready to fire (panel stage = extension)."
+ },
+ {
+  "script": "machines/38_twisting_the_backbone/generate_backbone_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 5.1,
+  "last": "[DEMO] 3/3 green \u2014 backbone machine ready to fire (balanced resonance rings)."
+ },
+ {
+  "script": "machines/39_scribbling_then_lifting/generate_scribble_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 18.3,
+  "last": "[DEMO] 3/3 green \u2014 scribble machine ready to fire (alternating knots on the assembly line)."
+ },
+ {
+  "script": "machines/44_cabling_the_spine/generate_cable_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 4.3,
+  "last": "[DEMO] 3/3 green \u2014 cable machine ready to fire (06\u00d734 triangle closed)."
+ },
+ {
+  "script": "machines/46_lacing_the_boots/generate_lacing_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 4.4,
+  "last": "[DEMO] 4/4 green \u2014 lacing machine ready to fire (ignition question: the first knotted lacing)."
+ },
+ {
+  "script": "machines/48_folding_dragons/generate_dragon_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 4.7,
+  "last": "[DEMO] 5/5 green \u2014 dragon machine ready to fire (cube-free words at the knot level = ignition question)."
+ },
+ {
+  "script": "machines/49_bending_space_conformally/generate_inversion_knots.py",
+  "env": "base",
+  "arg": "demo",
+  "rc": 1,
+  "sec": 0.2,
+  "last": "  (2) circle\u2192circle: radius residual=4.74e-15  \u2713"
+ },
+ {
+  "script": "machines/51_walking_the_gyroid/generate_gyroid_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 3.1,
+  "last": "[DEMO] 4/4 green \u2014 gyroid machine ready to fire (space-group symmetry of the paths = ignition measurement)."
+ },
+ {
+  "script": "machines/52_nesting_gimbals/generate_gimbal_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 2.3,
+  "last": "[DEMO] 5/5 green \u2014 gimbal machine ready to fire (axis geometry = new parameter space, theorem measured)."
+ },
+ {
+  "script": "machines/54_morphing_between_works/generate_morph_paths.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 20.6,
+  "last": "[DEMO] 5/5 green \u2014 morph machine ready to fire (profile archived; type edges = ignition measurement)."
+ },
+ {
+  "script": "machines/56_projecting_from_four_dimensions/generate_stereographic_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 1.6,
+  "last": "[DEMO] 5/5 green \u2014 stereography machine ready to fire (torus ladder drops out exactly, Hopf door open)."
+ },
+ {
+  "script": "machines/57_bouncing_in_the_box/generate_billiard_box_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 1.7,
+  "last": "[DEMO] 4/4 green \u2014 billiard machine ready to fire (Lissajous = smooth shadow, angular world = new territory)."
+ },
+ {
+  "script": "machines/60_slicing_singularities/generate_milnor_links.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 5.2,
+  "last": "[DEMO] 5/5 green \u2014 Milnor machine ready to fire (cable towers from algebra; roof over 10/44/56)."
+ },
+ {
+  "script": "machines/61_entangling_complete_graphs/generate_conway_gordon_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 4.8,
+  "last": "[DEMO] 4/4 green \u2014 Conway\u2013Gordon machine ready to fire (the unavoidable entanglement, secured by the theorem)."
+ },
+ {
+  "script": "machines/63_tracing_field_lines/generate_field_line_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 30.7,
+  "last": "[DEMO] 4/4 green \u2014 field-line machine ready to fire (the invisible field of the sculpture, now measurable)."
+ },
+ {
+  "script": "machines/64_counting_the_sticks/generate_stick_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 149.4,
+  "last": "[DEMO] 4/4 green \u2014 stick machine ready to fire (6 sticks, 1 trefoil candidate \u2014 the square-tube machine)."
+ },
+ {
+  "script": "machines/69_marking_the_grid/generate_grid_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 5.0,
+  "last": "[DEMO] 4/4 green \u2014 grid machine ready to fire (census-capable; arc index as new track)."
+ },
+ {
+  "script": "machines/71_meandering_the_river/generate_meander_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 22.7,
+  "last": "[DEMO] 3/3 green \u2014 meander machine ready to fire (census 1,2,8,42 self-confirmed; knot map = ignition)."
+ },
+ {
+  "script": "machines/72_swinging_double_pendulums/generate_pendulum_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 18.5,
+  "last": "[DEMO] 4/4 green \u2014 double-pendulum machine ready to fire (Hamiltonian chaos as a knot source, energy guard armed)."
+ },
+ {
+  "script": "machines/73_unrolling_continued_fractions/generate_cf_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 2.6,
+  "last": "[DEMO] 4/4 green \u2014 continued-fraction machine ready to fire (det=p by construction; the \u03c0 knot waits for stainless steel)."
+ },
+ {
+  "script": "machines/74_plaiting_pretzels/generate_pretzel_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 2.5,
+  "last": "[DEMO] 4/4 green \u2014 pretzel machine ready to fire (the missing classical family; det formula = ignition track)."
+ },
+ {
+  "script": "machines/76_stirring_the_taffy/generate_taffy_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 1.2,
+  "last": "[DEMO] 4/4 green \u2014 taffy machine ready to fire (pA protocols as a knot source, \u03bb=\u03c6\u00b2 exact)."
+ },
+ {
+  "script": "machines/81_clasping_the_double/generate_whitehead_doubles.py",
+  "env": "base",
+  "arg": "demo",
+  "rc": 1,
+  "sec": 9.6,
+  "last": "  (3) wh_trefoil: nyq=None  \u2717 FAIL: topo gate (keine (rho,H)-Kombi liefert knotende fseries)"
+ },
+ {
+  "script": "machines/81_clasping_the_double/loom_realize/generate_loom7.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": ""
+ },
+ {
+  "script": "machines/81_clasping_the_double/loom_realize/realize_W_trefoil.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 3.5,
+  "last": "  -> .fseries written: <repo>/machines/81_clasping_the_double/loom_realize/W"
+ },
+ {
+  "script": "machines/82_tensing_the_cage/generate_tensegrity_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 1.4,
+  "last": "[DEMO] 4/4 green \u2014 tensegrity machine ready to fire (form-finding exact; stainless-steel struts + rope knot buildable)."
+ },
+ {
+  "script": "machines/84_scattering_off_the_disk/generate_sinai_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 7.0,
+  "last": "[DEMO] 3/3 green \u2014 Sinai machine ready to fire (chaos billiard; 57+84 = the integrable/chaotic pair)."
+ },
+ {
+  "script": "machines/86_counting_sunflower_spirals/generate_phyllotaxis_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 1.8,
+  "last": "[DEMO] 4/4 green \u2014 phyllotaxis machine ready to fire (the sunflower delivers its own torus knots)."
+ },
+ {
+  "script": "machines/89_orbiting_the_black_hole/generate_kerr_photon_knots.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 17.8,
+  "last": "[DEMO] 4/4 green \u2014 Kerr machine ready to fire (the knot that light ties around the black hole)."
+ },
+ {
+  "script": "machines/90_rotating_the_tangle_ball/generate_mutant_pairs.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 9.0,
+  "last": "[DEMO] 5/5 green \u2014 mutant factory REPAIRED (twist+clasp, deterministic; det!=1 mandatory at ignition; s0 lesson documented)."
+ },
+ {
+  "script": "machines/93_cabling_the_mutants/generate_mutant_cables.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 7.1,
+  "last": "[DEMO] 3/3 green \u2014 cable machine ready to fire (the mutant detector waits for ignition)."
+ },
+ {
+  "script": "machines/94_ghosting_with_two_bands/generate_two_band_ghosts.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 6.4,
+  "last": "[DEMO] 4/4 green \u2014 ghost machine ready to fire (ignition bet: polynomials == f(p+q)? \u2014 own numbers, no lookup)."
+ },
+ {
+  "script": "machines/96_swapping_pretzel_strands/generate_pretzel_mutants.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 5.3,
+  "last": "[DEMO] 3/3 green \u2014 pretzel mutant machine ready to fire (citable pairs; polynomial collision = ignition duty)."
+ },
+ {
+  "script": "machines/99_braiding_only_positive/generate_positive_braids.py",
+  "env": "gnottheorie_env",
+  "arg": "demo",
+  "rc": 0,
+  "sec": 5.2,
+  "last": "[DEMO] 3/3 green \u2014 positive-braid machine ready to fire (the pipeline is tested on knots whose genus we KNOW BEFOREHAND)."
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_connectsum_ring.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "3 modules generated."
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "12 modules generated under <repo>/output"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_polygon.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "8 knots generated under <repo>/output"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_polygon_wave2.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.4,
+  "last": "10/10 knots generated under <repo>/output"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_shearsweep.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "Shearsweep index: <repo>/output/shearsweep_index.json"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave10.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "\u2192 26 fseries-Files in erzeugte_knoten/kf{121..146}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave11.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "\u2192 10 fseries files in erzeugte_knoten/kf{147..156}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave13.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.3,
+  "last": "\u2192 16 fseries files in erzeugte_knoten/kf{170..185}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave14.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "\u2192 6 fseries files in erzeugte_knoten/kf{186..191}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave15.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "\u2192 6 fseries files in erzeugte_knoten/kf{192..197}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave16.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.3,
+  "last": "\u2192 16 fseries files in erzeugte_knoten/kf{198..213}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave17.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "\u2192 12 fseries files in erzeugte_knoten/kf{214..225}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave18.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "\u2192 8 fseries files in erzeugte_knoten/kf{226..233}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave19.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "\u2192 8 fseries-Files in erzeugte_knoten/kf{234..241}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave2.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "Wave2-Index: <repo>/output/wave2_index.json"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave20.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "\u2192 9 fseries files in erzeugte_knoten/kf{242..250}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave21.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "\u2192 8 fseries files in erzeugte_knoten/kf{251..258}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave22.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "\u2192 9 fseries-Files in erzeugte_knoten/kf{259..267}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave23.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "-> 8 fseries files in erzeugte_knoten/kf{268..275}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave24.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "-> 8 fseries files in erzeugte_knoten/kf{276..283}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave25.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "-> 8 fseries-Files in erzeugte_knoten/kf{284..291}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave26.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "-> 11 fseries files in erzeugte_knoten/kf{292..302}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave27.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "-> 8 fseries files in erzeugte_knoten/kf{303..310}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave28.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "-> 10 fseries files in erzeugte_knoten/kf{311..320}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave29.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.3,
+  "last": "Wrote <repo>/output/wave29_index.json (19 variants)"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave3.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.3,
+  "last": "Wave3-Index: <repo>/output/wave3_index.json"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave30.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.4,
+  "last": "Wrote <repo>/output/wave30_index.json (15 variants)"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave31.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "Wrote <repo>/output/wave31_index.json (16 variants)"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave32.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "-> 8 fseries files in erzeugte_knoten/kf{371..378}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave4.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.3,
+  "last": "10 modules generated under <repo>/output"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave5.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "10 modules generated under <repo>/output"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave6.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "9 modules generated under <repo>/output"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave7.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "\u2192 12 fseries files in erzeugte_knoten/kf{74..85}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave8.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "\u2192 15 fseries-Files in erzeugte_knoten/kf{86..100}_*/"
+ },
+ {
+  "script": "machines/the_knotfamily_machine/make_family_wave9.py",
+  "env": "gnottheorie_env",
+  "arg": "",
+  "rc": 0,
+  "sec": 0.2,
+  "last": "\u2192 20 fseries files in erzeugte_knoten/kf{101..120}_*/"
+ }
+]

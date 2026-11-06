@@ -1,0 +1,56 @@
+# Which machine folder names another machine folder in its .py files (measured 6 Nov 2026, after the renames).
+# Keep machines/ intact: these folders import from, or read files of, their siblings.
+01_knotting_oscillations -> the_knotfamily_machine
+07_closing_differently -> the_knotfamily_machine
+10_climbing_the_torus_ladder -> the_knotfamily_machine
+11_fusing_mirror_twins -> 02_plugging_tangles 07_closing_differently
+12_filling_the_symmetry_table -> the_knotfamily_machine
+13_shrinking_into_itself -> 06_eating_own_output
+20_drumming_the_crossings -> 07_closing_differently
+26_listening_to_number_noise -> 07_closing_differently
+27_pumping_the_twist_account -> 06_eating_own_output
+30_encoding_with_knots -> 07_closing_differently
+31_crossing_the_fan -> 01_knotting_oscillations 10_climbing_the_torus_ladder 12_filling_the_symmetry_table the_knotfamily_machine
+32_running_through_effects_pedals -> 12_filling_the_symmetry_table the_knotfamily_machine
+34_folding_panels -> 06_eating_own_output
+44_cabling_the_spine -> 06_eating_own_output 34_folding_panels
+46_lacing_the_boots -> 39_scribbling_then_lifting
+47_breeding_for_strangeness -> 10_climbing_the_torus_ladder 27_pumping_the_twist_account 31_crossing_the_fan 32_running_through_effects_pedals the_knotfamily_machine
+48_folding_dragons -> 07_closing_differently 38_twisting_the_backbone
+49_bending_space_conformally -> the_knotfamily_machine
+54_morphing_between_works -> the_knotfamily_machine
+60_slicing_singularities -> 56_projecting_from_four_dimensions
+61_entangling_complete_graphs -> 27_pumping_the_twist_account
+63_tracing_field_lines -> 10_climbing_the_torus_ladder 61_entangling_complete_graphs the_knotfamily_machine
+64_counting_the_sticks -> 27_pumping_the_twist_account
+69_marking_the_grid -> 27_pumping_the_twist_account
+71_meandering_the_river -> 39_scribbling_then_lifting
+73_unrolling_continued_fractions -> 07_closing_differently
+76_stirring_the_taffy -> 07_closing_differently 27_pumping_the_twist_account the_knotfamily_machine
+80_folding_the_chain -> 27_pumping_the_twist_account
+81_clasping_the_double -> 10_climbing_the_torus_ladder the_knotfamily_machine
+90_rotating_the_tangle_ball -> 27_pumping_the_twist_account
+93_cabling_the_mutants -> 81_clasping_the_double 90_rotating_the_tangle_ball the_knotfamily_machine
+94_ghosting_with_two_bands -> 07_closing_differently
+99_braiding_only_positive -> 07_closing_differently
+100_summing_the_knots -> 10_climbing_the_torus_ladder the_knotfamily_machine
+102_starving_the_resolution -> 27_pumping_the_twist_account 100_summing_the_knots the_knotfamily_machine
+110_scaling_the_mutants -> 90_rotating_the_tangle_ball 100_summing_the_knots
+111_reversing_the_arrow -> 47_breeding_for_strangeness 80_folding_the_chain 84_scattering_off_the_disk the_knotfamily_machine
+114_cabling_the_ghosts -> 21_cloning_polynomial_ghosts 81_clasping_the_double 93_cabling_the_mutants the_knotfamily_machine
+118_stacking_the_commutator -> 117_stepping_the_delta
+119_ghosting_the_ladder -> 10_climbing_the_torus_ladder 81_clasping_the_double 117_stepping_the_delta the_knotfamily_machine
+120_braiding_the_turks_head -> 10_climbing_the_torus_ladder 81_clasping_the_double 117_stepping_the_delta 119_ghosting_the_ladder
+121_mirroring_the_staircase -> 117_stepping_the_delta 118_stacking_the_commutator
+122_deepening_the_twins -> 117_stepping_the_delta
+123_ratcheting_the_signature -> 117_stepping_the_delta 122_deepening_the_twins
+124_forging_the_fibers -> 117_stepping_the_delta
+125_banding_the_positives -> 117_stepping_the_delta
+127_pairing_the_conway_twins -> 126_widening_the_loom
+129_crossing_the_ladders -> 117_stepping_the_delta 124_forging_the_fibers
+130_braiding_the_roots -> 19_knotting_square_roots
+131_pairing_the_theta_blind -> 126_widening_the_loom
+257_widmark_polystix -> the_knotfamily_machine
+258_double_3_lattice_module -> the_knotfamily_machine
+259_over_knots -> 258_double_3_lattice_module the_knotfamily_machine
+# folders with sibling references: 53 of 77

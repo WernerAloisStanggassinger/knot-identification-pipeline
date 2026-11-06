@@ -1,0 +1,16 @@
+[DEMO] Smoke-Test Maschine 81 (Whitehead-Doubles)
+  (1) Bishop-Rahmen: Ortho 1.7e-16, Drall 1.25e-03→3.08e-04 (n×4 ⇒ falls — twist-free in Limes)  ✓
+  (2) Rohr-Treue (Basis): |Abstand−ρ|/ρ ≤ 0.0005  ✓
+  (3) wh_trefoil: nyq=None  ✗ FAIL: topo gate (keine (rho,H)-Kombi liefert knotende fseries)
+Traceback (most recent call last):
+  File "<scratch>/81_clasping_the_double/generate_whitehead_doubles.py", line 310, in <module>
+    main()
+    ~~~~^^
+  File "<scratch>/81_clasping_the_double/generate_whitehead_doubles.py", line 306, in main
+    cmd_demo(None)
+    ~~~~~~~~^^^^^^
+  File "<scratch>/81_clasping_the_double/generate_whitehead_doubles.py", line 289, in cmd_demo
+    assert ok3
+           ^^^
+AssertionError
+rc=1 env=miniforge3 base python, ORIGINAL code maschinen_ideen/81_clasping_the_double (scratch copy), 2026-11-05 16:05:29

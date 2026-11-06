@@ -1,0 +1,15 @@
+[DEMO] Smoke-Test Maschine 47 (Evolutions-Maschine)
+  (1) Proxy-Eichung: Kreis Wr=0.0000/ACN=0.000, T(2,3) Wr=-3.424/ACN=4.34  ✓
+  (2) Bestand: 6 Korpus-Proxy-Punkte (11_51__m127_conway, 11_58__m127_conway, 11a_263__fleet_n4_…)  ✓
+  (3) Novelty trajectory over generations: [1.684, 1.6971, 1.6971, 1.6971, 1.6971]  ✓ Fortschritt
+  (4) Zucht-Sieger: Wr=1.3714, ACN=11.6332, novelty=1.6971, nyq=None  ✗ FAIL: embedding gate (Voll-Auflösung)
+Traceback (most recent call last):
+  File "<scratch>/47_breeding_for_strangeness/generate_evolution_knots.py", line 242, in <module>
+    main()
+  File "<scratch>/47_breeding_for_strangeness/generate_evolution_knots.py", line 238, in main
+    cmd_demo(None)
+  File "<scratch>/47_breeding_for_strangeness/generate_evolution_knots.py", line 227, in cmd_demo
+    assert ok4
+           ^^^
+AssertionError
+rc=1 env=gnottheorie_env, ORIGINAL code maschinen_ideen/47_breeding_for_strangeness (scratch copy of all machine .py), 2026-11-05 16:05:35

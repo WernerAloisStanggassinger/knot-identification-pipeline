@@ -1,0 +1,102 @@
+{
+ "_meta": {
+  "date": "2026-09-06",
+  "lauf": "work_c19_20260904 Stage B v4",
+  "quelle_kandidaten": "candidates_stageA.jsonl (Stage A 04.-06.09., 350.449.955 Knoten, alle 6 Kategorien exakt, detfails=0)",
+  "methode": "det-Filter -> Volumen 1e-3 -> PFLICHT is_isometric_to"
+ },
+ "beleg": {
+  "S_18_d27_D3_chiral_sig-6": [
+   {
+    "burton_name": "18nh_00058834",
+    "burton_dt": "hImGkQNoLBePaFcRJD",
+    "burton_sig": "sabcdefghbijklmnohepqoaicdjmrqgfpklrnlZSYmlp8p8p8",
+    "det": 27,
+    "ziel_vol": 18.023757576944814,
+    "burton_vol": 18.02375757694482,
+    "vol_diff": 7.105427357601002e-15,
+    "crossing": "18n",
+    "confirmed_by": "is_isometric_to"
+   }
+  ],
+  "fleet_n6_2_3_3_3_3_5": [
+   {
+    "burton_name": "19ah_00576114",
+    "burton_dt": "qrpnomjklsghefdbcai",
+    "burton_sig": "tabcdeabcfghijklmnopqrsdeopqrslmnijkfghvvvvvvb------d",
+    "det": 1647,
+    "ziel_vol": 27.30859356178017,
+    "burton_vol": 27.308593561780164,
+    "vol_diff": 7.105427357601002e-15,
+    "crossing": "19a",
+    "confirmed_by": "is_isometric_to"
+   }
+  ],
+  "fleet_n5_3_3_3_3_7": [
+   {
+    "burton_name": "19ah_00055082",
+    "burton_dt": "mlkjnpoqsrcbaedfhgi",
+    "burton_sig": "tabcdefghijklmanopqrsdcbgfejihmlksrqponvvvvvvb------d",
+    "det": 837,
+    "ziel_vol": 23.105070747309007,
+    "burton_vol": 23.10507074730902,
+    "vol_diff": 1.4210854715202004e-14,
+    "crossing": "19a",
+    "confirmed_by": "is_isometric_to"
+   }
+  ],
+  "pz_3_5_11": [
+   {
+    "burton_name": "19ah_00000037",
+    "burton_dt": "onmlkjpsrqedcbagfih",
+    "burton_sig": "tabcdefghiajklmnopqrsdcbihgfesrqponmlkjvvvvvvb------d",
+    "det": 103,
+    "ziel_vol": 10.39615247507839,
+    "burton_vol": 10.396152475078388,
+    "vol_diff": 1.7763568394002505e-15,
+    "crossing": "19a",
+    "confirmed_by": "is_isometric_to"
+   }
+  ],
+  "pz_3_7_9": [
+   {
+    "burton_name": "19ah_00000043",
+    "burton_dt": "nmlkjosrqpdcbafeihg",
+    "burton_sig": "tabcdefghijkalmnopqrsdcbkjihgfesrqponmlvvvvvvb------d",
+    "det": 111,
+    "ziel_vol": 10.720058447435246,
+    "burton_vol": 10.720058447435239,
+    "vol_diff": 7.105427357601002e-15,
+    "crossing": "19a",
+    "confirmed_by": "is_isometric_to"
+   }
+  ],
+  "kaw_hit_k2_s7": [
+   {
+    "burton_name": "19nh_000768690",
+    "burton_dt": "pKRiLBjcMsfOqHEaDng",
+    "burton_sig": "tabcdefgahijeklbmnjopfkqrlgpoismcrqdnshhTPLL4aZNe3omc",
+    "det": 117,
+    "ziel_vol": 21.0507837635807,
+    "burton_vol": 21.0507837635807,
+    "vol_diff": 0.0,
+    "crossing": "19n",
+    "confirmed_by": "is_isometric_to"
+   }
+  ],
+  "lj_4_5_11_ph1p571_1p571_0p000": [
+   {
+    "burton_name": "19nh_013927849",
+    "burton_dt": "pHoKIqsABNrCfEDgMjl",
+    "burton_sig": "tabcdefgahijklmnopcqgrhijosdemlfqbpsnkrxjkTMPb7Fm6p1a",
+    "det": 225,
+    "ziel_vol": 25.501559396927583,
+    "burton_vol": 25.50155939692759,
+    "vol_diff": 7.105427357601002e-15,
+    "crossing": "19n",
+    "confirmed_by": "is_isometric_to"
+   }
+  ]
+ },
+ "unentscheidbar": []
+}

@@ -1,0 +1,381 @@
+{
+ "_meta": {
+  "source": "maguire_hyp_jones_census_c_le_17",
+  "url": "https://knots.dartmouth.edu/~rmaguire/knot_data/jones/",
+  "date": "2026-07-10",
+  "disc": [
+   512,
+   516
+  ],
+  "method": "Jones/det-Match gegen Maguire c<=17 hyp-Jones-Census, PFLICHT volumen-bestaetigt (Delta_vol <= ~1e-14). is_isometric_to statt vol+-Toleranz (Disc #516).",
+  "excluded_false_positives": [
+   "T_11_7_2_9",
+   "T_13_9_2_5"
+  ],
+  "excluded_reason": "(det,vol)-Beinahe-Kollisionen Delta_vol~1e-5, is_isometric_to=False -> bleiben beyond-17.",
+  "note": "Getrennt von crosscheck_knotinfo (KnotInfo c<=13). Dieses Feld = Maguire-Extended c14-17. Effekt: retracted distinct_knot_ids zaehlen als tabelliert (known), nicht novel.",
+  "boundary": "beyond-17 (weicher Boden: 90 unresolved no-Jones + 7 Kollisionen bleiben provisorisch novel; c18/19 nicht geladen)."
+ },
+ "retractions": {
+  "12n_881_sig4": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "12n",
+   "det": 121,
+   "vol": 17.01033178781739,
+   "maguire_vol": 17.010331787817396,
+   "vol_diff": 7.105427357601002e-15,
+   "maguire_dt": "jeLGbiDKfaHC"
+  },
+  "14a_13328": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "14a",
+   "det": 51,
+   "vol": 8.118898263271769,
+   "maguire_vol": 8.118898263271767,
+   "vol_diff": 1.7763568394002505e-15,
+   "maguire_dt": "cdiajklmnbefgh"
+  },
+  "14a_13401": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "14a",
+   "det": 297,
+   "vol": 20.069163179530218,
+   "maguire_vol": 20.069163179530218,
+   "vol_diff": 0.0,
+   "maguire_dt": "cdiamnljkbhfge"
+  },
+  "14a_19470": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "14a",
+   "det": 841,
+   "vol": 26.054401507265524,
+   "maguire_vol": 26.05440150726552,
+   "vol_diff": 3.552713678800501e-15,
+   "maguire_dt": "jklmnabcdefghi"
+  },
+  "S_15_d27_Z2_chiral": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "15n",
+   "det": 27,
+   "vol": 15.909110036727956,
+   "maguire_vol": 15.90911003672795,
+   "vol_diff": 5.329070518200751e-15,
+   "maguire_dt": "jfhLonKbceMGDai"
+  },
+  "S_15_d961_D3_chiral": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "15a",
+   "det": 961,
+   "vol": 27.546067328772427,
+   "maguire_vol": 27.546067328772445,
+   "vol_diff": 1.7763568394002505e-14,
+   "maguire_dt": "lkenmbajdcgfoih"
+  },
+  "S_16_d1595_Z2_chiral": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "16a",
+   "det": 1595,
+   "vol": 28.339361595370967,
+   "maguire_vol": 28.33936159537095,
+   "vol_diff": 1.7763568394002505e-14,
+   "maguire_dt": "klmnopbcdefaghij"
+  },
+  "S_16_d289_D9_chiral": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "16n",
+   "det": 289,
+   "vol": 23.747499909372184,
+   "maguire_vol": 23.747499909372195,
+   "vol_diff": 1.0658141036401503e-14,
+   "maguire_dt": "jMhoIBPlNaDcfEkG"
+  },
+  "S_16_d405_D10_chiral": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "15a",
+   "det": 405,
+   "vol": 21.544815448384742,
+   "maguire_vol": 21.54481544838475,
+   "vol_diff": 7.105427357601002e-15,
+   "maguire_dt": "ihjlkmonacbdfeg"
+  },
+  "S_16_d49_D6_amphi": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "16n",
+   "det": 49,
+   "vol": 15.884048274905483,
+   "maguire_vol": 15.884048274905485,
+   "vol_diff": 1.7763568394002505e-15,
+   "maguire_dt": "flpincHMaKOdGbJe"
+  },
+  "S_16_d525_D4_chiral": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "16a",
+   "det": 525,
+   "vol": 21.12229172372378,
+   "maguire_vol": 21.122291723723773,
+   "vol_diff": 7.105427357601002e-15,
+   "maguire_dt": "klniopbmcdfaghje"
+  },
+  "S_17_d151_Z2_Z2_chiral": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "15a",
+   "det": 151,
+   "vol": 12.509022871731823,
+   "maguire_vol": 12.509022871731828,
+   "vol_diff": 5.329070518200751e-15,
+   "maguire_dt": "kianmlojbhgfedc"
+  },
+  "S_17_d247_Z2_chiral": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "17a",
+   "det": 247,
+   "vol": 16.16308281669768,
+   "maguire_vol": 16.163082816697685,
+   "vol_diff": 3.552713678800501e-15,
+   "maguire_dt": "opmnijklqefgbcdah"
+  },
+  "S_17_d247_Z2_chiral_mut": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "17a",
+   "det": 247,
+   "vol": 16.16308281669768,
+   "maguire_vol": 16.163082816697685,
+   "vol_diff": 3.552713678800501e-15,
+   "maguire_dt": "opmnijklqefgbcdah"
+  },
+  "S_17_d9_Z2_chiral": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "17n",
+   "det": 9,
+   "vol": 16.0543547832015,
+   "maguire_vol": 16.054354783201507,
+   "vol_diff": 7.105427357601002e-15,
+   "maguire_dt": "iLMNkqCBpOdjHGEaf"
+  },
+  "S_23_d17_Z2_chiral": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "15n",
+   "det": 17,
+   "vol": 14.156291783743546,
+   "maguire_vol": 14.156291783743548,
+   "vol_diff": 1.7763568394002505e-15,
+   "maguire_dt": "iLhnGJMcbKFAEod"
+  },
+  "S_25_d423_Z2_chiral": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "17n",
+   "det": 423,
+   "vol": 24.949934661921926,
+   "maguire_vol": 24.949934661921912,
+   "vol_diff": 1.4210854715202004e-14,
+   "maguire_dt": "dFKmHoCPneBGqaiJl"
+  },
+  "conway_cw": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "11n",
+   "det": 1,
+   "vol": 11.21911772538136,
+   "maguire_vol": 11.21911772538136,
+   "vol_diff": 0.0,
+   "maguire_dt": "cjhFGIDakEb"
+  },
+  "conway_kt": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "11n",
+   "det": 1,
+   "vol": 11.219117725381361,
+   "maguire_vol": 11.21911772538136,
+   "vol_diff": 1.7763568394002505e-15,
+   "maguire_dt": "cjhFGIDakEb"
+  },
+  "fleet_n4_2_3_3_7": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "15a",
+   "det": 165,
+   "vol": 15.071552048181257,
+   "maguire_vol": 15.071552048181251,
+   "vol_diff": 5.329070518200751e-15,
+   "maguire_dt": "mnjklhiofbcdeag"
+  },
+  "fleet_n4_2_3_5_5": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "15a",
+   "det": 185,
+   "vol": 15.78159172606142,
+   "maguire_vol": 15.781591726061423,
+   "vol_diff": 3.552713678800501e-15,
+   "maguire_dt": "lmnkhijoefcdabg"
+  },
+  "fleet_n4_2_3_5_7": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "17a",
+   "det": 247,
+   "vol": 16.16308281669768,
+   "maguire_vol": 16.163082816697685,
+   "vol_diff": 3.552713678800501e-15,
+   "maguire_dt": "opmnijklqefgbcdah"
+  },
+  "fleet_n4_2_5_5_5": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "17a",
+   "det": 275,
+   "vol": 16.922315201851834,
+   "maguire_vol": 16.922315201851838,
+   "vol_diff": 3.552713678800501e-15,
+   "maguire_dt": "noplmijkqfgcdeabh"
+  },
+  "fleet_n5_2_3_3_3_5": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "16a",
+   "det": 459,
+   "vol": 21.180269691351658,
+   "maguire_vol": 21.18026969135166,
+   "vol_diff": 3.552713678800501e-15,
+   "maguire_dt": "cdjaopmnklbifghe"
+  },
+  "fleet_n5_3_3_3_3_5": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "17a",
+   "det": 621,
+   "vol": 22.70748535808461,
+   "maguire_vol": 22.707485358084597,
+   "vol_diff": 1.4210854715202004e-14,
+   "maguire_dt": "kjilnmoqpbadcegfh"
+  },
+  "fleet_n6_2_3_3_3_3_3": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "17a",
+   "det": 1053,
+   "vol": 26.146619125079788,
+   "maguire_vol": 26.146619125079788,
+   "vol_diff": 0.0,
+   "maguire_dt": "opnlmkijqgefdbcah"
+  },
+  "lj_2_7_11_ph1p571_1p571_0p000": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "15a",
+   "det": 319,
+   "vol": 17.22872380288254,
+   "maguire_vol": 17.228723802882538,
+   "vol_diff": 3.552713678800501e-15,
+   "maguire_dt": "ldkbaihnfmcjeog"
+  },
+  "lj_3_4_11_ph1p571_1p571_0p000": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "17n",
+   "det": 255,
+   "vol": 22.513287217896337,
+   "maguire_vol": 22.51328721789634,
+   "vol_diff": 3.552713678800501e-15,
+   "maguire_dt": "fnhLKqJMbOEPCiaGD"
+  },
+  "lj_4_7_9_ph1p571_1p571_0p000": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "17n",
+   "det": 145,
+   "vol": 22.73720183135581,
+   "maguire_vol": 22.737201831355808,
+   "vol_diff": 3.552713678800501e-15,
+   "maguire_dt": "egLpqIomdnfBCajkh"
+  },
+  "pz_3_5_7": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "15a",
+   "det": 71,
+   "vol": 10.100151540952375,
+   "maguire_vol": 10.100151540952377,
+   "vol_diff": 1.7763568394002505e-15,
+   "maguire_dt": "kjihlonmcbaedgf"
+  },
+  "pz_3_5_9": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "17a",
+   "det": 87,
+   "vol": 10.289808393809004,
+   "maguire_vol": 10.289808393809004,
+   "vol_diff": 0.0,
+   "maguire_dt": "mlkjinqpodcbafehg"
+  },
+  "rs_k3": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "14n",
+   "det": 3,
+   "vol": 4.124903251807677,
+   "maguire_vol": 4.124903251807676,
+   "vol_diff": 8.881784197001252e-16,
+   "maguire_dt": "fiklmnHJaGbcde"
+  },
+  "rs_k4": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "16n",
+   "det": 5,
+   "vol": 4.611961374497318,
+   "maguire_vol": 4.611961374497319,
+   "vol_diff": 1.7763568394002505e-15,
+   "maguire_dt": "gjlmnopIKaHbcdef"
+  },
+  "sd_p3_l5": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "15a",
+   "det": 75,
+   "vol": 10.836190169764782,
+   "maguire_vol": 10.836190169764784,
+   "vol_diff": 1.7763568394002505e-15,
+   "maguire_dt": "jihlkonmbaedcgf"
+  },
+  "st_dn3_s2_x4z3d50": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "15n",
+   "det": 49,
+   "vol": 15.324701258119793,
+   "maguire_vol": 15.324701258119795,
+   "vol_diff": 1.7763568394002505e-15,
+   "maguire_dt": "lNFjBmDKAGcoHeI"
+  },
+  "st_dn4_s39_x4z3d50": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "16n",
+   "det": 735,
+   "vol": 27.847811440632093,
+   "maguire_vol": 27.847811440632107,
+   "vol_diff": 1.4210854715202004e-14,
+   "maguire_dt": "nePGbiDKfmHOjaLC"
+  },
+  "st_dn5_s2_x4z2d45": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "15n",
+   "det": 121,
+   "vol": 20.71385041936266,
+   "maguire_vol": 20.71385041936265,
+   "vol_diff": 1.0658141036401503e-14,
+   "maguire_dt": "mFNaIBdLEgOHjCK"
+  },
+  "st_dn5_s34_x3z2d55": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "15a",
+   "det": 1805,
+   "vol": 32.676059437831405,
+   "maguire_vol": 32.67605943783141,
+   "vol_diff": 7.105427357601002e-15,
+   "maguire_dt": "lejohmckafndibg"
+  },
+  "th_n8": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "16a",
+   "det": 2205,
+   "vol": 30.394204400053724,
+   "maguire_vol": 30.39420440005373,
+   "vol_diff": 7.105427357601002e-15,
+   "maguire_dt": "fghijklmnopabcde"
+  },
+  "thk4_n5": {
+   "source": "maguire_hyp_jones_c_le_17",
+   "true_min_crossing": "15a",
+   "det": 1805,
+   "vol": 32.67605943783141,
+   "maguire_vol": 32.67605943783141,
+   "vol_diff": 0.0,
+   "maguire_dt": "lejohmckafndibg"
+  }
+ }
+}

@@ -110,6 +110,28 @@ it instead of using an established program, and how it was checked.
 - `research/kauffman_polynomial/` — the two-variable Kauffman polynomial F(a, z) from a PD code, pure Python, exact integers
   (Kauffman's descending-diagram recursion); equal to KnotInfo's F on all 249 prime knots with at most 10 crossings.
 
+## Machines, corpus data and deposit producers
+Since v1.10.0 this repository also holds the code and data that produced the corpus around the pipeline:
+- `machines/`: the 77 knot machines and the knot family machine that built the machine knots of the corpus, the comparisons of
+  the corpus with Burton's census and Maguire's data, and the identity checks (isometry of knot complements, normalisation
+  of the Alexander polynomial). `machines/README.md` says how to run them, what each needs, and the state of a test run of
+  every generator script.
+- `pipeline/`: 40 more tools that filled or checked fields of the corpus records (backfills of the determinant, HOMFLY, Jones,
+  knot Floer genus, cusp shape and fiberedness; θ over the corpus; the Burton receipts; guards), plus the corpus data:
+  `corpus_db.json` (843 records, built 28.10.2026), `distinct_id_registry.json`, `proven_identities.json`,
+  `proven_distinctions.json`, `proven_alternating.json`, and the retractions against Burton's and Maguire's data. Each record
+  names its folder in the authors' tree (`pflicht_path`). Those record folders are not in this repository, so the tools that
+  read them run only against the authors' tree; the corpus data themselves can be read by anyone. As in `machines/`, comments
+  and messages of these tools are English, while field names and other data values stored in the corpus records and receipt
+  files (for example `pflicht_path`) stay German, because the published data use them.
+- `output/bekannt/`: 222 machine curves of table knots, which machines 47 and 49 read. `output/new_found_knots/`: the three
+  machine curves that the Nitro identity check compares with.
+- `own_knots/`: the centrelines of the nine sculptures that generators and identity checks read (Always a Pleasure, Double-3,
+  Irrational, Nitro, Ping-Pong, Proxima B, Sundown, Sundowner, Trainstation). Each file is identical to the download of the same
+  sculpture on https://knot-structures.stainlesssteel4u.de/.
+- `deposit_producers/`: the scripts that computed the numbers in six Zenodo deposits, one folder per deposit. They are kept as
+  they were run (authors' paths of 2026); `deposit_producers/README.md` explains this.
+
 ## Install
 - An NVIDIA GPU with CUDA (scanner and tracker use CuPy).
 - Four conda environments with these names, because the stages call them by name: `gnottheorie_env` (scanner, tracker, most
@@ -118,6 +140,9 @@ it instead of using an established program, and how it was checked.
   22.10.2026). These are today's versions: the published results were computed with the versions current at the time,
   since the tools are kept up to date.
 - Third-party programs and data that are not included: see `THIRD_PARTY.md`.
+- θ in stage 8a: by default the stage calls `Theta_numeric.sage`, our modification of Bar-Natan–van der Veen's `Theta.sage`,
+  which is **not included** (`THIRD_PARTY.md`). Without it, stage 8a reports an error and is skipped, and the run goes on.
+  To compute θ, put `Theta.sage` from the authors in place and set `THETA_SYMBOLIC=1` (symbolic, so for small diagrams only).
 - `python3 pipeline/site_config.py` shows where the pipeline will look for everything (`KNOT_PIPELINE_<NAME>` overrides one location).
 
 ## Run
@@ -299,8 +324,16 @@ The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summ
   crossings, 0 differing).
 
 ## License
-GNU General Public License v3.0 or later (`LICENSE.txt`, SPDX `GPL-3.0-or-later`).
+- Code: GNU General Public License v3.0 or later (`LICENSE.txt`, SPDX `GPL-3.0-or-later`).
+- Data (`pipeline/*.json`: corpus records, registries, proven identities and distinctions, retractions): CC BY 4.0
+  (`LICENSE-DATA.txt`).
+- Machine-knot curves (`output/**/*.fseries`, and curves the machines write): CC BY-NC 4.0, see the `NOTICE.md` in each folder.
+- Sculpture centrelines and inputs derived from the sculptures (`own_knots/`, `machines/the_knotfamily_machine/double3_module_extracted.npy`):
+  © Werner Alois Stanggassinger, all rights reserved. You may download them, compute knot invariants and re-run the generators
+  for study and non-commercial research; fabrication, reproduction or redistribution of a shape only with written agreement
+  (`NOTICE.md` next to each file).
 
 ## Citation
-See `CITATION.cff`. Each GitHub release is archived on Zenodo with its own DOI.
+See `CITATION.cff`. Each GitHub release is archived on Zenodo with its own DOI. The DOI in `CITATION.cff`,
+10.5281/zenodo.23766950, is the concept DOI: it stands for all versions and resolves to the newest.
 Author: Werner Alois Stanggassinger, ORCID [0009-0005-8569-8317](https://orcid.org/0009-0005-8569-8317) — all deposits and preprints are listed there.

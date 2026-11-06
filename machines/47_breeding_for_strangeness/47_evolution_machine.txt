@@ -1,0 +1,18 @@
+47 — BREEDING FOR ALIENNESS (evolution machine)  [harvest 6, 2026-06-06]
+CORE: Genetic algorithm on fseries coefficients; fitness =
+DISTANCE from the stock (novelty search!) via cheap proxies (Wr from 27,
+ACN estimator, embedding margin) — the machine actively seeks what the
+corpus does NOT have. Mutations = coefficient noise + 32 effects;
+crossover = 31 hybrid mixer. ALL material exists.
+BET: Fitness progress measurable today; whether "alien in the proxy" = "alien
+in the knot" is decided Monday (the actual question of the machine).
+TURN AROUND AT BUILD: proxy alienness may breed geometry alienness
+instead of topology alienness (honestly carried as risk no. 1).
+--------------------------------------------------------------------------------
+BUILT 2026-06-06 (harvest-6 wave) — 4/4 — proxy calibration hits the literature
+anchor: T(2,3) proxy Wr=−3.424 (ideal 3.42, same value as the SONO calibration
+Disc #259). Novelty progress measured (1.92→2.00, 5 gen). Risk no. 1
+(geometry instead of topology alienness) openly flagged — breeding winner Wr≈0/
+ACN≈0.8 smells like a margin maximiser, exactly the predicted mode.
+READY TO FIRE (ignition after Monday).
+--------------------------------------------------------------------------------

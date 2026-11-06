@@ -1,0 +1,24 @@
+================================================================================
+32 — SENDING THROUGH EFFECTS UNITS (audio filters on .fseries)  [Harvest 06-06]
+================================================================================
+CORE: The .fseries is a spectrum — so run audio effects on it:
+comb filter (echo τ), chorus (detune), distortion (clipping in the time domain).
+Continuous deformation FAMILIES of existing knots.
+THEOREM CANDIDATE (derivable): filters act per harmonic ⇒ preserve
+the class occupation ⇒ comb filter with τ=2π/n preserves C_n EXACTLY —
+symmetry-faithful paths through shape space (08 paths, now with a tool).
+BET: where on the filter path does the knot type jump? (Bifurcation
+edges = 08 programme, cheaply traversable.)
+BUILD MATERIAL: pure coefficient algebra + machine_common gates.
+
+TURNED AROUND 2026-06-06: CRACK 1 — chorus/clipping leave the coefficient
+space (time domain needed) → re-Fourier via machine_common, Nyquist guard
+catches losses. CRACK 2 — comb filter can CANCEL harmonics (1+γe^{-ikτ}
+= 0 at γ=1) → gain gate |factor| >= 0.1 per occupied harmonic.
+CRACK 3 — "knot-type jump on the path" is not measurable without the pipeline →
+path demo measures only the embedding edge (honest); type edges = ignition programme.
+SURVIVES. Build: coefficient algebra + machine_common.
+
+--------------------------------------------------------------------------------
+BUILT 2026-06-06 — generate_effect_knots.py, 5/5 — comb-filter-preserves-C_n theorem to 1e-15, cancellation gate, clip/vibrato via re-Fourier. READY TO FIRE (ignition after Monday).
+--------------------------------------------------------------------------------

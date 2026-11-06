@@ -1,0 +1,14 @@
+80 — FOLDING THE CHAIN (HP lattice folding)  [Harvest 9, 2026-06-07]
+CORE: Self-avoiding lattice chain with HP energy (hydrophobic/polar,
+protein toy model): Monte-Carlo folding COMPACTIFIES the chain —
+then close + ask about knots. THE QUESTION: does compactness raise the
+knot rate? (Real protein-knot question, ~1% of proteins; 33 measured
+PURE chance, here the same statistic measures ENERGY-DRIVEN.)
+BET EXACT today: energy falls monotonically-stochastically (acceptance
+statistics measured); radius of gyration shrinks measurably; knot rate
+compact vs. random = the new number. FLIP IT: closing the
+folded chain must not pierce the fold → closing path
+outside + embedding gate.
+--------------------------------------------------------------------------------
+BUILT 2026-06-07 (Harvest-9 wave) — 4/4 — 🏆 THE PROTEIN NUMBER: |Wr|>1.5 suspicion 0/12 random → 5/12 folded (mean 0.49→1.29) — compactness ENTANGLES, measured. Energy −1→−20, Rg 5.2→2.2, self-avoidance bit-preserved. READY TO FIRE (ignition after Monday).
+--------------------------------------------------------------------------------

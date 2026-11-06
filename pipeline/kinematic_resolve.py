@@ -293,8 +293,10 @@ def main():
                              'The first with a classical diagram wins.')
     parser.add_argument('--match-tolerance', type=float, default=0.02,
                         help='Maximum (ti, tj) distance for a cluster match '
-                             '(Chebyshev, default 0.02). Crossings without a match '
-                             '= pseudo-crossings, filtered.')
+                             '(Chebyshev, default 0.02). Crossings without a match are dropped. '
+                             'CAUTION: in one generic projection every crossing is real, so dropping one '
+                             'changes the diagram. pipeline_run.sh passes 1.0, which drops nothing; use a '
+                             'smaller value only to diagnose.')
     parser.add_argument('--output', default='kinematic_result.json',
                         help='Output JSON path')
     parser.add_argument('--no-regina', action='store_true',

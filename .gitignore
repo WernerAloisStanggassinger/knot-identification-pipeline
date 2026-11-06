@@ -11,6 +11,15 @@ data/fremlin_cache/
 data/fremlin_pages/
 data/fremlin_index.htm
 
-# written by the pipeline and the corpus layer in the portable profile
-output/
+# written by the pipeline and the corpus layer in the portable profile; the curves the machines read are shipped (v1.10.0)
+output/*
+!output/bekannt/
+!output/new_found_knots/
+output/new_found_knots/*
+!output/new_found_knots/S_24_d961_D6_amphi/
+!output/new_found_knots/NOTICE.md
+# demo and production output of the knot machines
+machines/**/demo_smoke/
+machines/**/out_fseries/
+machines/**/new_knots/
 _backups/

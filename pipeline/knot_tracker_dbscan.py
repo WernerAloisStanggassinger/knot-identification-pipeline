@@ -27,6 +27,11 @@ close in 3D but happen to overlap from this one perspective)
 are spread over the (ti, tj) plane — they form no compact
 cluster and are weeded out by the min-cell-count filter.
 
+Caveat: the (ti, tj) point is fixed only approximately, and only when the two strands come close in space.
+For strands far apart in space it moves with the camera, and such a crossing can fall through the
+min-cell-count filter. The diagram is still right, because it is read from one single projection
+(kinematic_resolve.py), not from the clusters; the clusters only label its crossings.
+
 Anti-pattern avoided here
 -------------------------
 - 5D clusters over (sx, sy, sz, ti, tj): Discovery #74 — mega-clusters or

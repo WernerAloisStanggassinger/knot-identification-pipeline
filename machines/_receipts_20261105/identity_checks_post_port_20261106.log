@@ -1,0 +1,82 @@
+=== isometry.py
+trainstation {'seed': 0, 'roh': 48, 'simpl': 22, 'vol': 33.600846951271464, 'sol': 'all tetrahedra positively oriented'}
+trainstation {'seed': 9001, 'roh': 54, 'simpl': 20, 'vol': 33.60084695127147, 'sol': 'all tetrahedra positively oriented'}
+trainstation {'seed': 9002, 'roh': 42, 'simpl': 20, 'vol': 33.60084695127145, 'sol': 'all tetrahedra positively oriented'}
+trainstation {'seed': 9003, 'roh': 56, 'simpl': 18, 'vol': 33.60084695127144, 'sol': 'all tetrahedra positively oriented'}
+sundown {'seed': 0, 'roh': 48, 'simpl': 18, 'vol': 33.60084695127146, 'sol': 'all tetrahedra positively oriented'}
+sundown {'seed': 9001, 'roh': 50, 'simpl': 18, 'vol': 33.600846951271464, 'sol': 'all tetrahedra positively oriented'}
+sundown {'seed': 9002, 'roh': 40, 'simpl': 18, 'vol': 33.60084695127144, 'sol': 'all tetrahedra positively oriented'}
+sundown {'seed': 9003, 'roh': 44, 'simpl': 20, 'vol': 33.60084695127145, 'sol': 'all tetrahedra positively oriented'}
+Burton 18ah_5090151 vol 33.60084695127146 all tetrahedra positively oriented
+nitro {'seed': 0, 'roh': 32, 'simpl': 28, 'vol': 32.26294393895127, 'sol': 'all tetrahedra positively oriented'}
+trainstation H1 Z Sym D6 amphicheiral True
+sundown H1 Z Sym D6 amphicheiral True
+burton H1 Z Sym D6 amphicheiral True
+ERGEBNIS {"trainstation~sundown": true, "trainstation~burton": true, "sundown~burton": true, "trainstation(seed2)~sundown(seed2)": true, "GEGENFALL nitro~sundown": false, "GEGENFALL figure8~sundown": false}
+rc=0
+=== three_sculptures.py
+double-3 {'seed': 0, 'roh': 62, 'simpl': 16, 'vol': 23.151729895911835, 'sol': 'all tetrahedra positively oriented'}
+always-a-pleasure {'seed': 0, 'roh': 38, 'simpl': 14, 'vol': 23.151729895911828, 'sol': 'all tetrahedra positively oriented'}
+proxima-b {'seed': 0, 'roh': 42, 'simpl': 12, 'vol': 23.15172989591184, 'sol': 'all tetrahedra positively oriented'}
+ERGEBNIS {"double-3~always-a-pleasure": true, "double-3~proxima-b": true, "double-3~K12a1019": true, "always-a-pleasure~K12a1019": true, "proxima-b~K12a1019": true, "GEGENFALL double-3~K12a1018": false, "GEGENFALL double-3~trainstation": false}
+rc=0
+=== nitro_isometry.py
+nitro {'seed': 0, 'roh': 32, 'simpl': 28, 'vol': 32.262943938951274, 'sol': 'all tetrahedra positively oriented'}
+nitro {'seed': 9001, 'roh': 48, 'simpl': 24, 'vol': 32.26294393895127, 'sol': 'all tetrahedra positively oriented'}
+nitro {'seed': 9002, 'roh': 72, 'simpl': 26, 'vol': 32.262943938951274, 'sol': 'all tetrahedra positively oriented'}
+nitro {'seed': 9003, 'roh': 62, 'simpl': 25, 'vol': 32.26294393895126, 'sol': 'all tetrahedra positively oriented'}
+kf191 {'seed': 0, 'roh': 51, 'simpl': 24, 'vol': 32.262943938951246, 'sol': 'all tetrahedra positively oriented'}
+kf191 {'seed': 9001, 'roh': 41, 'simpl': 24, 'vol': 32.26294393895127, 'sol': 'all tetrahedra positively oriented'}
+kf191 {'seed': 9002, 'roh': 43, 'simpl': 27, 'vol': 32.26294393895127, 'sol': 'all tetrahedra positively oriented'}
+kf191 {'seed': 9003, 'roh': 45, 'simpl': 27, 'vol': 32.262943938951274, 'sol': 'all tetrahedra positively oriented'}
+kf201 {'seed': 0, 'roh': 47, 'simpl': 24, 'vol': 32.26294393895125, 'sol': 'all tetrahedra positively oriented'}
+kf201 {'seed': 9001, 'roh': 43, 'simpl': 24, 'vol': 32.26294393895125, 'sol': 'all tetrahedra positively oriented'}
+kf201 {'seed': 9002, 'roh': 43, 'simpl': 27, 'vol': 32.26294393895127, 'sol': 'all tetrahedra positively oriented'}
+kf201 {'seed': 9003, 'roh': 47, 'simpl': 26, 'vol': 32.26294393895125, 'sol': 'all tetrahedra positively oriented'}
+kf202 {'seed': 0, 'roh': 53, 'simpl': 24, 'vol': 32.26294393895127, 'sol': 'all tetrahedra positively oriented'}
+kf202 {'seed': 9001, 'roh': 41, 'simpl': 25, 'vol': 32.26294393895126, 'sol': 'all tetrahedra positively oriented'}
+kf202 {'seed': 9002, 'roh': 43, 'simpl': 25, 'vol': 32.26294393895127, 'sol': 'all tetrahedra positively oriented'}
+kf202 {'seed': 9003, 'roh': 45, 'simpl': 24, 'vol': 32.26294393895128, 'sol': 'all tetrahedra positively oriented'}
+trainstation(GEGENFALL) {'seed': 0, 'roh': 48, 'simpl': 22, 'vol': 33.600846951271464, 'sol': 'all tetrahedra positively oriented'}
+trainstation(GEGENFALL) {'seed': 9001, 'roh': 54, 'simpl': 20, 'vol': 33.60084695127146, 'sol': 'all tetrahedra positively oriented'}
+trainstation(GEGENFALL) {'seed': 9002, 'roh': 42, 'simpl': 18, 'vol': 33.60084695127144, 'sol': 'all tetrahedra positively oriented'}
+trainstation(GEGENFALL) {'seed': 9003, 'roh': 56, 'simpl': 20, 'vol': 33.60084695127144, 'sol': 'all tetrahedra positively oriented'}
+ping-pong(GEGENFALL) {'seed': 0, 'roh': 56, 'simpl': 26, 'vol': 24.351352283060532, 'sol': 'all tetrahedra positively oriented'}
+ping-pong(GEGENFALL) {'seed': 9001, 'roh': 62, 'simpl': 26, 'vol': 24.35135228306052, 'sol': 'all tetrahedra positively oriented'}
+ping-pong(GEGENFALL) {'seed': 9002, 'roh': 60, 'simpl': 24, 'vol': 24.35135228306052, 'sol': 'all tetrahedra positively oriented'}
+ping-pong(GEGENFALL) {'seed': 9003, 'roh': 62, 'simpl': 24, 'vol': 24.351352283060514, 'sol': 'all tetrahedra positively oriented'}
+ERGEBNIS {"nitro~kf191": true, "nitro~kf201": true, "nitro~kf202": true, "nitro~trainstation(GEGENFALL)": false, "nitro~ping-pong(GEGENFALL)": false, "nitro(seed2)~kf191(seed2)": true}
+Traceback (most recent call last):
+  File "<repo>/machines/trainstation_sundown_isometry_20260917/nitro_isometry.py", line 59, in <module>
+    import sympy
+ModuleNotFoundError: No module named 'sympy'
+rc=1
+=== nitro_isometry.py (sage_stable: has snappy AND sympy; snappy_env lacks sympy)
+nitro {'seed': 0, 'roh': 32, 'simpl': 28, 'vol': 32.26294393895127, 'sol': 'all tetrahedra positively oriented'}
+nitro {'seed': 9001, 'roh': 48, 'simpl': 24, 'vol': 32.26294393895126, 'sol': 'all tetrahedra positively oriented'}
+nitro {'seed': 9002, 'roh': 72, 'simpl': 26, 'vol': 32.26294393895126, 'sol': 'all tetrahedra positively oriented'}
+nitro {'seed': 9003, 'roh': 62, 'simpl': 24, 'vol': 32.26294393895127, 'sol': 'all tetrahedra positively oriented'}
+kf191 {'seed': 0, 'roh': 51, 'simpl': 25, 'vol': 32.26294393895125, 'sol': 'all tetrahedra positively oriented'}
+kf191 {'seed': 9001, 'roh': 41, 'simpl': 24, 'vol': 32.262943938951246, 'sol': 'all tetrahedra positively oriented'}
+kf191 {'seed': 9002, 'roh': 43, 'simpl': 27, 'vol': 32.26294393895125, 'sol': 'all tetrahedra positively oriented'}
+kf191 {'seed': 9003, 'roh': 45, 'simpl': 27, 'vol': 32.26294393895128, 'sol': 'all tetrahedra positively oriented'}
+kf201 {'seed': 0, 'roh': 47, 'simpl': 24, 'vol': 32.26294393895127, 'sol': 'all tetrahedra positively oriented'}
+kf201 {'seed': 9001, 'roh': 43, 'simpl': 24, 'vol': 32.26294393895127, 'sol': 'all tetrahedra positively oriented'}
+kf201 {'seed': 9002, 'roh': 43, 'simpl': 27, 'vol': 32.26294393895126, 'sol': 'all tetrahedra positively oriented'}
+kf201 {'seed': 9003, 'roh': 47, 'simpl': 25, 'vol': 32.262943938951274, 'sol': 'all tetrahedra positively oriented'}
+kf202 {'seed': 0, 'roh': 53, 'simpl': 24, 'vol': 32.26294393895125, 'sol': 'all tetrahedra positively oriented'}
+kf202 {'seed': 9001, 'roh': 41, 'simpl': 25, 'vol': 32.26294393895125, 'sol': 'all tetrahedra positively oriented'}
+kf202 {'seed': 9002, 'roh': 43, 'simpl': 27, 'vol': 32.26294393895125, 'sol': 'all tetrahedra positively oriented'}
+kf202 {'seed': 9003, 'roh': 45, 'simpl': 24, 'vol': 32.26294393895125, 'sol': 'all tetrahedra positively oriented'}
+trainstation(GEGENFALL) {'seed': 0, 'roh': 48, 'simpl': 22, 'vol': 33.60084695127146, 'sol': 'all tetrahedra positively oriented'}
+trainstation(GEGENFALL) {'seed': 9001, 'roh': 54, 'simpl': 20, 'vol': 33.60084695127146, 'sol': 'all tetrahedra positively oriented'}
+trainstation(GEGENFALL) {'seed': 9002, 'roh': 42, 'simpl': 20, 'vol': 33.600846951271464, 'sol': 'all tetrahedra positively oriented'}
+trainstation(GEGENFALL) {'seed': 9003, 'roh': 56, 'simpl': 22, 'vol': 33.600846951271436, 'sol': 'all tetrahedra positively oriented'}
+ping-pong(GEGENFALL) {'seed': 0, 'roh': 56, 'simpl': 26, 'vol': 24.351352283060525, 'sol': 'all tetrahedra positively oriented'}
+ping-pong(GEGENFALL) {'seed': 9001, 'roh': 62, 'simpl': 26, 'vol': 24.351352283060525, 'sol': 'all tetrahedra positively oriented'}
+ping-pong(GEGENFALL) {'seed': 9002, 'roh': 60, 'simpl': 24, 'vol': 24.35135228306051, 'sol': 'all tetrahedra positively oriented'}
+ping-pong(GEGENFALL) {'seed': 9003, 'roh': 62, 'simpl': 24, 'vol': 24.351352283060518, 'sol': 'all tetrahedra positively oriented'}
+ERGEBNIS {"nitro~kf191": true, "nitro~kf201": true, "nitro~kf202": true, "nitro~trainstation(GEGENFALL)": false, "nitro~ping-pong(GEGENFALL)": false, "nitro(seed2)~kf191(seed2)": true}
+nitro H1 Z Sym D6 amphicheiral True det 961 min simpl crossings 24
+kf191 H1 Z Sym D6 amphicheiral True det 961 min simpl crossings 24
+rc=0

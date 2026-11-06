@@ -1,0 +1,25 @@
+{
+  "_doku": {
+    "zweck": "Knoten, deren Alternierungs-Status BEWIESEN ist — durch ein konstruiertes alternierendes Diagramm plus Identitaetsnachweis ueber die Isometrie der Komplemente (Gordon-Luecke). Datei statt Hand-Fix, damit die Herkunft lesbar bleibt (wie proven_distinctions.json).",
+    "gelesen_von": "claude_setup_v2/tools/span_untere_schranke.py :: alternierend_status()",
+    "regel": "Ein Eintrag ueberstimmt alle Heuristiken. Nur eintragen, was gerechnet und protokolliert ist.",
+    "disc": 814,
+    "beleg": "konversationen/alternierende_enumeration_20260920/"
+  },
+  "st118_k2": {
+    "alternierend": true,
+    "c_exakt": 22,
+    "wie": "Abschluss des alternierenden 3-Zopf-Wortes [1,-2,1,-2,1,1,-2,1,-2,1,-2,-2,1,-2,1,-2,1,1,-2,-2,-2,-2] (22 Kreuzungen, regina isAlternating()=True). Jones bitgleich mit dem Record (gespiegelt), Volumen 38.0832950911238 identisch, SnapPy is_isometric_to(Record) = True ==> nach Gordon-Luecke derselbe Knoten. Alternierung ist spiegelinvariant, die Spiegel-Blindheit von is_isometric_to stoert hier also nicht.",
+    "rahmen": "Die Kandidatenfamilie ist vollstaendig: span V = 22 und alternierend ==> c = 22 (KMT); g = 10 HFK-exakt und Seifert-Algorithmus minimal auf alternierenden Diagrammen (Crowell/Murasugi) ==> s_D = 3 Seifert-Kreise; Zopfindex 3 exakt (MFW-Intervall [3,3]). Alle 1.048.576 Woerter s1^a1 s2^-b1 ... mit Summe 22 durchsucht, 699.051 davon Knoten, 32 mit der Ziel-Determinante 16767, alle 32 mit bitgleichem Jones.",
+    "datum": "2026-09-20",
+    "skript": "konversationen/alternierende_enumeration_20260920/drei_zopf_suche.py"
+  },
+  "fleet_n5_2_3_5_7_7": {
+    "alternierend": true,
+    "c_exakt": 24,
+    "wie": "Standard-Pretzel-Diagramm P(2,3,5,7,7) ueber spherogram-RationalTangles gebaut: 24 Kreuzungen, eine Komponente, regina isAlternating()=True, Jones bitgleich mit dem Record, Volumen 24.3567004120 identisch, SnapPy is_isometric_to(Record) = True.",
+    "rahmen": "Die fleet_*-Familie IST per Konstruktion ein n-Strang-Pretzel mit Parametern aus {2,3,5,7} (maschinen_ideen/_dieder_ladder_run_2026_06_19/build_fleet_queue.py, c_hint = sum(ps)). Hier 2+3+5+7+7 = 24 = span V(K) ==> c = 24 exakt.",
+    "datum": "2026-09-20",
+    "skript": "konversationen/alternierende_enumeration_20260920/ (Pretzel-Bau + Isometrie)"
+  }
+}

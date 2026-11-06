@@ -107,6 +107,8 @@ it instead of using an established program, and how it was checked.
   two knots by it that ignores mirror images; different values prove different knots up to mirror image, equal values prove nothing.
 - `research/torsion_polynomial/` — Dunfield–Friedl–Jackson Conjecture 1.7: the hyperbolic torsion polynomial (SnapPy) against genus
   and fiberedness (knot Floer homology) for every hyperbolic knot of a census file, with precision escalation and calibration.
+- `research/kauffman_polynomial/` — the two-variable Kauffman polynomial F(a, z) from a PD code, pure Python, exact integers
+  (Kauffman's descending-diagram recursion); equal to KnotInfo's F on all 249 prime knots with at most 10 crossings.
 
 ## Install
 - An NVIDIA GPU with CUDA (scanner and tracker use CuPy).

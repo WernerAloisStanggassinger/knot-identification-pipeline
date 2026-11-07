@@ -40,6 +40,11 @@ SnapPy's `verify_hyperbolicity()`; our part is the order in which it is tried on
    KnotInfo, Fremlin and the SnapPy census.
 9. **Sort and render** — folder placement and a Blender render (`SKIP_SORT_RENDER=1` skips it).
 
+Stages 7, 8a, 8b and 9 are not fatal: the run goes on and the exit code stays 0. Since v1.11.0 every run also writes
+`<knot>_run_status.json` next to the invariants (per stage `ok`, `failed`, `skipped` or `not_run`, with the number of error
+lines, the fatal stage of an abort, and the exit code), so a caller can tell a failed optional stage from success; with
+`STRICT_EXIT=1` such a run exits 4 instead of 0.
+
 **6D geometry cross-check** (separate from the stages above). `pipeline/sixd_scan.py` measures what the diagram throws away:
 curvature, torsion, writhe and average crossing number of the curve itself, from analytic Fourier derivatives.
 `pipeline/canonical_flow.py` first relaxes the curve towards a tight, reproducible shape (the SONO flow, after Pierański's Shrink-On-No-Overlaps algorithm: P. Pierański, in *Ideal Knots*, eds. A. Stasiak,
@@ -152,7 +157,10 @@ cd my_knot/                                   # a folder with exactly one .fseri
 bash /path/to/knot-identification-pipeline/pipeline/pipeline_run.sh
 ```
 `examples/trefoil.fseries` is a small example curve. On the authors' machine (RTX 3070) a typical knot takes about six minutes.
-The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summary.md`.
+The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summary.md`; `<knot>_run_status.json` says
+which stages ran and how they ended. Exit codes: 0 done (even when a non-fatal stage failed), 2 usage, 3 a fatal stage failed,
+4 only with `STRICT_EXIT=1` when the run would have exited 0 but a stage reported an error. Without `Theta_numeric.sage`
+stage 8a fails on every run, which is why the default stays 0.
 
 ## How this release relates to the code that produced the results
 - **Two code trees, on purpose.** "The authors' copy" in this README is a living tree, not only a historical state: the authors
@@ -294,7 +302,11 @@ The main result is `<knot>_mandatory_invariants_complete.json` plus `<knot>_summ
   `homfly_crosscheck.py`, `mandatory_invariants.py` and `slice_verdict.py` (3.11.2026, strictness and CRT bound), all described above; the stage driver `pipeline_run.sh` (23.10.2026; a shell script, outside the Python proof): under `set -e` the stage-2 tracker
   ladder (minimum cell count 2000, 1000, …, 100) stopped at the first failing step instead of trying the next, so from 24.08. to
   23.10.2026 a run whose tracker failed at 2000 ended there; it changes which runs finish, not the values of a run that finishes;
-  and again on 3.11.2026, stages 8a/8b report success only when they succeeded.
+  and again on 3.11.2026, stages 8a/8b report success only when they succeeded; and on 7.11.2026 (v1.11.0, both trees) it
+  writes `<knot>_run_status.json` and knows `STRICT_EXIT=1` (above) — it adds a file and changes no value. Also on 7.11.2026
+  in both trees: the default of `kinematic_resolve.py --match-tolerance` went from 0.02 to 1.0, because a bare call with the
+  old default silently dropped crossings without a cluster match (in one generic projection every crossing is real); pipeline
+  runs always passed 1.0 explicitly, so no result of a pipeline run changes — only bare calls of the module do.
   Only in this release, not in the authors' copy: the location changes of 3.11.2026 (under *Locations* above); the corpus layer reads English records since 3.11.2026 (`record_names.py`, above),
   `theta_crosscheck.py` writes its note "pathological Cs order" (e5218b0) and, since 3.11.2026, its message for a missing PD code in English; and, from 3.11.2026, `summary_writer.py`
   leaves `chern_simons` empty for a non-hyperbolic knot, `pipeline_run.sh` names a missing `Theta_numeric.sage`, three messages are

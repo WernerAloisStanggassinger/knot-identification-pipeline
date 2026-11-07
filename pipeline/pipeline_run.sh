@@ -55,9 +55,41 @@ PROJ_DIR="$(pwd)"
 
 log()   { echo -e "\033[1;34m[PIPELINE]\033[0m $*"; }
 N_ERR=0
-err()   { echo -e "\033[1;31m[PIPELINE ERROR]\033[0m $*" >&2; N_ERR=$((N_ERR+1)); }
-ok()    { echo -e "\033[1;32m[PIPELINE OK]\033[0m $*"; }
-stage() { echo -e "\n\033[1;33m=== STAGE $1: $2 ===\033[0m"; }
+err()   { echo -e "\033[1;31m[PIPELINE ERROR]\033[0m $*" >&2; if [ -n "$CUR_STAGE" ]; then ST[$CUR_STAGE]=failed; NE[$CUR_STAGE]=$(( ${NE[$CUR_STAGE]:-0} + 1 )); fi; N_ERR=$((N_ERR+1)); }
+ok()    { echo -e "\033[1;32m[PIPELINE OK]\033[0m $*"; if [ -n "$CUR_STAGE" ]; then ST[$CUR_STAGE]=ok; fi; }
+stage() { echo -e "\n\033[1;33m=== STAGE $1: $2 ===\033[0m"; CUR_STAGE=$1; ST[$1]=running; }
+# >>> run status (wave C, 06.11.2026) — per-stage record for callers; the exit code alone could not tell a failed
+# optional stage (7 enrichments, 8a theta, 8b crosscheck, 9 sort+render) from success (outside review 06.11.2026).
+# stage() marks a stage running, ok() marks it ok, err() marks it failed and counts the error line; last call wins,
+# a stage still running at exit finished without an ok line (0a, 2a, 4a, 8) unless it is the one the abort hit;
+# the error count stays (stage 7: "ok" with errors = some enrichments failed). Stages never entered stay not_run.
+# Written ONCE, in the EXIT trap, after stage 9 (which may move the folder): <knot>_run_status.json next to the invariants.
+# STRICT_EXIT=1: exit 4 when the run would exit 0 but any stage reported an error. Default stays 0 — stage 8a fails on
+# every run without Theta_numeric.sage (not distributed), and `pipeline_run.sh && next` must keep working.
+declare -A ST=() NE=()
+CUR_STAGE=""
+FATAL_STAGE=""
+STAGE_ORDER="0a P 1 2 2a 3 4 4a 5 6 7 8 8a 8b 9"
+write_run_status() {
+    local rc=$1 s j="" sep="" fj=null
+    if [ -z "${KNOT:-}" ] || [ ! -d "${PROJ_DIR:-/nonexistent}" ]; then return 0; fi
+    local f="$PROJ_DIR/${KNOT}_run_status.json"
+    # the stage that was running at the abort is FATAL_STAGE (set in the traps BEFORE stage 9 runs and moves CUR_STAGE to 9)
+    if [ $rc -ne 0 ] && [ -n "$FATAL_STAGE" ] && [ "${ST[$FATAL_STAGE]:-}" = "running" ]; then ST[$FATAL_STAGE]=failed; fi
+    if [ $rc -ne 0 ] && [ -n "$CUR_STAGE" ] && [ "${ST[$CUR_STAGE]:-}" = "running" ]; then ST[$CUR_STAGE]=failed; fi
+    # every other stage still "running" finished without an ok line (0a, 2a, 4a, 8 have none): the run moved past it, so ok.
+    # Found by the trefoil smoke of 07.11.2026 (four stages reported running after a clean exit).
+    for s in $STAGE_ORDER; do if [ "${ST[$s]:-}" = "running" ]; then ST[$s]=ok; fi; done
+    if [ -n "$FATAL_STAGE" ]; then fj="\"$FATAL_STAGE\""; fi
+    for s in $STAGE_ORDER; do
+        j+="$sep\"$s\": {\"status\": \"${ST[$s]:-not_run}\", \"errors\": ${NE[$s]:-0}}"; sep=", "
+    done
+    printf '{"knot": "%s", "rc": %s, "fatal_stage": %s, "n_err": %s, "strict_exit": %s, "total_sec": %s, "written": "%s", "stages": {%s}}\n' \
+        "$KNOT" "$rc" "$fj" "$N_ERR" "${STRICT_EXIT:-0}" "$(( $(date +%s) - ${T0:-$(date +%s)} ))" "$(date '+%Y-%m-%dT%H:%M:%S')" "$j" > "$f"
+    log "Run status → $f"
+}
+# <<< run status
+
 
 # timing
 T0=$(date +%s)
@@ -76,7 +108,7 @@ STAGE9_RAN=0
 
 run_stage9() {
     if [ "${SKIP_SORT_RENDER:-0}" = "1" ]; then
-        log "Stage 9 (Sort+Render) skipped — SKIP_SORT_RENDER=1"
+        ST[9]=skipped; log "Stage 9 (Sort+Render) skipped — SKIP_SORT_RENDER=1"
         STAGE9_RAN=1
         return 0
     fi
@@ -108,10 +140,16 @@ run_stage9() {
 
 on_exit() {
     local rc=$?
+    if [ $rc -ne 0 ] && [ -z "$FATAL_STAGE" ]; then FATAL_STAGE="$CUR_STAGE"; fi
     if [ $rc -ne 0 ] && [ "$STAGE9_RAN" = "0" ]; then
         echo >&2
         err "Pipeline aborted (rc=$rc) — stage 9 cleanup runs anyway..."
         run_stage9 || true
+    fi
+    write_run_status $rc || true
+    if [ $rc -eq 0 ] && [ "${STRICT_EXIT:-0}" = "1" ] && [ "$N_ERR" -gt 0 ]; then
+        err "STRICT_EXIT=1 and $N_ERR stage error(s) → exit 4 (mandatory data are saved; see ${KNOT:-}_run_status.json)"
+        rc=4
     fi
     exit $rc
 }
@@ -126,6 +164,7 @@ trap on_exit EXIT
 on_signal() {
     local signame=$1
     local exitcode=$2
+    FATAL_STAGE="$CUR_STAGE"
     if [ "$STAGE9_RAN" = "0" ]; then
         echo >&2
         err "Signal $signame received — stage 9 cleanup (--no-render) running..."
@@ -519,6 +558,7 @@ fi
 # stage 6+ (homfly/khovanov/length_spectrum) are exponential + unnecessary for the det
 # adjudication. STOP_AFTER_MANDATORY=1 -> clean exit 0 (backward compatible: unset -> continue).
 if [ "${STOP_AFTER_MANDATORY:-0}" = "1" ]; then
+    for s in 6 7 8 8a 8b 9; do ST[$s]=skipped; done
     log "Stage 6+ skipped — STOP_AFTER_MANDATORY=1 (R3 det adjudicator, det in $PFL)"
     exit 0
 fi
@@ -613,7 +653,7 @@ if [ "${SKIP_THETA:-0}" != "1" ]; then
         err "Stage 8a (Theta) failed — no $THETA_JSON written; mandatory data saved"
     fi
 else
-    log "Stage 8a (Theta) skipped — SKIP_THETA=1"
+    ST[8a]=skipped; log "Stage 8a (Theta) skipped — SKIP_THETA=1"
 fi
 
 # ─────────────────────────────────────────────
@@ -636,7 +676,7 @@ if [ "${SKIP_CROSSCHECK:-0}" != "1" ]; then
         err "Stage 8b (Crosscheck) failed — no $CC_JSON written; mandatory data saved"
     fi
 else
-    log "Stage 8b (Crosscheck) skipped — SKIP_CROSSCHECK=1"
+    ST[8b]=skipped; log "Stage 8b (Crosscheck) skipped — SKIP_CROSSCHECK=1"
 fi
 
 # ─────────────────────────────────────────────
